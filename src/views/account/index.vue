@@ -4,7 +4,7 @@
       <div class="clearfix my_refresh">
         <div>
           <el-row class="box-card-header">
-            <el-button size="small" type="primary" style="margin-left: 10px" @click="onRefresh()">新建账号</el-button>
+            <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateUser()">新建账号</el-button>
             <!-- <el-button size="small" type="primary" style="margin-left: 10px" @click="onRefresh()">删除账户</el-button> -->
           </el-row>
         </div>
@@ -15,9 +15,12 @@
         <!--/刷新按钮-->
       </div>
       <!--内容开始-->
-      <el-table :data="tableData" style="width: 100%" v-loading="loading" element-loading-text="加载中"
-        element-loading-spinner="el-icon-loading">
-        <el-table-column prop="account" label="用户名"/>
+      <el-table :data="tableData" style="width: 100%" v-loading="loading" element-loading-text="加载中" element-loading-spinner="el-icon-loading">
+        <el-table-column label="用户名称">
+            <template #default="scope">
+                <el-button link type="primary" @click="onSettingsUser(scope.row.id)">{{scope.row.account}}</el-button>
+            </template>
+        </el-table-column>
         <el-table-column prop="description" label="描述"/>
         <el-table-column label="状态">
             <template #default="scope">
@@ -28,7 +31,7 @@
                 <div class="icon" v-else>
                     <el-icon :size="16" style="color: #ADB0B8;padding-right: 10px"><RemoveFilled /></el-icon>
                     <span >禁用</span>
-                </div>                
+                </div>
             </template>
         </el-table-column>
         <el-table-column label="上次登录时间">
@@ -39,9 +42,8 @@
         </el-table-column>
         <el-table-column label="操作">
             <template #default="scope">
-                <el-button link type="primary" @click="onSelectService(scope.row.id)">授权</el-button>
-                <el-button link type="primary" @click="onSelectService(scope.row.id)">编辑</el-button>
-                <el-button link type="primary" @click="onSelectService(scope.row.id)">删除</el-button>
+                <el-button link type="primary" :disabled="! scope.row.editable" @click="onSelectService(scope.row.id)">编辑</el-button>
+                <el-button link type="primary" :disabled="! scope.row.deletable" @click="onDeleteAccount(scope.row.id)">删除</el-button>
             </template>
         </el-table-column>
       </el-table>
@@ -57,12 +59,11 @@
 <script>
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from '@/utils/date.js'
-import { GetAccount } from '@/api/index.js'
-
+import { GetAccount, DeleteAccount } from '@/api/index.js'
 export default {
     name: 'AccountIndex',
     components: { Pagination },
-  data() {
+    data() {
         return {
             tableData: [],
             loading: true,
@@ -84,6 +85,11 @@ export default {
                 this.loading = false
             }
         },
+        loadDeleteAccount: function (data) {
+            DeleteAccount(data).then(() => {
+                this.onRefresh()
+            })
+        },
         formatDate(time) {
             return formatTime(time)
         },
@@ -102,6 +108,21 @@ export default {
             this.pageSize = s
             this.loadGetAccount(s, 1)
         },
+        onSettingsUser(id) {
+            this.$router.push({
+                path: '/users/settings',
+                query: { uid: id },
+            })
+        },
+        onCreateUser() {
+            this.$router.push({ path: '/users/create'})
+        },
+        onDeleteAccount(id) {
+            let uid = []
+            uid.push(id)
+            let data = { user_id: uid }
+            this.loadDeleteAccount(data)
+        }
     },
     created() {
         this.loadGetAccount(this.pageSize, this.page)

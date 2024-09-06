@@ -3,7 +3,6 @@
 </template>
   
 <script>
-
 export default {
     name: 'HomeIndex',
     components: {},
@@ -13,7 +12,11 @@ export default {
         userInfo: {},
       }
     },
+    methods: {
+        
+    },
     created() {
+        
     }
 }
 </script>

@@ -17,6 +17,7 @@
         </div>
         <el-row>
             <div>
+                <el-button link @click="login">登录</el-button>
                 <el-button link @click="Logout">退出</el-button>
             </div>
         </el-row>
@@ -31,7 +32,7 @@
 
 <script>
 import AppAside from './aside'
-import { logout } from '@/api/index.js'
+import { login, logout } from '@/api/index.js'
 export default {
     name: 'LayoutIndex',
     components: {
@@ -57,6 +58,10 @@ export default {
                 this.LoadLogOut()
             }).catch(() => {})
         },
+        login() {
+            login()
+            console.log('登录')
+        }
     },
 }
 </script>

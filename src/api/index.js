@@ -10,11 +10,33 @@ import ajax from '../api/ajax'
  * @param {*} params 请求参数，默认为空对象
  * @param {*} data 请求参数，默认为空对象
  */
-/** *********************************用户相关**************************************************** */
-/**
- * 用户登录
- */
-// export const login = (data) => ajax('/uias/v1/user/signin', 'POST', null, data)
+
+export const login = () => ajax('/api/uias/v1/user/signin', 'POST', null, '{"uias":{"account":"admin","password":"123456"}}')
 export const logout = () => ajax('/api/uias/v1/user/logout', 'POST')
 
+// 获取账号
 export const GetAccount = (params) => ajax('/api/uias/v1/uias/user/center/account', 'GET', params, null)
+// 创建账号
+export const CreateAccount = (data) => ajax('/api/uias/v1/uias/user/center/account', 'POST', null, data)
+// 删除账号 /v1/uias/user/center/account
+export const DeleteAccount = (data) => ajax('/api/uias/v1/uias/user/center/account', 'DELETE', null, data)
+
+// 获取角色
+export const GetRoles = (params) => ajax('/api/uias/v1/uias/roles', 'GET', params, null)
+// 创建角色 /v1/uias/roles
+export const CreateRoles = (data) => ajax('/api/uias/v1/uias/roles', 'POST', null, data)
+// 删除角色
+export const DeleteRoles = (data) => ajax('/api/uias/v1/uias/roles', 'DELETE', null, data)
+
+
+// 获取策略
+export const GetPolicies = (params) => ajax('/api/uias/v1/uias/policy', 'GET', params, null)
+// 删除策略
+export const DeletePolicies = (data) => ajax('/api/uias/v1/uias/policy', 'DELETE', null, data)
+
+// 角色用户绑定
+export const RoleBindingUser = (data) => ajax('/api/uias/v1/uias/roles/binding/users', 'POST', null, data)
+// 查询用户所属角色 /api/uias/v1/uias/user/center/user/5e5ec5f23180475fa546ee6c30c045b1/roles
+export const SelectRoleFromUser = (paths) => ajax(`/api/uias/v1/uias/user/center/user/${paths.uid}/roles`, 'GET')
+// 查询角色绑定的策略 /api/uias/v1/uias/user/center/role/7ca007cc2cb44824b22383f2fa43bb0c/policies
+export const SelectPoliciesFromRole = (paths) => ajax(`/api/uias/v1/uias/user/center/role/${paths.rid}/policies`, 'GET')
