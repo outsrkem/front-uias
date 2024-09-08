@@ -1,9 +1,11 @@
 <template>
     <div class="settings-container">
-        <div>
-            <h3>返回  创建用户</h3>
-        </div>
         <el-card class="box-card">
+            <template #header>
+                <div class="card-header">
+                    <span>新建账号</span>
+                </div>
+            </template>
             <div class="row-container"  style="margin-top: 30px;">
                 <div class="text-container">
                     <div class="text-top">
@@ -11,8 +13,8 @@
                     </div>
                 </div>
                 <div style="width: 100%;">
-                    <el-form :model="accountData" ref="account-form" label-width="auto">
-                        <el-table :data="accountData" style="width: 100%">
+                    <el-form :model="accountData" ref="account-form">
+                        <el-table :data="accountData">
                             <el-table-column label="账号名称">
                                 <template #default="scope">
                                     <el-form-item :prop="scope.$index + '.account'" :rules="fromRules.account">
@@ -87,14 +89,14 @@
                     </el-select>
                 </div>
             </div>
-            <div class="row-container" style="margin-top: 30px; ">
+            <template #footer>
                 <div class="end-container">
-                    <div style="margin-right: 100px;">
-                        <el-button type="primary">返回</el-button>
-                        <el-button type="primary" @click="onCreateUser" :loading="createLoading">创建账号</el-button>
+                    <div style="margin-right: 20px;">
+                        <el-button size="small" type="primary" @click="onCance">取消</el-button>
+                        <el-button size="small" type="primary" @click="onCreateUser" :loading="createLoading">创建账号</el-button>
                     </div>
                 </div>
-            </div>
+            </template>
         </el-card>
     </div>
 </template>
@@ -203,7 +205,7 @@ export default {
                 let u = res.payload.users
                 u.map(item => {
                     // 获取用户id, 用于后续绑定角色
-                    uids.push(item['user_id'])
+                    uids.push(item['id'])
                 })
                 this.loadRoleBindingUser(this.ChoosingRole, uids)
             })
@@ -213,6 +215,10 @@ export default {
             RoleBindingUser(data).then(res => {
                 console.log(res)
             })
+        },
+        //取消创建
+        onCance() {
+            this.$router.push({ name: 'users' })
         },
     },
     created() {

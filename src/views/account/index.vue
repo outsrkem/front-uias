@@ -1,65 +1,97 @@
 <template>
-  <div class="settings-container">
-    <el-card class="box-card">
-      <div class="clearfix my_refresh">
-        <div>
-          <el-row class="box-card-header">
-            <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateUser()">新建账号</el-button>
-            <!-- <el-button size="small" type="primary" style="margin-left: 10px" @click="onRefresh()">删除账户</el-button> -->
-          </el-row>
-        </div>
-        <!--刷新按钮-->
-        <el-row>
-          <el-button size="small" type="primary" @click="onRefresh" style="margin-left: 10px">刷新</el-button>
-        </el-row>
-        <!--/刷新按钮-->
-      </div>
-      <!--内容开始-->
-      <el-table :data="tableData" style="width: 100%" v-loading="loading" element-loading-text="加载中" element-loading-spinner="el-icon-loading">
-        <el-table-column label="用户名称">
-            <template #default="scope">
-                <el-button link type="primary" @click="onSettingsUser(scope.row.id)">{{scope.row.account}}</el-button>
-            </template>
-        </el-table-column>
-        <el-table-column prop="description" label="描述"/>
-        <el-table-column label="状态">
-            <template #default="scope">
-                <div class="icon" v-if="scope.row.enabled">
-                    <el-icon :size="16" style="color: #50D4AB;padding-right: 10px"><SuccessFilled /></el-icon>
-                    <span >启用</span>
+    <div class="settings-container">
+        <el-card class="box-card">
+            <div class="clearfix my_refresh">
+                <div>
+                <el-row class="box-card-header">
+                    <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateUser()">新建账号</el-button>
+                    <!-- <el-button size="small" type="primary" style="margin-left: 10px" @click="onRefresh()">删除账户</el-button> -->
+                </el-row>
                 </div>
-                <div class="icon" v-else>
-                    <el-icon :size="16" style="color: #ADB0B8;padding-right: 10px"><RemoveFilled /></el-icon>
-                    <span >禁用</span>
-                </div>
-            </template>
-        </el-table-column>
-        <el-table-column label="上次登录时间">
-            <template #default="scope">{{ formatDate(scope.row.last_login_at) }}</template>
-        </el-table-column>
-        <el-table-column label="创建时间">
-            <template #default="scope">{{ formatDate(scope.row.create_time) }}</template>
-        </el-table-column>
-        <el-table-column label="操作">
-            <template #default="scope">
-                <el-button link type="primary" :disabled="! scope.row.editable" @click="onSelectService(scope.row.id)">编辑</el-button>
-                <el-button link type="primary" :disabled="! scope.row.deletable" @click="onDeleteAccount(scope.row.id)">删除</el-button>
-            </template>
-        </el-table-column>
-      </el-table>
-    <!--分页开始-->
-    <Pagination :pageTotal="pageTotal"  :pageSize="pageSize"
-    @CurrentChange="onCurrentChange" @SizeChange="onSizeChange">
-    </Pagination>
-    <!--分页结束-->
-    </el-card>
-  </div>
+                <!--刷新按钮-->
+                <el-row>
+                <el-button size="small" type="primary" @click="onRefresh" style="margin-left: 10px">刷新</el-button>
+                </el-row>
+                <!--/刷新按钮-->
+            </div>
+            <!--内容开始-->
+            <el-table :data="tableData" style="width: 100%" v-loading="loading" element-loading-text="加载中" element-loading-spinner="el-icon-loading">
+                <el-table-column label="账号名称" show-overflow-tooltip>
+                    <template #default="scope">
+                        <el-button link type="primary" @click="onSettingsUser(scope.row.id)">{{scope.row.account}}</el-button>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="username" label="用户名" show-overflow-tooltip/>
+                <el-table-column prop="description" label="描述" show-overflow-tooltip/>
+                <el-table-column label="状态">
+                    <template #default="scope">
+                        <div class="icon" v-if="scope.row.enabled" style="display: flex; align-items: center">
+                            <el-icon :size="16" style="color: #50D4AB;padding-right: 10px"><SuccessFilled /></el-icon>
+                            <span >启用</span>
+                        </div>
+                        <div class="icon" v-else>
+                            <el-icon :size="16" style="color: #ADB0B8;padding-right: 10px"><RemoveFilled /></el-icon>
+                            <span >禁用</span>
+                        </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="上次登录时间" show-overflow-tooltip>
+                    <template #default="scope">{{ formatDate(scope.row.last_login_at) }}</template>
+                </el-table-column>
+                <el-table-column label="创建时间" show-overflow-tooltip>
+                    <template #default="scope">{{ formatDate(scope.row.create_time) }}</template>
+                </el-table-column>
+                <el-table-column label="操作">
+                    <template #default="scope">
+                        <el-button link type="primary" :disabled="! scope.row.editable" @click="onEditUserInfo(scope.row)">编辑</el-button>
+                        <el-button link type="primary" :disabled="! scope.row.deletable" @click="onDeleteAccount(scope.row.id)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <!--分页开始-->
+            <Pagination :pageTotal="pageTotal"  :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange"/>
+            <!--分页结束-->
+        </el-card>
+        <!-- 修改用户详情开始 -->
+        <el-dialog v-model="openEdirUser" title="编辑用户信息" width="30%" label-position="Right">
+            <el-descriptions :column=1>
+                <el-descriptions-item label="账号名称">{{ userInfo.account }}</el-descriptions-item>
+                <el-descriptions-item label="账号ID">{{ userInfo.id }}</el-descriptions-item>
+                <el-descriptions-item label="用户名">{{ userInfo.username }}</el-descriptions-item>
+                <el-descriptions-item label="上次登录时间">{{ formatDate(userInfo.last_login_at) }}</el-descriptions-item>
+                <el-descriptions-item label="状态">{{ userInfo.enabled }}</el-descriptions-item>
+                <!-- <el-descriptions-item label="描述">{{ userInfo.description }}</el-descriptions-item> -->
+            </el-descriptions>
+            <el-form :model="editUserInfo">
+                <el-form-item label="状态">
+                    <el-radio-group v-model="editUserInfo.enabled">
+                        <el-radio value='true' >启用</el-radio>
+                        <el-radio value='flase' >禁用</el-radio>
+                    </el-radio-group>
+                </el-form-item>
+                <el-form-item label="描述">
+                    <el-input v-model="editUserInfo.description" type="textarea" maxlength="128" show-word-limit placeholder="请输入用户描述"/>
+                </el-form-item>
+            </el-form>
+            <div style="display: flex; justify-content: flex-end; align-items: center;">
+                <el-form-item  size="small">
+                    <el-button @click="openEdirUser = false">取消</el-button>
+                    <el-button type="primary" @click="onSubmitEditUserInfo">创建</el-button>
+                </el-form-item>
+            </div>
+        </el-dialog>
+        <!-- 修改用户详情结束 -->
+    </div>
 </template>
       
 <script>
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from '@/utils/date.js'
-import { GetAccount, DeleteAccount } from '@/api/index.js'
+import {
+    GetAccount,
+    DeleteAccount,
+    EditAccount
+} from '@/api/index.js'
 export default {
     name: 'AccountIndex',
     components: { Pagination },
@@ -69,7 +101,18 @@ export default {
             loading: true,
             pageTotal: 0,
             pageSize: 10,
-            page: 1
+            page: 1,
+            openEdirUser: false,
+            editUserId: '',
+            editUserInfo: {},
+            userInfo: {},
+        }
+    },
+    computed: {
+        isTrueComputed: {
+            get() {
+                return this.editUserInfo.enabled ? 'true' : 'flase'
+            }
         }
     },
     methods: {
@@ -90,6 +133,17 @@ export default {
                 this.onRefresh()
             })
         },
+        // 编辑用户请求
+        loadEditRole: function (data) {
+            EditAccount(data).then(() => {
+                this.openEdirUser = false
+                this.$notify({ title: '操作成功', duration: 2000, type: 'success', })
+                this.onRefresh()
+            }).catch(() => {
+                this.$notify({ title: '操作失败', duration: 2000, type: 'error', })
+                this.onRefresh()
+            })
+        },
         formatDate(time) {
             return formatTime(time)
         },
@@ -98,7 +152,7 @@ export default {
         },
         onRefresh() {
             this.loading = true
-            this.loadGetAccount()
+            this.loadGetAccount(this.pageSize, this.page)
         },
         onCurrentChange(p) {
             this.page = p
@@ -106,12 +160,15 @@ export default {
         },
         onSizeChange(s) {
             this.pageSize = s
+            this.page = 1
             this.loadGetAccount(s, 1)
         },
-        onSettingsUser(id) {
+        onSettingsUser(user_id) {
             this.$router.push({
-                path: '/users/settings',
-                query: { uid: id },
+                name: 'settings',
+                params: {
+                    user_id: user_id
+                }
             })
         },
         onCreateUser() {
@@ -122,6 +179,28 @@ export default {
             uid.push(id)
             let data = { user_id: uid }
             this.loadDeleteAccount(data)
+        },
+        // 修改用户信息
+        onEditUserInfo(val) {
+            console.log(val)
+            this.editUserId = val.id
+            this.userInfo = val
+            this.editUserInfo.username = val.username
+            this.editUserInfo.enabled = val.enabled ? 'true' : 'flase'
+            this.editUserInfo.description = val.description
+            this.openEdirUser = true
+        },
+        onSubmitEditUserInfo() {
+            console.log(this.editUserInfo)
+            let data = {
+                user_id: this.editUserId,
+                data: {
+                    enabled : this.editUserInfo.enabled === 'true' ? true : false,
+                    description : this.editUserInfo.description
+                }
+
+            }
+            this.loadEditRole(data)
         }
     },
     created() {

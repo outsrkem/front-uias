@@ -5,7 +5,7 @@ import axios from 'axios'
 // import router from '@/router'
 
 // 非组件模块可以这样加载使用 element 的 message 提示组件
-import { ElMessage  } from 'element-plus'
+import { ElMessage,ElMessageBox  } from 'element-plus'
 
 const request = axios.create({
   // baseURL: 'http://ttapi.research.itcast.cn/' // 请求的基础路径
@@ -41,11 +41,15 @@ request.interceptors.response.use(function (response) {
 }, function (error) {
     const { status } = error.response
     if (status === 401) {
-        // 跳转到登录页面
-        // 清除本地存储中的用户登录状态
-        // router.push('/login')
-        ElMessage.error('登录状态无效，请重新登录')
-        return error.response
+        // 跳转到登录页面,清除本地存储中的用户登录状态
+        ElMessageBox.confirm('登录状态无效，请重新登录', '登录提示',
+            { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning', draggable: true, }
+        ).then(() => {
+            let wl = window.location
+            window.location.assign(wl.protocol + '//' + wl.host + '#/login');
+        }).catch(() => {
+            return error.response
+        })
     } else if (status === 403) {
         // token 无权限访问
         ElMessage({

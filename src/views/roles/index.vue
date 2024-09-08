@@ -1,60 +1,98 @@
 <template>
     <div class="settings-container">
-      <el-card class="box-card">
-        <div class="clearfix my_refresh">
-          <div>
-            <el-row class="box-card-header">
-              <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateRole()">新建角色</el-button>
-              <!-- <el-button size="small" type="primary" style="margin-left: 10px" @click="onRefresh()">删除账户</el-button> -->
+        <el-card class="box-card">
+            <div class="clearfix my_refresh">
+            <div>
+                <el-row class="box-card-header">
+                <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateRole()">新建角色</el-button>
+                <!-- <el-button size="small" type="primary" style="margin-left: 10px" @click="onRefresh()">删除账户</el-button> -->
+                </el-row>
+            </div>
+            <!--刷新按钮-->
+            <el-row>
+                <el-button size="small" type="primary" @click="onRefresh" style="margin-left: 10px">刷新</el-button>
             </el-row>
-          </div>
-          <!--刷新按钮-->
-          <el-row>
-            <el-button size="small" type="primary" @click="onRefresh" style="margin-left: 10px">刷新</el-button>
-          </el-row>
-          <!--/刷新按钮-->
-        </div>
-        <!--内容开始-->
-        <el-table :data="tableData" style="width: 100%" v-loading="loading" element-loading-text="加载中"
-          element-loading-spinner="el-icon-loading">
-          <el-table-column prop="name" label="角色名称"/>
-          <el-table-column prop="description" label="描述"/>
-          <el-table-column label="创建时间">
-              <template #default="scope">{{ formatDate(scope.row.create_time) }}</template>
-          </el-table-column>
-          <el-table-column label="操作">
-              <template #default="scope">
-                <el-button link type="primary" :disabled="! scope.row.editable" @click="onSelectService(scope.row.id)">编辑</el-button>
-                <el-button link type="primary" :disabled="! scope.row.deletable" @click="onDeleteRole(scope.row.id)">删除</el-button>
-              </template>
-          </el-table-column>
-        </el-table>
-      <!--分页开始-->
-      <Pagination :pageTotal="pageTotal"  :pageSize="pageSize"
-      @CurrentChange="onCurrentChange" @SizeChange="onSizeChange">
-      </Pagination>
-      <!--分页结束-->
-      </el-card>
+            <!--/刷新按钮-->
+            </div>
+            <!--内容开始-->
+            <el-table :data="tableData" style="width: 100%" v-loading="loading" element-loading-text="加载中"
+            element-loading-spinner="el-icon-loading">
+            <el-table-column label="角色名称" show-overflow-tooltip>
+                <template #default="scope">
+                    <el-button link type="primary" @click="onEditRole(scope.row.id)">{{scope.row.name}}</el-button>
+                </template>
+            </el-table-column>
+            <el-table-column prop="users" label="用户数" min-width="20" show-overflow-tooltip/>
+            <el-table-column prop="policies" label="策略数" min-width="20" show-overflow-tooltip/>
+            <el-table-column label="创建时间">
+                <template #default="scope">{{ formatDate(scope.row.create_time) }}</template>
+            </el-table-column>
+            <el-table-column label="操作">
+                <template #default="scope">
+                    <el-button link type="primary" :disabled="! scope.row.editable" @click="onEditRoleInfo(scope.row)">编辑</el-button>
+                    <el-button link type="primary" :disabled="! scope.row.deletable" @click="onDeleteRole(scope.row.id)">删除</el-button>
+                </template>
+            </el-table-column>
+            </el-table>
+            <!--分页开始-->
+            <Pagination :pageTotal="pageTotal"  :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange"/>
+            <!--分页结束-->
+        </el-card>
+        <!-- 修改角色详情开始 -->
+        <el-dialog v-model="openEdirRole" title="编辑角色信息" width="30%" label-position="Right">
+            <el-form :model="roleInfo" :rules="fromRules" ref="role-from">
+                <el-form-item label="角色名称" prop="name" label-width="100px">
+                    <el-input v-model="roleInfo.name"/>
+                </el-form-item>
+                <el-form-item label="角色描述" label-width="100px">
+                    <el-input v-model="roleInfo.description" type="textarea" maxlength="128" show-word-limit placeholder="请输入角色描述"/>
+                </el-form-item>
+            </el-form>
+            <div style="display: flex; justify-content: flex-end; align-items: center;">
+                <el-form-item  size="small">
+                    <el-button @click="openEdirRole = false">取消</el-button>
+                    <el-button type="primary" @click="onSubmitEditRoleInfo">创建</el-button>
+                </el-form-item>
+            </div>
+
+        </el-dialog>
+        <!-- 修改角色详情结束 -->
     </div>
   </template>
         
 <script>
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from '@/utils/date.js'
-import { GetRoles,DeleteRoles } from '@/api/index.js'
+import {
+    GetRoles,
+    EditRole,
+    DeleteRoles
+} from '@/api/index.js'
 
 // import { login } from '@/api/index.js'
 export default {
     name: 'RolesIndex',
     components: { Pagination },
     data() {
-          return {
-              tableData: [],
-              loading: true,
-              pageTotal: 0,
-              pageSize: 10,
-              page: 1
-          }
+        return {
+            tableData: [],
+            loading: true,
+            pageTotal: 0,
+            pageSize: 10,
+            page: 1,
+            editRoleId: '',
+            roleInfo: {
+                name: '',
+                description:''
+            },
+            openEdirRole: false,
+            fromRules: {
+                name: [
+                    { required: true, message: '请输入角色名称', trigger: 'blur' },
+                    { min: 1, max: 64, message: '长度为1到64个字符', trigger: ['blur','change'] },
+                ]
+            }
+        }
       },
     methods: {
         loadLogin: function () {
@@ -72,6 +110,13 @@ export default {
                 this.loading = false
             }
         },
+        // 编辑角色请求
+        loadEditRole: async function (data) {
+            await EditRole(data)
+            this.onRefresh()
+            this.openEdirRole = false
+
+        },
         loadDeleteRole: function (data) {
             DeleteRoles(data).then(() => {
                 this.onRefresh()
@@ -85,7 +130,7 @@ export default {
         },
         onRefresh() {
             this.loading = true
-            this.loadGetRoles()
+            this.loadGetRoles(this.pageSize, this.page)
         },
         onCurrentChange(p) {
             this.page = p
@@ -93,6 +138,7 @@ export default {
         },
         onSizeChange(s) {
             this.pageSize = s
+            this.page = 1
             this.loadGetRoles(s, 1)
         },
         onCreateRole() {
@@ -103,12 +149,35 @@ export default {
             rid.push(val)
             let data = { role_id: rid }
             this.loadDeleteRole(data)
+        },
+        onEditRole(id) {
+            this.$router.push({ path: '/roles/edit', query: { rid: id } })
+        },
+        // 修改角色信息
+        onEditRoleInfo(val) {
+            this.editRoleId = val.id
+            this.roleInfo.name = val.name
+            this.roleInfo.description = val.description
+            this.openEdirRole = true
+        },
+        // 提交修改
+        onSubmitEditRoleInfo() {
+            let data = {
+                role_id: this.editRoleId,
+                role: this.roleInfo
+            }
+            this.$refs['role-from'].validate(valid => {
+                if (!valid) {
+                    return // 如果表单验证失败，停止请求提交
+                }
+                this.loadEditRole(data)
+            })
         }
-      },
-      created() {
-          this.loadLogin()
-          this.loadGetRoles(this.pageSize, this.page)
-      }
+    },
+    created() {
+        this.loadLogin()
+        this.loadGetRoles(this.pageSize, this.page)
+    }
       
 }
 </script>

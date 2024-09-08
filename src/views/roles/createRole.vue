@@ -47,8 +47,7 @@ export default {
                 }
                 let data = { role: this.roleForm }
                 this.loadCreateRoles(data)
-            }
-            )
+            })
         },
         onCountermand() {
             this.$router.push({ path: '/roles' })
