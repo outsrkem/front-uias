@@ -3,12 +3,13 @@
  */
 import axios from 'axios'
 // import router from '@/router'
-
+import { toLoginPage } from './common.js'
 // 非组件模块可以这样加载使用 element 的 message 提示组件
 import { ElMessage,ElMessageBox  } from 'element-plus'
 
 const request = axios.create({
-  // baseURL: 'http://ttapi.research.itcast.cn/' // 请求的基础路径
+    // baseURL: 'http://ttapi.research.itcast.cn/' // 请求的基础路径
+    baseURL: '/api/uias'
 })
 
 request.interceptors.request.use(
@@ -45,8 +46,7 @@ request.interceptors.response.use(function (response) {
         ElMessageBox.confirm('登录状态无效，请重新登录', '登录提示',
             { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning', draggable: true, }
         ).then(() => {
-            let wl = window.location
-            window.location.assign(wl.protocol + '//' + wl.host + '#/login');
+            toLoginPage()
         }).catch(() => {
             return error.response
         })

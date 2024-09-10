@@ -17,7 +17,6 @@
         </div>
         <el-row>
             <div>
-                <el-button link @click="login">登录</el-button>
                 <el-button link @click="Logout">退出</el-button>
             </div>
         </el-row>
@@ -32,7 +31,8 @@
 
 <script>
 import AppAside from './aside'
-import { login, logout } from '@/api/index.js'
+import {toLoginPage} from '@/utils/common.js'
+import { logout } from '@/api/index.js'
 export default {
     name: 'LayoutIndex',
     components: {
@@ -50,7 +50,7 @@ export default {
             await logout().then(() => {
                 window.sessionStorage.removeItem('active-path')
                 this.$cookies.remove('session');
-                this.$router.push('/')
+                toLoginPage()
             })
         },
         Logout() {
@@ -58,10 +58,6 @@ export default {
                 this.LoadLogOut()
             }).catch(() => {})
         },
-        login() {
-            login()
-            console.log('登录')
-        }
     },
 }
 </script>
