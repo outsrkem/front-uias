@@ -12,6 +12,7 @@ import ajax from '../api/ajax'
  */
 
 export const logout = () => ajax('/v1/user/logout', 'POST')
+export const basicInfo = () => ajax('/v1/uias/user/basicInfo', 'GET', null, null)
 
 // 获取账号
 export const GetAccount = (params) => ajax('/v1/uias/user/center/account', 'GET', params, null)

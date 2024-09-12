@@ -7,16 +7,13 @@
       <el-header class="header">
         <div>
           <el-row class="box-card-header">
-            <div style="padding-top: 15px">
-              <!-- 面包屑导航，Breadcrumb -->
-              <el-breadcrumb separator-class="el-icon-arrow-right">
-                <el-breadcrumb-item v-for="item in breadcrumb" :key="item.id">{{ item }}</el-breadcrumb-item>
-              </el-breadcrumb>
-            </div>
+            <el-button link @click="onConsole">控制台</el-button>
           </el-row>
         </div>
         <el-row>
             <div>
+                <el-button link>欢迎您，{{ userInfo.username }}</el-button>
+                <el-button link @click="onUserCenter">个人中心</el-button>
                 <el-button link @click="Logout">退出</el-button>
             </div>
         </el-row>
@@ -31,8 +28,15 @@
 
 <script>
 import AppAside from './aside'
-import {toLoginPage} from '@/utils/common.js'
-import { logout } from '@/api/index.js'
+import {
+    toLoginPage,
+    toUserCenter,
+    toConsole,
+} from '@/utils/common.js'
+import {
+    logout,
+    basicInfo
+} from '@/api/index.js'
 export default {
     name: 'LayoutIndex',
     components: {
@@ -41,9 +45,12 @@ export default {
     props: {},
     data() {
         return {
-            username: '', // 显示账户名
+            userInfo: {},
             breadcrumb: [], // 面包屑导航
         }
+    },
+    computed: {
+
     },
     methods: {
         LoadLogOut: async function () {
@@ -53,12 +60,23 @@ export default {
                 toLoginPage()
             })
         },
-        Logout() {
-            this.$confirm('确认退出吗？', '退出提示', {confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'}).then(() => {
-                this.LoadLogOut()
-            }).catch(() => {})
+        GetbasicInfo: async function () {
+            const res = await basicInfo()
+            this.userInfo = res.payload.userinfo
         },
+        Logout() {
+            this.LoadLogOut()
+        },
+        onUserCenter() {
+            toUserCenter()
+        },
+        onConsole() {
+            toConsole()
+        }
     },
+    created() {
+        this.GetbasicInfo()
+    }
 }
 </script>
 

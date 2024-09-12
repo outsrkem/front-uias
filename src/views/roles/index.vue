@@ -39,7 +39,7 @@
             <!--分页结束-->
         </el-card>
         <!-- 修改角色详情开始 -->
-        <el-dialog v-model="openEdirRole" title="编辑角色信息" width="30%" label-position="Right">
+        <el-dialog v-model="openEdirRole" title="编辑角色信息" width="30%" label-position="Right" :close-on-click-modal ="false">
             <el-form :model="roleInfo" :rules="fromRules" ref="role-from">
                 <el-form-item label="角色名称" prop="name" label-width="100px">
                     <el-input v-model="roleInfo.name"/>

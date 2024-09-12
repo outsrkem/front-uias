@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 const Layout = () => import('../views/layout/index.vue')
+const Home = () => import('../views/home/index.vue')
 const Account = () => import('../views/account/index.vue')
 const Settings = () => import('../views/account/settings.vue')
 const UserAddRole = () => import('../views/account/addRole.vue')
@@ -12,7 +13,6 @@ const EditRole = () => import('../views/roles/editRole.vue')
 const Policies = () => import('../views/policies/index.vue')
 const PolicyInfo = () => import('../views/policies/policyInfo.vue')
 const CreatePolicy = () => import('../views/policies/createPolicy.vue')
-
 const Options = () => import('../views/options/index.vue')
 
 const routes = [
@@ -21,7 +21,7 @@ const routes = [
         component: Layout,
         meta: { title: 'devops' },
         children: [
-            { path: '/', redired: '/users' },
+            { meta: { title: '首页' }, path: '/', name: 'home', component: Home },
             { meta: { title: '用户' }, path: '/users', name: 'users', component: Account },
             { meta: { title: '用户设置' }, path: '/users/settings/:user_id', name: 'settings', component: Settings },
             { meta: { title: '用户设置' }, path: '/users/settings/:user_id/addRole', name: 'userAddRole', component: UserAddRole },

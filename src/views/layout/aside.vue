@@ -4,22 +4,20 @@
         route 是开启路由模式,这里使用 this.$router.push 跳转，更灵活一些
     -->
     <div class="el-aside">
+        <h4 style="padding-left: 20px; margin-bottom: 20px; margin-top: 20px;">身份认证中心</h4>
         <el-menu :default-active="activePath" unique-opened>
             <!-- @click="onSaveNavState(subItem.path)" 用于保存当前展开的菜单 -->
-            <el-menu-item index="/" @click="OnSwitchRoutes('')">
-                <i class="el-icon-house"></i><span>首页</span>
-            </el-menu-item>
             <el-menu-item index="/users" @click="OnSwitchRoutes('/users')">
-                <i class="el-icon-menu"></i><span>用户</span>
+                <el-icon><User /></el-icon><span>用户</span>
             </el-menu-item>
             <el-menu-item index="/roles" @click="OnSwitchRoutes('/roles')">
-                <i class="el-icon-menu"></i><span>角色</span>
+                <el-icon><Connection /></el-icon><span>角色</span>
             </el-menu-item>
             <el-menu-item index="/policies" @click="OnSwitchRoutes('/policies')">
-                <i class="el-icon-menu"></i><span>策略</span>
+                <el-icon><Operation /></el-icon><span>策略</span>
             </el-menu-item>
             <el-menu-item index="/options" @click="OnSwitchRoutes('/options')">
-                <i class="el-icon-menu"></i><span>配置</span>
+                <el-icon><Setting /></el-icon><span>配置</span>
             </el-menu-item>
         </el-menu>
     </div>
@@ -27,6 +25,7 @@
 
 <script>
 // import globalBus from '@/utils/global-bus'
+import { saveNavPath } from '@/utils/common.js'
 export default {
     name: 'AppAside',
     components: {},
@@ -43,11 +42,10 @@ export default {
         this.activePath = window.sessionStorage.getItem('active-path') || '/users'
         // this.$router.push({ path: this.activePath })
     },
-    mounted() {},
     methods: {
         saveActivePath(activePath) {
             this.activePath = activePath
-            window.sessionStorage.setItem('active-path', activePath)
+            saveNavPath(activePath)
         },
         OnSwitchRoutes(activePath) {
             this.saveActivePath(activePath)

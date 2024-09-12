@@ -53,7 +53,7 @@
             <!--分页结束-->
         </el-card>
         <!-- 修改用户详情开始 -->
-        <el-dialog v-model="openEdirUser" title="编辑用户信息" width="30%" label-position="Right">
+        <el-dialog v-model="openEdirUser" title="编辑用户信息" width="30%" label-position="Right" :close-on-click-modal ="false">
             <el-descriptions :column=1>
                 <el-descriptions-item label="账号名称">{{ userInfo.account }}</el-descriptions-item>
                 <el-descriptions-item label="账号ID">{{ userInfo.id }}</el-descriptions-item>
