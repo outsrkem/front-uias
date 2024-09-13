@@ -9,7 +9,12 @@
             <el-table :data="allPolicies" style="width: 100%" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55" :selectable="selected"/>
                 <el-table-column prop="name" label="策略名称"/>
-                <el-table-column prop="type" label="类型" />
+                <el-table-column label="类型">
+                    <template #default="scope">
+                        <div v-if="scope.row.system"><span >系统策略</span></div>
+                        <div v-else><span >自定义策略</span></div>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="description" label="描述"/>
             </el-table>
         </div>

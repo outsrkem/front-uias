@@ -55,6 +55,9 @@ export default {
         loadCreateRoles: function (data) {
             CreateRoles(data).then(() => {
                 this.$router.push({ path: '/roles' })
+            }).catch(err => {
+                let msg = err.data.metadata.message
+                this.$notify({ duration: 5000, title: '操作失败', message: msg, type: 'error' })
             })
         }
     }

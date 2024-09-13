@@ -36,14 +36,14 @@
                         <el-checkbox v-for="(item, index) in actions.ListOnly" :key="index" :value="item.name" name="type">{{item.description}}</el-checkbox>
                     </el-checkbox-group>
                 </div>
-                <div v-if="actions.ListOnly.length > 0">
+                <div v-if="actions.ReadOnly.length > 0">
                     <el-tag type="primary">只读</el-tag>
                     <el-checkbox-group v-model="selectedData.actions">
                         <el-checkbox v-for="(item, index) in actions.ReadOnly" :key="index" :value="item.name" name="type">{{item.description}}</el-checkbox>
                     </el-checkbox-group>
                 </div>
-                <div v-if="actions.ListOnly.length > 0">
-                    <el-tag type="primary">写</el-tag>
+                <div v-if="actions.ReadWrite.length > 0">
+                    <el-tag type="primary">可写</el-tag>
                     <el-checkbox-group v-model="selectedData.actions">
                         <el-checkbox v-for="(item, index) in actions.ReadWrite" :key="index" :value="item.name" name="type">{{item.description}}</el-checkbox>
                     </el-checkbox-group>
@@ -118,7 +118,7 @@ export default {
             if (this.DisplayTips_1 === false) {
                 // 选择了服务，根据服务的action判断
                 let actions = this.actions
-                // 没有actions时，禁用按钮
+                // 没有actions时，禁用创建策略按钮
                 return actions.ReadOnly.length === 0 && actions.ListOnly.length === 0 && actions.ReadWrite.length === 0; 
             } else {
                 return false
@@ -168,15 +168,12 @@ export default {
                             ReadWrite.push(act) 
                         }
                     }
-
-
                 })
                 this.actions = {
                     ReadOnly: ReadOnly,
                     ListOnly: ListOnly,
                     ReadWrite: ReadWrite
                 }
-                console.log(this.actions)
             })
         },
         loadCreatePolicy: function (data) {

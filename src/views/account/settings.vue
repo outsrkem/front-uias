@@ -25,7 +25,9 @@
     </el-card>
     <el-card>
         <el-tabs v-model="activeName"  @tab-change="tabChange">
-            <el-tab-pane label="安全设置" name="first">安全设置</el-tab-pane>
+            <el-tab-pane label="安全设置" name="first">
+                <SafetySet :vmodel="basicInfo"></SafetySet>
+            </el-tab-pane>
             <el-tab-pane label="所属角色" name="second">
                 <div>
                     <el-button size="small" type="primary" :disabled="! basicInfo.editable" @click="onUserBindRole">加入角色</el-button>
@@ -62,6 +64,7 @@
 </template>
 
 <script>
+import SafetySet from './safetyset.vue'
 import { formatTime } from '@/utils/date.js'
 import {
     GetAccount,
@@ -71,6 +74,9 @@ import {
 } from '@/api/index.js'
 export default {
     name: 'SettingsIndex',
+    components: {
+        SafetySet
+    },
     data() {
         return {
             userId: '',
@@ -149,6 +155,11 @@ export default {
                 path: `/users/settings/${user_id}/addRole`
             })
         },
+        onRefresh() {
+            const uid = this.$route.params.user_id
+            this.loadGetAccount(uid)
+            this.loadSelectRoleFromUser(uid)
+        }
     },
     created() {
         const tabPane = this.$route.query.pane
@@ -164,5 +175,4 @@ export default {
 </script>
 
 <style scoped lang="less">
-
 </style>

@@ -42,7 +42,7 @@
                 <el-table-column label="操作">
                     <template #default="scope">
                         <el-button link type="primary" :disabled="! scope.row.editable" @click="onEditUserInfo(scope.row)">编辑</el-button>
-                        <el-button link type="primary" :disabled="! scope.row.deletable" @click="onDeleteAccount(scope.row.id)">删除</el-button>
+                        <el-button link type="primary" :disabled="! scope.row.deletable" @click="onDeleteAccount(scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -72,25 +72,30 @@
             <div style="display: flex; justify-content: flex-end; align-items: center;">
                 <el-form-item  size="small">
                     <el-button @click="openEdirUser = false">取消</el-button>
-                    <el-button type="primary" @click="onSubmitEditUserInfo">创建</el-button>
+                    <el-button type="primary" @click="onSubmitEditUserInfo">确定</el-button>
                 </el-form-item>
             </div>
         </el-dialog>
         <!-- 修改用户详情结束 -->
+        <DeleteUser ref="DeleteUser" :vdata="deleteUserInfo"></DeleteUser>
     </div>
+
 </template>
       
 <script>
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from '@/utils/date.js'
+import DeleteUser from "./deleteUser.vue";
 import {
     GetAccount,
-    DeleteAccount,
     EditAccount
 } from '@/api/index.js'
 export default {
     name: 'AccountIndex',
-    components: { Pagination },
+    components: {
+        Pagination,
+        DeleteUser,
+     },
     data() {
         return {
             tableData: [],
@@ -102,6 +107,7 @@ export default {
             editUserId: '',
             editUserInfo: {},
             userInfo: {},
+            deleteUserInfo: [],
         }
     },
     computed: {
@@ -124,19 +130,15 @@ export default {
                 this.loading = false
             }
         },
-        loadDeleteAccount: function (data) {
-            DeleteAccount(data).then(() => {
-                this.onRefresh()
-            })
-        },
         // 编辑用户请求
         loadEditRole: function (data) {
             EditAccount(data).then(() => {
                 this.openEdirUser = false
                 this.$notify({ title: '操作成功', duration: 2000, type: 'success', })
                 this.onRefresh()
-            }).catch(() => {
-                this.$notify({ title: '操作失败', duration: 2000, type: 'error', })
+            }).catch((err) => {
+                let msg = err.data.metadata.message
+                this.$notify({ title: '操作失败', duration: 5000, message: msg, type: 'error', })
                 this.onRefresh()
             })
         },
@@ -170,11 +172,11 @@ export default {
         onCreateUser() {
             this.$router.push({ path: '/users/create'})
         },
-        onDeleteAccount(id) {
-            let uid = []
-            uid.push(id)
-            let data = { user_id: uid }
-            this.loadDeleteAccount(data)
+        onDeleteAccount(raw) {
+            // 删除用户
+            this.$refs.DeleteUser.openDeleteUserDialog()
+            this.deleteUserInfo = []
+            this.deleteUserInfo.push(raw)
         },
         // 修改用户信息
         onEditUserInfo(val) {
@@ -194,7 +196,6 @@ export default {
                     enabled : this.editUserInfo.enabled === 'true' ? true : false,
                     description : this.editUserInfo.description
                 }
-
             }
             this.loadEditRole(data)
         }

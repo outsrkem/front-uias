@@ -92,8 +92,8 @@
             <template #footer>
                 <div class="end-container">
                     <div style="margin-right: 20px;">
-                        <el-button size="small" type="primary" @click="onCance">取消</el-button>
-                        <el-button size="small" type="primary" @click="onCreateUser" :loading="createLoading">创建账号</el-button>
+                        <el-button size="small" type="primary" @click="onCance()">取消</el-button>
+                        <el-button size="small" type="primary" @click="onCreateUser()" :loading="createLoading">创建账号</el-button>
                     </div>
                 </div>
             </template>
@@ -208,12 +208,19 @@ export default {
                     uids.push(item['id'])
                 })
                 this.loadRoleBindingUser(this.ChoosingRole, uids)
+            }).catch(err => {
+                let msg = err.data.metadata.message
+                this.$notify({duration: 2000, title: '创建用户失败', message: msg, type: 'error'})
             })
         },
         loadRoleBindingUser: function (rid, uid) {
             const data = { roles: rid, users: uid }
-            RoleBindingUser(data).then(res => {
-                console.log(res)
+            RoleBindingUser(data).then(() => {
+                this.$notify({ duration: 2000, title: '创建用户成功', type: 'success' })
+                this.$router.push({ name: 'users' })
+            }).catch(err => {
+                let msg = err.data.metadata.message
+                this.$notify({duration: 2000, title: '绑定角色失败', message: msg, type: 'error'})
             })
         },
         //取消创建

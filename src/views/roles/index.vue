@@ -48,7 +48,7 @@
             <div style="display: flex; justify-content: flex-end; align-items: center;">
                 <el-form-item  size="small">
                     <el-button @click="openEdirRole = false">取消</el-button>
-                    <el-button type="primary" @click="onSubmitEditRoleInfo">创建</el-button>
+                    <el-button type="primary" @click="onSubmitEditRoleInfo">确定</el-button>
                 </el-form-item>
             </div>
         </el-dialog>

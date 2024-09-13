@@ -1,5 +1,8 @@
 const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
+    configureWebpack: {
+        devtool: false,
+    },
     transpileDependencies: true,
     publicPath: '/uias/',
     devServer: {
@@ -12,6 +15,7 @@ module.exports = defineConfig({
               '^/api/uias': '/api/uias'
             }
           }
-        }
+        },
+        webSocketServer: false,
     },
 })
