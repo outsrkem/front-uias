@@ -1,19 +1,17 @@
 <template>
     <div class="settings-container">
         <el-card class="box-card">
-            <div class="clearfix my_refresh">
-                <div>
-                <el-row class="box-card-header">
-                    <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateUser()">新建账号</el-button>
-                    <!-- <el-button size="small" type="primary" style="margin-left: 10px" @click="onRefresh()">删除账户</el-button> -->
-                </el-row>
+            <template #header>
+                <div class="my_refresh">
+                    <el-row>
+                        <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateUser()">新建账号</el-button>
+                        <!-- <el-button size="small" type="primary" style="margin-left: 10px" @click="onRefresh()">删除账户</el-button> -->
+                    </el-row>
+                    <el-row>
+                        <el-button size="small" type="primary" @click="onRefresh" style="margin-left: 10px">刷新</el-button>
+                    </el-row>
                 </div>
-                <!--刷新按钮-->
-                <el-row>
-                <el-button size="small" type="primary" @click="onRefresh" style="margin-left: 10px">刷新</el-button>
-                </el-row>
-                <!--/刷新按钮-->
-            </div>
+            </template>
             <!--内容开始-->
             <el-table :data="tableData" style="width: 100%" v-loading="loading" element-loading-text="加载中" element-loading-spinner="el-icon-loading">
                 <el-table-column label="账号名称" show-overflow-tooltip>
@@ -35,7 +33,7 @@
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column label="上次登录时间" show-overflow-tooltip>
+                <el-table-column label="最近登录时间" show-overflow-tooltip>
                     <template #default="scope">{{ formatDate(scope.row.last_login_at) }}</template>
                 </el-table-column>
                 <el-table-column label="创建时间" show-overflow-tooltip>
@@ -58,15 +56,13 @@
                 <el-descriptions-item label="账号名称">{{ userInfo.account }}</el-descriptions-item>
                 <el-descriptions-item label="账号ID">{{ userInfo.id }}</el-descriptions-item>
                 <el-descriptions-item label="用户名">{{ userInfo.username }}</el-descriptions-item>
-                <el-descriptions-item label="上次登录时间">{{ formatDate(userInfo.last_login_at) }}</el-descriptions-item>
-                <el-descriptions-item label="状态">{{ userInfo.enabled }}</el-descriptions-item>
-                <!-- <el-descriptions-item label="描述">{{ userInfo.description }}</el-descriptions-item> -->
+                <el-descriptions-item label="最近登录时间">{{ formatDate(userInfo.last_login_at) }}</el-descriptions-item>
             </el-descriptions>
             <el-form :model="editUserInfo">
                 <el-form-item label="状态">
                     <el-radio-group v-model="editUserInfo.enabled">
-                        <el-radio value='true' >启用</el-radio>
-                        <el-radio value='flase' >禁用</el-radio>
+                        <el-radio value='true'>启用</el-radio>
+                        <el-radio value='flase'>禁用</el-radio>
                     </el-radio-group>
                 </el-form-item>
                 <el-form-item label="描述">

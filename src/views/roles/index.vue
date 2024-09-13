@@ -1,22 +1,19 @@
 <template>
     <div class="settings-container">
         <el-card class="box-card">
-            <div class="clearfix my_refresh">
-            <div>
-                <el-row class="box-card-header">
-                <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateRole()">新建角色</el-button>
-                <!-- <el-button size="small" type="primary" style="margin-left: 10px" @click="onRefresh()">删除账户</el-button> -->
-                </el-row>
-            </div>
-            <!--刷新按钮-->
-            <el-row>
-                <el-button size="small" type="primary" @click="onRefresh" style="margin-left: 10px">刷新</el-button>
-            </el-row>
-            <!--/刷新按钮-->
-            </div>
+            <template #header>
+                <div class="my_refresh">
+                    <el-row>
+                        <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateRole()">新建角色</el-button>
+                    </el-row>
+                    <el-row>
+                        <el-button size="small" type="primary" @click="onRefresh" style="margin-left: 10px">刷新</el-button>
+                    </el-row>
+                </div>
+            </template>
             <!--内容开始-->
             <el-table :data="tableData" style="width: 100%" v-loading="loading" element-loading-text="加载中"
-            element-loading-spinner="el-icon-loading">
+                element-loading-spinner="el-icon-loading">
             <el-table-column label="角色名称" show-overflow-tooltip>
                 <template #default="scope">
                     <el-button link type="primary" @click="onEditRole(scope.row.id)">{{scope.row.name}}</el-button>
@@ -54,7 +51,6 @@
                     <el-button type="primary" @click="onSubmitEditRoleInfo">创建</el-button>
                 </el-form-item>
             </div>
-
         </el-dialog>
         <!-- 修改角色详情结束 -->
     </div>
