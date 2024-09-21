@@ -19,21 +19,21 @@ const routes = [
     {
         path: '/',
         component: Layout,
-        meta: { title: 'devops' },
+        meta: { title: 'UIAS' },
         children: [
             { meta: { title: '首页' }, path: '/', name: 'home', component: Home },
-            { meta: { title: '用户' }, path: '/users', name: 'users', component: Account },
+            { meta: { title: '用户管理' }, path: '/users', name: 'users', component: Account },
             { meta: { title: '用户设置' }, path: '/users/settings/:user_id', name: 'settings', component: Settings },
             { meta: { title: '用户设置' }, path: '/users/settings/:user_id/addRole', name: 'userAddRole', component: UserAddRole },
-            { meta: { title: '角色' }, path: '/roles', name: 'roles', component: Roles },
+            { meta: { title: '角色管理' }, path: '/roles', name: 'roles', component: Roles },
             { meta: { title: '创建角色' }, path: '/roles/create', name: 'createRoles', component: CreateRole },
-            { meta: { title: '编辑角色' }, path: '/roles/edit', name: 'editRoles', component: EditRole },
-            { meta: { title: '编辑角色' }, path: '/roles/addUser', name: 'roleaddUser', component: RoleAddUers },
-            { meta: { title: '编辑角色' }, path: '/roles/addPolices', name: 'roleAddPolices', component: RoleAddPolices },
-            { meta: { title: '策略' }, path: '/policies', name: 'policies', component: Policies },
-            { meta: { title: '策略信息' }, path: '/policies/create', name: 'createPolicy', component: CreatePolicy },
+            { meta: { title: '角色详情' }, path: '/roles/edit', name: 'editRoles', component: EditRole },
+            { meta: { title: '角色绑定用户' }, path: '/roles/addUser', name: 'roleaddUser', component: RoleAddUers },
+            { meta: { title: '角色绑定策略' }, path: '/roles/addPolices', name: 'roleAddPolices', component: RoleAddPolices },
+            { meta: { title: '策略管理' }, path: '/policies', name: 'policies', component: Policies },
+            { meta: { title: '新建策略' }, path: '/policies/create', name: 'createPolicy', component: CreatePolicy },
             { meta: { title: '策略信息' }, path: '/policies/:policy_id', name: 'policyInfo', component: PolicyInfo },
-            { meta: { title: '配置' }, path: '/options', name: 'options', component: Options },
+            { meta: { title: '系统配置' }, path: '/options', name: 'options', component: Options },
         ]
     },
     { meta: { title: '创建用户' }, path: '/users/create', name: 'create', component: CreateUser },
@@ -43,5 +43,13 @@ const router = createRouter({
     history: createWebHashHistory('/uias/'),
     routes,
 })
+
+router.beforeEach((to, from, next) => {
+    if (to.meta && to.meta.title) {
+        document.title = to.meta.title;
+    }
+    next();
+});
+
 
 export default router
