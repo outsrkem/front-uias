@@ -66,7 +66,6 @@ import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
 import { GetRoles, EditRole, DeleteRoles } from "@/api/index.js";
 
-// import { login } from '@/api/index.js'
 export default {
     name: "RolesIndex",
     components: { Pagination },
@@ -92,9 +91,6 @@ export default {
         };
     },
     methods: {
-        loadLogin: function () {
-            console.log("登录");
-        },
         loadGetRoles: async function (page_size, page) {
             try {
                 const params = { page_size: page_size, page: page };
@@ -108,15 +104,29 @@ export default {
             }
         },
         // 编辑角色请求
-        loadEditRole: async function (data) {
-            await EditRole(data);
-            this.onRefresh();
-            this.openEdirRole = false;
+        loadEditRole: function (data) {
+            EditRole(data)
+                .then(() => {
+                    this.onRefresh();
+                    this.openEdirRole = false;
+                    this.$notify({ title: "操作成功", duration: 2000, type: "success" });
+                })
+                .catch((err) => {
+                    let msg = err.data.metadata.message;
+                    this.$notify({ title: "操作失败", duration: 5000, message: msg, type: "error" });
+                    this.onRefresh();
+                });
         },
         loadDeleteRole: function (data) {
-            DeleteRoles(data).then(() => {
-                this.onRefresh();
-            });
+            DeleteRoles(data)
+                .then(() => {
+                    this.$notify({ title: "操作成功", duration: 2000, type: "success" });
+                    this.onRefresh();
+                })
+                .catch((err) => {
+                    let msg = err.data.metadata.message;
+                    this.$notify({ title: "操作失败", duration: 5000, message: msg, type: "error" });
+                });
         },
         formatDate(time) {
             return formatTime(time);
@@ -175,7 +185,6 @@ export default {
         },
     },
     created() {
-        this.loadLogin();
         this.loadGetRoles(this.pageSize, this.page);
     },
 };

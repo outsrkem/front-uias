@@ -76,14 +76,22 @@ export default {
                 this.loading = false;
                 this.pageTotal = res.payload.page_info.total;
             } catch (err) {
+                console.log(err);
                 this.tableData = [];
                 this.loading = false;
             }
         },
         loadDeletePolicies: function (data) {
-            DeletePolicies(data).then(() => {
-                this.onRefresh();
-            });
+            DeletePolicies(data)
+                .then(() => {
+                    this.onRefresh();
+                    this.$notify({ title: "操作成功", duration: 2000, type: "success" });
+                })
+                .catch((err) => {
+                    let msg = err.data.metadata.message;
+                    this.$notify({ title: "操作失败", duration: 5000, message: msg, type: "error" });
+                    this.onRefresh();
+                });
         },
         formatDate(time) {
             return formatTime(time);

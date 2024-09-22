@@ -5,7 +5,12 @@
                 <div class="my_refresh">
                     <el-row>
                         <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateUser()">新建账号</el-button>
-                        <!-- <el-button size="small" type="primary" style="margin-left: 10px" @click="onRefresh()">删除账户</el-button> -->
+                        <!-- <el-button size="small" type="primary" style="margin-left: 10px" @click="onRefresh()" disabled>删除账户</el-button> -->
+                        <!-- 按钮间距 -->
+                        <span style="padding-left: 5px; padding-right: 5px"></span>
+                        <el-input size="small" v-model="searchAccountQuery" style="width: 200px" placeholder="按账号搜索" clearable />
+                        <span style="padding-left: 5px; padding-right: 5px"></span>
+                        <el-input size="small" v-model="searchUsernameQuery" style="width: 200px" placeholder="按用户名搜索" clearable />
                     </el-row>
                     <el-row>
                         <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
@@ -14,7 +19,7 @@
             </template>
             <!--内容开始-->
             <el-table
-                :data="tableData"
+                :data="filteredAccount"
                 style="width: 100%"
                 v-loading="loading"
                 element-loading-text="加载中"
@@ -111,6 +116,8 @@ export default {
             userInfo: {},
             deleteUserInfo: [],
             timeoutId: null,
+            searchAccountQuery: "",
+            searchUsernameQuery: "",
         };
     },
     computed: {
@@ -118,6 +125,22 @@ export default {
             get() {
                 return this.editUserInfo.enabled ? "true" : "flase";
             },
+        },
+        filteredAccount() {
+            // 如果没有搜索关键词，则显示所有用户
+            if (!this.searchAccountQuery && !this.searchUsernameQuery) return this.tableData;
+
+            // 按账号搜索
+            return this.tableData.filter((item) => {
+                if (this.searchAccountQuery && item.account.toLowerCase().includes(this.searchAccountQuery.toLowerCase())) {
+                    console.log([item]);
+                    return [item];
+                }
+                if (this.searchUsernameQuery && item.username.toLowerCase().includes(this.searchUsernameQuery.toLowerCase())) {
+                    console.log([item]);
+                    return [item];
+                }
+            });
         },
     },
     methods: {
