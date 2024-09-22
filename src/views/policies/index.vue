@@ -43,9 +43,15 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <!--分页开始-->
-            <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange"> </Pagination>
-            <!--分页结束-->
+            <template #footer>
+                <div class="end-container">
+                    <div>
+                        <!--分页开始-->
+                        <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
+                        <!--分页结束-->
+                    </div>
+                </div>
+            </template>
         </el-card>
     </div>
 </template>

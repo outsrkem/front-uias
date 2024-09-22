@@ -1,25 +1,25 @@
 <template>
     <el-container class="layout-container">
-        <el-header class="header">
-            <div>
-                <el-row>
-                    <el-text class="header-text line-spacing">认证中心</el-text>
-                    <el-link class="header-text line-spacing" href="/console" target="_blank">控制台</el-link>
-                </el-row>
-            </div>
-            <div>
-                <el-row>
-                    <el-text class="header-text line-spacing">{{ dateMessage }}</el-text>
-                    <el-text class="header-text line-spacing">欢迎您，{{ userInfo.username }}</el-text>
-                    <el-button class="header-text line-spacing" link @click="onUserCenter">个人中心</el-button>
-                    <el-button class="header-text line-spacing" link @click="Logout">退出</el-button>
-                </el-row>
-            </div>
-        </el-header>
+        <el-aside class="aside" width="auth">
+            <app-aside />
+        </el-aside>
         <el-container>
-            <el-aside class="aside" width="auth">
-                <app-aside />
-            </el-aside>
+            <el-header class="header">
+                <div>
+                    <el-row>
+                        <el-text class="header-text line-spacing">认证中心</el-text>
+                        <el-link class="header-text line-spacing" href="/console" target="_blank">控制台</el-link>
+                    </el-row>
+                </div>
+                <div>
+                    <el-row>
+                        <el-text class="header-text line-spacing">{{ dateMessage }}</el-text>
+                        <el-text class="header-text line-spacing">欢迎您，{{ userInfo.username }}</el-text>
+                        <el-button class="header-text line-spacing" link @click="onUserCenter">个人中心</el-button>
+                        <el-button class="header-text line-spacing" link @click="Logout">退出</el-button>
+                    </el-row>
+                </div>
+            </el-header>
             <el-main class="main">
                 <!-- 子路由出口 -->
                 <router-view />
@@ -98,6 +98,7 @@ export default {
 }
 .aside {
     width: "auth";
+    padding-top: 50px;
 }
 
 .header {

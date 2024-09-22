@@ -4,7 +4,7 @@
         route 是开启路由模式,这里使用 this.$router.push 跳转，更灵活一些
     -->
     <div>
-        <el-menu :default-active="activePath" unique-opened :collapse="isCollapse">
+        <el-menu :default-active="activePath" unique-opened>
             <!-- @click="onSaveNavState(subItem.path)" 用于保存当前展开的菜单 -->
             <el-menu-item index="/users" @click="OnSwitchRoutes('/users')">
                 <el-icon><User /></el-icon>
@@ -22,12 +22,6 @@
                 <el-icon><Setting /></el-icon>
                 <template #title><span>配置管理</span></template>
             </el-menu-item>
-            <el-menu-item index="/collapse" @click="OnClose()">
-                <!-- 面板折叠按钮 -->
-                <el-icon v-if="!isCollapse"><Fold /></el-icon>
-                <el-icon v-else><Expand /></el-icon>
-                <template #title><span>收起</span></template>
-            </el-menu-item>
         </el-menu>
     </div>
 </template>
@@ -42,8 +36,6 @@ export default {
         return {
             activePath: "",
             menusList: [],
-            isCollapse: false,
-            collapseMes: "收回菜单",
         };
     },
     computed: {},
@@ -60,13 +52,6 @@ export default {
         OnSwitchRoutes(activePath) {
             this.saveActivePath(activePath);
             this.$router.push({ path: activePath });
-        },
-        OnClose() {
-            if (this.isCollapse) {
-                this.isCollapse = false;
-            } else {
-                this.isCollapse = true;
-            }
         },
     },
 };

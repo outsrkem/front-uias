@@ -36,9 +36,15 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <!--分页开始-->
-            <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
-            <!--分页结束-->
+            <template #footer>
+                <div class="end-container">
+                    <div>
+                        <!--分页开始-->
+                        <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
+                        <!--分页结束-->
+                    </div>
+                </div>
+            </template>
         </el-card>
         <!-- 修改角色详情开始 -->
         <el-dialog v-model="openEdirRole" title="编辑角色信息" width="30%" label-position="Right" :close-on-click-modal="false">
