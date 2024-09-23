@@ -1,8 +1,17 @@
 <template>
     <el-card style="margin-bottom: 20px">
         <template #header>
-            <div class="card-header">
+            <div>
                 <span>角色添加用户</span>
+                <span style="padding-left: 5px; padding-right: 5px"></span>
+                <el-input
+                    size="small"
+                    v-model="searchAccountQuery"
+                    style="width: 400px"
+                    placeholder="按账号搜索（默认当前页搜索，回车进行远程搜索）"
+                    clearable
+                    @change="onSearch()"
+                />
             </div>
         </template>
         <div>
@@ -47,7 +56,7 @@
 <script>
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
-import { GetAccount, RoleBindingUser } from "@/api/index.js";
+import { GetAccount, RoleBindingUser, SearchAccount } from "@/api/index.js";
 export default {
     name: "AddUsersIndex",
     components: { Pagination },
@@ -59,6 +68,7 @@ export default {
             pageTotal: 0,
             pageSize: 10,
             page: 1,
+            searchAccountQuery: "",
         };
     },
     methods: {
@@ -79,12 +89,28 @@ export default {
         },
         onCurrentChange(p) {
             this.page = p;
-            this.loadGetAccount(this.pageSize, p);
+            if (this.searchAccountQuery === "") {
+                this.loadGetAccount(this.pageSize, p);
+            } else {
+                this.loadSearchAccount(this.searchAccountQuery, this.pageSize, p);
+            }
         },
         onSizeChange(s) {
             this.pageSize = s;
             this.page = 1;
-            this.loadGetAccount(s, 1);
+            if (this.searchAccountQuery === "") {
+                this.loadGetAccount(s, 1);
+            } else {
+                this.loadSearchAccount(this.searchAccountQuery, s, 1);
+            }
+        },
+        onSearch() {
+            if (this.searchAccountQuery === "") {
+                this.loadGetAccount(this.pageSize, this.page);
+            } else {
+                this.page = 1;
+                this.loadSearchAccount(this.searchAccountQuery, this.pageSize, this.page);
+            }
         },
         onCance() {
             const role_id = this.$route.query.rid;
@@ -98,6 +124,14 @@ export default {
             GetAccount(params).then((res) => {
                 this.allUsers = res.payload.items;
                 this.pageTotal = res.payload.page_info.total;
+            });
+        },
+        loadSearchAccount: function (k, s = 10, p = 1) {
+            const params = { k: k, p: p, s: s };
+            SearchAccount(params).then((res) => {
+                this.allUsers = res.payload.items;
+                this.pageTotal = res.payload.page_info.total;
+                this.loading = false;
             });
         },
         loadRoleBindingUser: function (rid, uid) {

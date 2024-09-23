@@ -5,12 +5,17 @@
                 <div class="my_refresh">
                     <el-row>
                         <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateUser()">新建账号</el-button>
-                        <!-- <el-button size="small" type="primary" style="margin-left: 10px" @click="onRefresh()" disabled>删除账户</el-button> -->
-                        <!-- 按钮间距 -->
                         <span style="padding-left: 5px; padding-right: 5px"></span>
-                        <el-input size="small" v-model="searchAccountQuery" style="width: 200px" placeholder="按账号搜索" clearable />
-                        <span style="padding-left: 5px; padding-right: 5px"></span>
-                        <el-input size="small" v-model="searchUsernameQuery" style="width: 200px" placeholder="按用户名搜索" clearable />
+                        <el-input
+                            size="small"
+                            v-model="searchAccountQuery"
+                            style="width: 400px"
+                            placeholder="按账号搜索（默认当前页搜索，回车进行远程搜索）"
+                            clearable
+                            @change="onSearch()"
+                        />
+                        <!-- <span style="padding-left: 5px; padding-right: 5px"></span> -->
+                        <!-- <el-input size="small" v-model="searchUsernameQuery" style="width: 200px" placeholder="按用户名搜索" clearable /> -->
                     </el-row>
                     <el-row>
                         <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
@@ -102,7 +107,7 @@
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
 import DeleteUser from "./deleteUser.vue";
-import { GetAccount, EditAccount } from "@/api/index.js";
+import { GetAccount, EditAccount, SearchAccount } from "@/api/index.js";
 export default {
     name: "AccountIndex",
     components: {
@@ -139,11 +144,9 @@ export default {
             // 按账号搜索
             return this.tableData.filter((item) => {
                 if (this.searchAccountQuery && item.account.toLowerCase().includes(this.searchAccountQuery.toLowerCase())) {
-                    console.log([item]);
                     return [item];
                 }
                 if (this.searchUsernameQuery && item.username.toLowerCase().includes(this.searchUsernameQuery.toLowerCase())) {
-                    console.log([item]);
                     return [item];
                 }
             });
@@ -161,6 +164,14 @@ export default {
                 this.tableData = [];
                 this.loading = false;
             }
+        },
+        loadSearchAccount: function (k, s = 10, p = 1) {
+            const params = { k: k, p: p, s: s };
+            SearchAccount(params).then((res) => {
+                this.tableData = res.payload.items;
+                this.pageTotal = res.payload.page_info.total;
+                this.loading = false;
+            });
         },
         // 编辑用户请求
         loadEditRole: function (data) {
@@ -184,17 +195,31 @@ export default {
             this.loading = true;
             clearTimeout(this.timeoutId);
             this.timeoutId = setTimeout(() => {
-                this.loadGetAccount(this.pageSize, this.page);
+                if (this.searchAccountQuery === "") {
+                    this.loadGetAccount(this.pageSize, this.page);
+                } else {
+                    this.loadSearchAccount(this.searchAccountQuery, this.pageSize, this.page);
+                }
             }, 650);
         },
         onCurrentChange(p) {
             this.page = p;
-            this.loadGetAccount(this.pageSize, p);
+            //this.loadGetAccount(this.pageSize, p);
+            if (this.searchAccountQuery === "") {
+                this.loadGetAccount(this.pageSize, p);
+            } else {
+                this.loadSearchAccount(this.searchAccountQuery, this.pageSize, p);
+            }
         },
         onSizeChange(s) {
             this.pageSize = s;
             this.page = 1;
-            this.loadGetAccount(s, 1);
+            if (this.searchAccountQuery === "") {
+                this.loadGetAccount(s, 1);
+            } else {
+                this.loadSearchAccount(this.searchAccountQuery, s, 1);
+            }
+            //this.loadGetAccount(s, 1);
         },
         onSettingsUser(user_id) {
             this.$router.push({
@@ -203,6 +228,14 @@ export default {
                     user_id: user_id,
                 },
             });
+        },
+        onSearch() {
+            if (this.searchAccountQuery === "") {
+                this.loadGetAccount(this.pageSize, this.page);
+            } else {
+                this.page = 1;
+                this.loadSearchAccount(this.searchAccountQuery, this.pageSize, this.page);
+            }
         },
         onCreateUser() {
             this.$router.push({ path: "/users/create" });

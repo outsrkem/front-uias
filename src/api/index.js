@@ -22,6 +22,8 @@ export const CreateAccount = (data) => ajax('/v1/uias/user/center/account', 'POS
 export const DeleteAccount = (data) => ajax('/v1/uias/user/center/account', 'DELETE', null, data)
 // 修改账户 /v1/uias/user/center/account
 export const EditAccount = (data) => ajax('/v1/uias/user/center/account', 'PATCH', null, data)
+// 搜索用户（按账号名） GET /v1/uias/common/account/search
+export const SearchAccount = (params) => ajax('/v1/uias/common/account/search', 'GET', params)
 
 // 获取角色
 export const GetRoles = (params) => ajax('/v1/uias/roles', 'GET', params, null)

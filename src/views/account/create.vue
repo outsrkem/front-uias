@@ -141,14 +141,14 @@ export default {
             pageLoading: false,
             placeholder: {
                 account: "账号(必填)",
-                username: "姓名(选填)",
+                username: "姓名(必填)",
                 mobile: "移动电话号码(选填): 13612345678",
                 email: "邮箱地址(选填): example@example.com",
                 describes: "描述(选填)",
             },
             fromRules: {
                 account: [{ required: true, type: "string", message: "账号不能为空", trigger: ["blur", "change"] }],
-                username: [{ type: "string", trigger: ["blur", "change"] }],
+                username: [{ required: true, type: "string", trigger: ["blur", "change"] }],
                 email: [{ type: "email", message: "请输入正确的电子邮件地址", trigger: ["blur", "change"] }],
                 mobile: [{ pattern: /^1[3456789]\d{9}$/, message: "请输入正确的手机号格式", trigger: ["blur", "change"] }],
                 describes: [{ type: "string", trigger: ["blur", "change"] }],
@@ -220,10 +220,19 @@ export default {
             });
         },
         loadGetRoles: function () {
-            GetRoles({ page_size: 100 }).then((res) => {
-                let r = res.payload.items;
-                this.roles = r;
-            });
+            GetRoles({ page_size: 100 })
+                .then((res) => {
+                    let r = res.payload.items;
+                    this.roles = r;
+                })
+                .catch((err) => {
+                    if (err.status === 403) {
+                        this.$notify({ duration: 2000, title: "没有权限获取角色", type: "warning" });
+                    } else {
+                        let msg = err.data.metadata.message;
+                        this.$notify({ duration: 2000, title: "获取角色失败", message: msg, type: "error" });
+                    }
+                });
         },
         loadCreateAccount: function (data) {
             let uids = [];
@@ -238,8 +247,12 @@ export default {
                 })
                 .catch((err) => {
                     this.onSwitchStatus(false);
-                    let msg = err.data.metadata.message;
-                    this.$notify({ duration: 2000, title: "创建用户失败", message: msg, type: "error" });
+                    if (err.status === 403) {
+                        this.$notify({ duration: 2000, title: "您没有权限创建用户", type: "warning" });
+                    } else {
+                        let msg = err.data.metadata.message;
+                        this.$notify({ duration: 2000, title: "创建用户失败", message: msg, type: "error" });
+                    }
                 });
         },
         loadRoleBindingUser: function (rid, uid) {
@@ -252,8 +265,12 @@ export default {
                 })
                 .catch((err) => {
                     this.onSwitchStatus(false);
-                    let msg = err.data.metadata.message;
-                    this.$notify({ duration: 2000, title: "绑定角色失败", message: msg, type: "error" });
+                    if (err.status === 403) {
+                        this.$notify({ duration: 2000, title: "您没有权限绑定角色", type: "warning" });
+                    } else {
+                        let msg = err.data.metadata.message;
+                        this.$notify({ duration: 2000, title: "绑定角色失败", message: msg, type: "error" });
+                    }
                 });
         },
         onSwitchStatus(val) {
