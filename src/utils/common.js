@@ -5,12 +5,12 @@ export function toLoginPage() {
 
 export function toUserCenter() {
     let url = `/console/#/accountInfo`;
-    return window.open(url, '_blank');
+    return window.location.href = url;
 }
 
 export function toConsole() {
     let url = `/console`;
-    return window.open(url, '_blank');
+    return window.location.href = url;
 }
 
 export function saveNavPath(activePath) {
