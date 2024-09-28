@@ -145,7 +145,7 @@ export default {
 }
 .title {
     display: inline-block;
-    width: 100px;
+    width: 130px;
     margin-left: 10px;
     margin-right: 5px;
     margin-bottom: 5px;

@@ -1,17 +1,9 @@
-name: Devops CI
+name: Release Version
 
 on:
   push:
-    branches:
-      - "build_*"
-      - "master"
-  pull_request:
-    branches:
-      - "master"
-    types:
-      - opened
-      - closed
-
+    tags:
+      - "v*.*.*"
 env:
   NAME: uias
 
@@ -21,7 +13,7 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4.1.1
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
@@ -30,10 +22,11 @@ jobs:
       - name: npm install
         run: npm install
 
-      - name: Get branch name
-        id: branch
-        run: |
-          echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      - name: Get tag version
+        id: branch-names
+        uses: tj-actions/branch-names@v8
+        with:
+          strip_tag_prefix: v
 
       - name: build
         run: npm run build
@@ -41,7 +34,7 @@ jobs:
       - name: Pack Compression
         run: |
           mv dist ${{ env.NAME }}
-          tar zcvf ${{ env.NAME }}-${{ steps.branch.outputs.branch }}.tar.gz ${{ env.NAME }}
+          tar zcvf ${{ env.NAME }}-${{ steps.branch-names.outputs.tag }}.tar.gz ${{ env.NAME }}
 
       - name: Upload
         env:
@@ -53,4 +46,4 @@ jobs:
           mv obsutil_linux_amd64_* obsutil
           chmod 755 obsutil/obsutil
           ./obsutil/obsutil config -i=$AK -k=$SK -e=obs.cn-north-4.myhuaweicloud.com
-          ./obsutil/obsutil cp ./${{ env.NAME }}-${{ steps.branch.outputs.branch }}.tar.gz obs://110254b2cf424535aec05afe14ab8497/${{ env.NAME }}/
+          ./obsutil/obsutil cp ./${{ env.NAME }}-${{ steps.branch-names.outputs.tag }}.tar.gz obs://110254b2cf424535aec05afe14ab8497/${{ env.NAME }}/
