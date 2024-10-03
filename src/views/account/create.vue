@@ -12,7 +12,7 @@
                         <div class="text-top">用户信息</div>
                     </div>
                     <div style="width: 100%">
-                        <el-form :model="accountData" ref="account-form">
+                        <el-form :size="size" :model="accountData" ref="account-form">
                             <el-table :data="accountData">
                                 <el-table-column label="账号名称">
                                     <template #default="scope">
@@ -97,7 +97,7 @@
                         <div class="text-top">登录密码</div>
                     </div>
                     <div>
-                        <el-form :model="basicinfo" ref="password-form" :rules="fromRules">
+                        <el-form :size="size" :model="basicinfo" ref="password-form" :rules="fromRules">
                             <el-form-item prop="password" style="width: 480px" :inline="true">
                                 <el-input v-model="basicinfo.password" type="password" autocomplete="off" placeholder="请输入密码" />
                             </el-form-item>
@@ -110,7 +110,7 @@
                         <div class="text-top">选择角色</div>
                     </div>
                     <div>
-                        <el-select v-model="ChoosingRole" multiple placeholder="请选择角色" style="width: 960px">
+                        <el-select :size="size" v-model="ChoosingRole" multiple placeholder="请选择角色，不能超过10个" style="width: 960px">
                             <el-option v-for="item in roles" :key="item.value" :label="item.name" :value="item.id" />
                         </el-select>
                     </div>
@@ -133,6 +133,7 @@ export default {
     name: "CreateUser",
     data() {
         return {
+            size: "small",
             accountData: [],
             maxRow: 10,
             addButton: false,
@@ -142,13 +143,13 @@ export default {
             placeholder: {
                 account: "账号(必填)",
                 username: "姓名(必填)",
-                mobile: "移动电话号码(选填): 13612345678",
-                email: "邮箱地址(选填): example@example.com",
+                mobile: "电话号码(选填)",
+                email: "邮箱地址(选填)",
                 describes: "描述(选填)",
             },
             fromRules: {
                 account: [{ required: true, type: "string", message: "账号不能为空", trigger: ["blur", "change"] }],
-                username: [{ required: true, type: "string", trigger: ["blur", "change"] }],
+                username: [{ required: true, type: "string", message: "用户名不能为空", trigger: ["blur", "change"] }],
                 email: [{ type: "email", message: "请输入正确的电子邮件地址", trigger: ["blur", "change"] }],
                 mobile: [{ pattern: /^1[3456789]\d{9}$/, message: "请输入正确的手机号格式", trigger: ["blur", "change"] }],
                 describes: [{ type: "string", trigger: ["blur", "change"] }],
