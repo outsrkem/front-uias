@@ -19,8 +19,10 @@
             <span v-else>
                 <div class="value">
                     <div class="icon">
-                        <el-icon :size="14" style="color: #ffb700; padding-right: 10px"><WarningFilled /></el-icon>
-                        <el-text>未绑定</el-text>
+                        <el-text>
+                            <el-icon style="color: #ffb700; padding-right: 10px"><WarningFilled /></el-icon>
+                            <span>未绑定</span>
+                        </el-text>
                     </div>
                 </div>
             </span>
@@ -36,8 +38,10 @@
             <span v-else>
                 <div class="value">
                     <div class="icon">
-                        <el-icon :size="14" style="color: #ffb700; padding-right: 10px"><WarningFilled /></el-icon>
-                        <el-text>关闭</el-text>
+                        <el-text>
+                            <el-icon style="color: #ffb700; padding-right: 10px"><WarningFilled /></el-icon>
+                            <span>关闭</span>
+                        </el-text>
                     </div>
                 </div>
             </span>
