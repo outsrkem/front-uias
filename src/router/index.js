@@ -23,6 +23,7 @@ const routes = [
         children: [
             { meta: { title: '首页' }, path: '/', name: 'home', component: Home },
             { meta: { title: '用户管理' }, path: '/users', name: 'users', component: Account },
+            { meta: { title: '创建用户' }, path: '/users/create', name: 'create', component: CreateUser },
             { meta: { title: '用户设置' }, path: '/users/settings/:user_id', name: 'settings', component: Settings },
             { meta: { title: '用户设置' }, path: '/users/settings/:user_id/addRole', name: 'userAddRole', component: UserAddRole },
             { meta: { title: '角色管理' }, path: '/roles', name: 'roles', component: Roles },
@@ -36,7 +37,6 @@ const routes = [
             { meta: { title: '系统配置' }, path: '/options', name: 'options', component: Options },
         ]
     },
-    { meta: { title: '创建用户' }, path: '/users/create', name: 'create', component: CreateUser },
 ]
 
 const router = createRouter({
@@ -44,10 +44,14 @@ const router = createRouter({
     routes,
 })
 
+import { saveNavPath } from "@/utils/common.js";
 router.beforeEach((to, from, next) => {
     if (to.meta && to.meta.title) {
         document.title = to.meta.title;
     }
+    const path = to.path
+    const activePath = path.split("/")[0] + "/" + path.split("/")[1];
+    saveNavPath(activePath);
     next();
 });
 

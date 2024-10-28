@@ -4,20 +4,22 @@
             <template #header>
                 <div class="my_refresh">
                     <el-row>
-                        <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateUser()">新建账号</el-button>
+                        <span>用户管理</span>
                         <span style="padding-left: 5px; padding-right: 5px"></span>
-                        <el-input
-                            size="small"
-                            v-model="searchAccountQuery"
-                            style="width: 400px"
-                            placeholder="按账号搜索（默认当前页搜索，回车进行远程搜索）"
-                            clearable
-                            @change="onSearch()"
-                        />
+
                         <!-- <span style="padding-left: 5px; padding-right: 5px"></span> -->
                         <!-- <el-input size="small" v-model="searchUsernameQuery" style="width: 200px" placeholder="按用户名搜索" clearable /> -->
                     </el-row>
                     <el-row>
+                        <el-input
+                            size="small"
+                            v-model="searchAccountQuery"
+                            style="width: 400px"
+                            placeholder="按账号名称搜索（默认当前页搜索，回车进行远程搜索）"
+                            clearable
+                            @change="onSearch()"
+                        />
+                        <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateUser()">创建用户</el-button>
                         <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
                     </el-row>
                 </div>
@@ -62,40 +64,42 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <template #footer>
-                <div class="end-container">
-                    <div>
-                        <!--分页开始-->
-                        <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
-                        <!--分页结束-->
-                    </div>
+            <div class="pagination">
+                <div>
+                    <!--分页开始-->
+                    <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
+                    <!--分页结束-->
                 </div>
-            </template>
+            </div>
         </el-card>
         <!-- 修改用户详情开始 -->
         <el-dialog v-model="openEdirUser" title="编辑用户信息" width="30%" label-position="Right" :close-on-click-modal="false">
-            <el-descriptions :column="1">
-                <el-descriptions-item label="账号名称">{{ userInfo.account }}</el-descriptions-item>
-                <el-descriptions-item label="账号ID">{{ userInfo.id }}</el-descriptions-item>
-                <el-descriptions-item label="用户名">{{ userInfo.username }}</el-descriptions-item>
-                <el-descriptions-item label="最近登录时间">{{ formatDate(userInfo.last_login_at) }}</el-descriptions-item>
-            </el-descriptions>
-            <el-form :model="editUserInfo">
-                <el-form-item label="状态">
-                    <el-radio-group v-model="editUserInfo.enabled">
-                        <el-radio value="true">启用</el-radio>
-                        <el-radio value="flase">禁用</el-radio>
-                    </el-radio-group>
-                </el-form-item>
-                <el-form-item label="描述">
-                    <el-input v-model="editUserInfo.description" type="textarea" maxlength="128" show-word-limit placeholder="请输入用户描述" />
-                </el-form-item>
-            </el-form>
-            <div style="display: flex; justify-content: flex-end; align-items: center">
-                <el-form-item size="small">
-                    <el-button @click="openEdirUser = false">取消</el-button>
-                    <el-button type="primary" @click="onSubmitEditUserInfo">确定</el-button>
-                </el-form-item>
+            <div style="margin-left: 45px; margin-right: 50px">
+                <el-descriptions :column="1">
+                    <el-descriptions-item label="账号ID">{{ userInfo.id }}</el-descriptions-item>
+                    <el-descriptions-item label="账号名称">{{ userInfo.account }}</el-descriptions-item>
+                    <el-descriptions-item label="最近登录时间">{{ formatDate(userInfo.last_login_at) }}</el-descriptions-item>
+                </el-descriptions>
+                <el-form :model="editUserInfo" label-width="auto">
+                    <el-form-item label="状态">
+                        <el-radio-group v-model="editUserInfo.enabled">
+                            <el-radio value="true">启用</el-radio>
+                            <el-radio value="flase">禁用</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                    <el-form-item label="用户名">
+                        <el-input v-model="editUserInfo.username" />
+                    </el-form-item>
+                    <el-form-item label="描述">
+                        <el-input v-model="editUserInfo.description" type="textarea" maxlength="128" show-word-limit placeholder="请输入用户描述" />
+                    </el-form-item>
+                </el-form>
+                <div style="display: flex; justify-content: flex-end; align-items: center">
+                    <el-form-item size="small">
+                        <el-button @click="openEdirUser = false">取消</el-button>
+                        <el-button type="primary" @click="onSubmitEditUserInfo">确定</el-button>
+                    </el-form-item>
+                </div>
             </div>
         </el-dialog>
         <!-- 修改用户详情结束 -->
@@ -174,8 +178,8 @@ export default {
             });
         },
         // 编辑用户请求
-        loadEditRole: function (data) {
-            EditAccount(data)
+        loadEditRole: function (paths, data) {
+            EditAccount(paths, data)
                 .then(() => {
                     this.openEdirUser = false;
                     this.$notify({ title: "操作成功", duration: 2000, type: "success" });
@@ -200,7 +204,7 @@ export default {
                 } else {
                     this.loadSearchAccount(this.searchAccountQuery, this.pageSize, this.page);
                 }
-            }, 650);
+            }, this.$config.delayTime);
         },
         onCurrentChange(p) {
             this.page = p;
@@ -257,19 +261,21 @@ export default {
             this.openEdirUser = true;
         },
         onSubmitEditUserInfo() {
-            console.log(this.editUserInfo);
+            const paths = { user_id: this.editUserId };
             let data = {
-                user_id: this.editUserId,
-                data: {
+                // user_id: this.editUserId,
+                accountInfo: {
+                    username: this.editUserInfo.username,
                     enabled: this.editUserInfo.enabled === "true" ? true : false,
                     description: this.editUserInfo.description,
                 },
             };
-            this.loadEditRole(data);
+            this.loadEditRole(paths, data);
         },
     },
     created() {
-        this.loadGetAccount(this.pageSize, this.page);
+        // this.loadGetAccount(this.pageSize, this.page);
+        this.onRefresh();
     },
 };
 </script>

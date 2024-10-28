@@ -16,14 +16,16 @@ export const basicInfo = () => ajax('/v1/uias/user/basicInfo', 'GET', null, null
 
 // 获取账号
 export const GetAccount = (params) => ajax('/v1/uias/user/center/account', 'GET', params, null)
+// 查询账号详情 /v1/uias/user/center/account/:user_id
+export const AccountDetail = (paths) => ajax(`/v1/uias/user/center/account/${paths.user_id}`, 'GET', null, null)
 // 创建账号
 export const CreateAccount = (data) => ajax('/v1/uias/user/center/account', 'POST', null, data)
 // 删除账号 /v1/uias/user/center/account
 export const DeleteAccount = (data) => ajax('/v1/uias/user/center/account', 'DELETE', null, data)
 // 修改账户 /v1/uias/user/center/account
-export const EditAccount = (data) => ajax('/v1/uias/user/center/account', 'PATCH', null, data)
-// 搜索用户（按账号名） GET /v1/uias/common/account/search
-export const SearchAccount = (params) => ajax('/v1/uias/common/account/search', 'GET', params)
+export const EditAccount = (paths,data) => ajax(`/v1/uias/user/center/account/${paths.user_id}`, 'PATCH', null, data)
+// 搜索用户（按账号名） GET /v1/uias/user/account/search
+export const SearchAccount = (params) => ajax('/v1/uias/user/account/search', 'GET', params)
 
 // 获取角色
 export const GetRoles = (params) => ajax('/v1/uias/roles', 'GET', params, null)
@@ -34,7 +36,7 @@ export const CreateRoles = (data) => ajax('/v1/uias/roles', 'POST', null, data)
 // 删除角色
 export const DeleteRoles = (data) => ajax('/v1/uias/roles', 'DELETE', null, data)
 // 编辑角色 /v1/uias/roles
-export const EditRole = (data) => ajax('/v1/uias/roles', 'PATCH', null, data)
+export const EditRole = (paths, data) => ajax(`/v1/uias/roles/${paths.role_id}`, 'PATCH', null, data)
 
 
 // 获取策略

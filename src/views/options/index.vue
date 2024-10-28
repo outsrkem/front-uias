@@ -13,7 +13,7 @@
                     </el-row>
                 </div>
             </template>
-            <div v-loading="loading.data">
+            <div style="min-height: 170px" v-loading="loading.data">
                 <div v-for="(item, index) in options" :key="index">
                     <div class="title">
                         <el-text>{{ item.title }}</el-text>
@@ -101,7 +101,7 @@ export default {
             clearTimeout(this.timeoutId);
             this.timeoutId = setTimeout(() => {
                 this.loadSelectOptions();
-            }, 650);
+            }, this.$config.delayTime);
         },
         onEditOptions(val) {
             if (this.indexId > -1) {
@@ -132,7 +132,8 @@ export default {
         },
     },
     created() {
-        this.loadSelectOptions();
+        // this.loadSelectOptions();
+        this.onRefresh();
     },
 };
 </script>

@@ -71,7 +71,7 @@
 <script>
 import SafetySet from "./safetyset.vue";
 import { formatTime } from "@/utils/date.js";
-import { GetAccount, SelectRoleFromUser, SelectPoliciesFromRole, UnbindRoleAndUser } from "@/api/index.js";
+import { AccountDetail, SelectRoleFromUser, SelectPoliciesFromRole, UnbindRoleAndUser } from "@/api/index.js";
 export default {
     name: "SettingsIndex",
     components: {
@@ -90,15 +90,16 @@ export default {
         formatDate(time) {
             return formatTime(time);
         },
-        loadGetAccount: async function (user_id) {
-            try {
-                const params = { user_id: user_id };
-                const res = await GetAccount(params);
-                this.basicInfo = res.payload.items;
-                this.loading = false;
-            } catch (err) {
-                this.loading = false;
-            }
+        loadAccountDetail: function (user_id) {
+            const paths = { user_id: user_id };
+            AccountDetail(paths)
+                .then((res) => {
+                    this.basicInfo = res.payload.user;
+                    this.loading = false;
+                })
+                .catch(() => {
+                    this.loading = false;
+                });
         },
         loadSelectRoleFromUser: function (uid) {
             this.roles = [];
@@ -162,7 +163,7 @@ export default {
         },
         onRefresh() {
             const uid = this.$route.params.user_id;
-            this.loadGetAccount(uid);
+            this.loadAccountDetail(uid);
             this.loadSelectRoleFromUser(uid);
         },
     },
@@ -173,8 +174,8 @@ export default {
         }
         const uid = this.$route.params.user_id;
         this.userId = uid;
-        this.loadGetAccount(uid);
         this.loadSelectRoleFromUser(uid);
+        this.loadAccountDetail(uid);
     },
 };
 </script>

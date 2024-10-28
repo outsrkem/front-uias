@@ -4,9 +4,10 @@
             <template #header>
                 <div class="my_refresh">
                     <el-row>
-                        <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateRole()">新建角色</el-button>
+                        <span>角色管理</span>
                     </el-row>
                     <el-row>
+                        <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateRole()">新建角色</el-button>
                         <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
                     </el-row>
                 </div>
@@ -36,31 +37,32 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <template #footer>
-                <div class="end-container">
-                    <div>
-                        <!--分页开始-->
-                        <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
-                        <!--分页结束-->
-                    </div>
+            <div class="pagination">
+                <div>
+                    <!--分页开始-->
+                    <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
+                    <!--分页结束-->
                 </div>
-            </template>
+            </div>
         </el-card>
         <!-- 修改角色详情开始 -->
-        <el-dialog v-model="openEdirRole" title="编辑角色信息" width="30%" label-position="Right" :close-on-click-modal="false">
-            <el-form :model="roleInfo" :rules="fromRules" ref="role-from">
-                <el-form-item label="角色名称" prop="name" label-width="100px">
-                    <el-input v-model="roleInfo.name" />
-                </el-form-item>
-                <el-form-item label="角色描述" label-width="100px">
-                    <el-input v-model="roleInfo.description" type="textarea" maxlength="128" show-word-limit placeholder="请输入角色描述" />
-                </el-form-item>
-            </el-form>
-            <div style="display: flex; justify-content: flex-end; align-items: center">
-                <el-form-item size="small">
-                    <el-button @click="openEdirRole = false">取消</el-button>
-                    <el-button type="primary" @click="onSubmitEditRoleInfo">确定</el-button>
-                </el-form-item>
+        <el-dialog v-model="openEdirRole" title="编辑角色信息" width="30%" :close-on-click-modal="false">
+            <div style="margin-left: 45px; margin-right: 50px">
+                <el-form label-width="auto" :model="roleInfo" :rules="fromRules" ref="role-from">
+                    <el-form-item label="角色名称" prop="name">
+                        <el-input v-model="roleInfo.name" />
+                    </el-form-item>
+                    <el-form-item label="角色描述">
+                        <el-input v-model="roleInfo.description" type="textarea" show-word-limit placeholder="请输入角色描述" />
+                    </el-form-item>
+                </el-form>
+
+                <div style="display: flex; justify-content: flex-end; align-items: center">
+                    <el-form-item size="small">
+                        <el-button @click="openEdirRole = false">取消</el-button>
+                        <el-button type="primary" @click="onSubmitEditRoleInfo">确定</el-button>
+                    </el-form-item>
+                </div>
             </div>
         </el-dialog>
         <!-- 修改角色详情结束 -->
@@ -110,8 +112,8 @@ export default {
             }
         },
         // 编辑角色请求
-        loadEditRole: function (data) {
-            EditRole(data)
+        loadEditRole: function (paths, data) {
+            EditRole(paths, data)
                 .then(() => {
                     this.onRefresh();
                     this.openEdirRole = false;
@@ -146,7 +148,7 @@ export default {
             clearTimeout(this.timeoutId);
             this.timeoutId = setTimeout(() => {
                 this.loadGetRoles(this.pageSize, this.page);
-            }, 650);
+            }, this.$config.delayTime);
         },
         onCurrentChange(p) {
             this.page = p;
@@ -163,7 +165,7 @@ export default {
         onDeleteRole(val) {
             let rid = [];
             rid.push(val);
-            let data = { role_id: rid };
+            let data = { role_ids: rid };
             this.loadDeleteRole(data);
         },
         onEditRole(id) {
@@ -178,20 +180,22 @@ export default {
         },
         // 提交修改
         onSubmitEditRoleInfo() {
+            const paths = { role_id: this.editRoleId };
             let data = {
-                role_id: this.editRoleId,
+                // role_id: this.editRoleId,
                 role: this.roleInfo,
             };
             this.$refs["role-from"].validate((valid) => {
                 if (!valid) {
                     return; // 如果表单验证失败，停止请求提交
                 }
-                this.loadEditRole(data);
+                this.loadEditRole(paths, data);
             });
         },
     },
     created() {
-        this.loadGetRoles(this.pageSize, this.page);
+        // this.loadGetRoles(this.pageSize, this.page);
+        this.onRefresh();
     },
 };
 </script>

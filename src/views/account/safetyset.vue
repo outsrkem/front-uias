@@ -145,8 +145,9 @@ export default {
                     data = { sip: this.radiodata.value };
                     break;
             }
-            const rwa = { user_id: this.vmodel.id, data: data };
-            EditAccount(rwa)
+            const paths = { user_id: this.vmodel.id };
+            const rwa = { accountInfo: data };
+            EditAccount(paths, rwa)
                 .then(() => {
                     // this.$parent.onRefresh() // 这个不生效，不知道为什么
                     this.$notify({ title: "操作成功", duration: 2000, type: "success" });

@@ -4,9 +4,10 @@
             <template #header>
                 <div class="my_refresh">
                     <el-row>
-                        <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreatePolicy()">新建策略</el-button>
+                        <span>策略管理</span>
                     </el-row>
                     <el-row>
+                        <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreatePolicy()">新建策略</el-button>
                         <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
                     </el-row>
                 </div>
@@ -43,15 +44,13 @@
                     </template>
                 </el-table-column>
             </el-table>
-            <template #footer>
-                <div class="end-container">
-                    <div>
-                        <!--分页开始-->
-                        <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
-                        <!--分页结束-->
-                    </div>
+            <div class="pagination">
+                <div>
+                    <!--分页开始-->
+                    <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
+                    <!--分页结束-->
                 </div>
-            </template>
+            </div>
         </el-card>
     </div>
 </template>
@@ -111,7 +110,7 @@ export default {
             clearTimeout(this.timeoutId);
             this.timeoutId = setTimeout(() => {
                 this.loadGetPolicies(this.pageSize, this.page);
-            }, 650);
+            }, this.$config.delayTime);
         },
         onCurrentChange(p) {
             this.page = p;
@@ -130,15 +129,17 @@ export default {
         onPolicyInfo(id) {
             this.$router.push({ name: "policyInfo", params: { policy_id: id } });
         },
+        // 点击删除策略按钮
         onDeletePolicies(id) {
             let pid = [];
             pid.push(id);
-            let data = { policy_id: pid };
+            let data = { policy_ids: pid };
             this.loadDeletePolicies(data);
         },
     },
     created() {
-        this.loadGetPolicies(this.pageSize, this.page);
+        // this.loadGetPolicies(this.pageSize, this.page);
+        this.onRefresh();
     },
 };
 </script>

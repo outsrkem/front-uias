@@ -12,8 +12,11 @@ import './styles/index.less'
 
 // 加载 引入vue-cookies。
 import vueCookies from 'vue-cookies'
+import config from './config/config'
 const app = createApp(App)
 
+// 注册配置项
+app.config.globalProperties.$config = config;
 // 使用element国际化
 app.use(ElementPlus, {
     locale: zhCn,

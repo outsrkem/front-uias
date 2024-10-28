@@ -1,6 +1,6 @@
 // 时间格式过滤器
 export function formatTime(value) {
-    if (value === null || value === '' || value === undefined) {
+    if (value === null || value === '' || value === undefined || value <= 0) {
         return '--'
     }
     const date = new Date(value)
