@@ -1,8 +1,13 @@
 <template>
     <el-card style="margin-bottom: 20px">
         <template #header>
-            <div class="card-header">
-                <span>策略信息</span>
+            <div class="my_refresh">
+                <el-row>
+                    <span>策略信息</span>
+                </el-row>
+                <el-row>
+                    <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
+                </el-row>
             </div>
         </template>
         <el-descriptions :column="2">
@@ -20,7 +25,7 @@
             >
         </el-descriptions>
     </el-card>
-    <el-card>
+    <el-card v-loading="loading">
         <el-tabs v-model="activeName" @tab-change="tabChange">
             <el-tab-pane label="策略内容" name="first">
                 <div style="width: auto">
@@ -54,6 +59,7 @@ export default {
     name: "PolicyInfoIndex",
     data() {
         return {
+            loading: true,
             policyInfo: {},
             roles: [],
             activeName: "first",
@@ -95,11 +101,19 @@ export default {
         tabChange(val) {
             this.$router.push({ query: { ...this.$route.query, pane: val } });
         },
+        onRefresh() {
+            const policy_id = this.policyId;
+            this.loading = true;
+            clearTimeout(this.timeoutId);
+            this.timeoutId = setTimeout(() => {
+                this.loadGetPoliciesInfo(policy_id);
+                this.loadSelectRolesFromPolicy(policy_id);
+            }, this.$config.delayTime);
+        },
     },
     created() {
-        const policy_id = this.$route.params.policy_id;
-        this.loadGetPoliciesInfo(policy_id);
-        this.loadSelectRolesFromPolicy(policy_id);
+        this.policyId = this.$route.params.policy_id;
+        this.onRefresh();
     },
 };
 </script>

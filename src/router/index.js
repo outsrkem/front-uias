@@ -11,6 +11,7 @@ const RoleAddUers = () => import(/* webpackChunkName: "bf7f65dfc0d6" */'../views
 const RoleAddPolices = () => import(/* webpackChunkName: "adfe8dd02f1a" */'../views/roles/addPolices.vue')
 const EditRole = () => import(/* webpackChunkName: "7f2bf95b80e9" */'../views/roles/editRole.vue')
 const Policies = () => import(/* webpackChunkName: "a5f622a5cb98" */'../views/policies/index.vue')
+const EditPolicy = () => import(/* webpackChunkName: "2b503cbcd00b" */'../views/policies/editPolicy.vue')
 const PolicyInfo = () => import(/* webpackChunkName: "d7a504c30ecd" */'../views/policies/policyInfo.vue')
 const CreatePolicy = () => import(/* webpackChunkName: "69bde736ec27" */'../views/policies/createPolicy.vue')
 const Options = () => import(/* webpackChunkName: "7e23450b77fd" */'../views/options/index.vue')
@@ -33,6 +34,7 @@ const routes = [
             { meta: { title: '角色绑定策略' }, path: '/roles/addPolices', name: 'roleAddPolices', component: RoleAddPolices },
             { meta: { title: '策略管理' }, path: '/policies', name: 'policies', component: Policies },
             { meta: { title: '新建策略' }, path: '/policies/create', name: 'createPolicy', component: CreatePolicy },
+            { meta: { title: '策略详情' }, path: '/policies/edit/:policyId', name: 'editPolicy', component: EditPolicy },
             { meta: { title: '策略信息' }, path: '/policies/:policy_id', name: 'policyInfo', component: PolicyInfo },
             { meta: { title: '系统配置' }, path: '/options', name: 'options', component: Options },
         ]

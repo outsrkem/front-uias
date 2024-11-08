@@ -13,20 +13,14 @@
                 </div>
             </template>
             <!--内容开始-->
-            <el-table
-                :data="tableData"
-                style="width: 100%"
-                v-loading="loading"
-                element-loading-text="加载中"
-                element-loading-spinner="el-icon-loading"
-            >
+            <el-table :data="tableData" style="width: 100%" v-loading="loading">
                 <el-table-column label="角色名称" show-overflow-tooltip>
                     <template #default="scope">
                         <el-button link type="primary" @click="onEditRole(scope.row.id)">{{ scope.row.name }}</el-button>
                     </template>
                 </el-table-column>
-                <el-table-column prop="users" label="用户数" min-width="20" show-overflow-tooltip />
-                <el-table-column prop="policies" label="策略数" min-width="20" show-overflow-tooltip />
+                <el-table-column prop="users" label="用户数" show-overflow-tooltip />
+                <el-table-column prop="policies" label="策略数" show-overflow-tooltip />
                 <el-table-column label="创建时间">
                     <template #default="scope">{{ formatDate(scope.row.create_time) }}</template>
                 </el-table-column>

@@ -13,33 +13,24 @@
                 </div>
             </template>
             <!--内容开始-->
-            <el-table
-                :data="tableData"
-                style="width: 100%"
-                v-loading="loading"
-                element-loading-text="加载中"
-                element-loading-spinner="el-icon-loading"
-            >
+            <el-table :data="tableData" style="width: 100%" v-loading="loading">
                 <el-table-column label="策略名称" show-overflow-tooltip>
                     <template #default="scope">
                         <el-button link type="primary" @click="onPolicyInfo(scope.row.id)">{{ scope.row.name }}</el-button>
                     </template>
                 </el-table-column>
+
                 <el-table-column label="类型">
                     <template #default="scope">
-                        <div v-if="scope.row.system">
-                            <span>系统策略</span>
-                        </div>
-                        <div v-else>
-                            <span>自定义策略</span>
-                        </div>
+                        <div v-if="scope.row.system"><span>系统策略</span></div>
+                        <div v-else><span>自定义策略</span></div>
                     </template>
                 </el-table-column>
 
                 <el-table-column prop="description" label="描述" show-overflow-tooltip />
                 <el-table-column label="操作">
                     <template #default="scope">
-                        <el-button link type="primary" :disabled="!scope.row.editable" @click="onSelectService(scope.row.id)">编辑</el-button>
+                        <el-button link type="primary" :disabled="!scope.row.editable" @click="onSelectService(scope.row)">编辑</el-button>
                         <el-button link type="primary" :disabled="!scope.row.deletable" @click="onDeletePolicies(scope.row.id)">删除</el-button>
                     </template>
                 </el-table-column>
@@ -101,8 +92,9 @@ export default {
         formatDate(time) {
             return formatTime(time);
         },
-        onSelectService(sid) {
-            console.log("点击了按钮", sid);
+        // 修改策略
+        onSelectService(val) {
+            this.$router.push({ path: `/policies/edit/${val.id}` });
         },
         onRefresh() {
             // 添加延时，优化视觉体验感

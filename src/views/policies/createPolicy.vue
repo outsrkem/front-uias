@@ -35,7 +35,7 @@
                 <div v-if="DisplayTips2">
                     <el-tag type="danger">该服务没有action</el-tag>
                 </div>
-                <div v-if="actions.ListOnly.length > 0">
+                <div v-if="actions.ListOnly.length > 0" style="margin-bottom: 10px">
                     <el-tag type="primary">列表</el-tag>
                     <el-checkbox-group v-model="selectedData.actions">
                         <el-checkbox v-for="(item, index) in actions.ListOnly" :key="index" :value="item.name" name="type">{{
@@ -43,7 +43,7 @@
                         }}</el-checkbox>
                     </el-checkbox-group>
                 </div>
-                <div v-if="actions.ReadOnly.length > 0">
+                <div v-if="actions.ReadOnly.length > 0" style="margin-bottom: 10px">
                     <el-tag type="primary">只读</el-tag>
                     <el-checkbox-group v-model="selectedData.actions">
                         <el-checkbox v-for="(item, index) in actions.ReadOnly" :key="index" :value="item.name" name="type">{{
@@ -65,16 +65,15 @@
                 <el-input v-model="policyForm.description" type="textarea" maxlength="128" show-word-limit placeholder="请输入策略描述" />
             </el-form-item>
         </el-form>
-        <template #footer>
-            <div class="end-container end-width">
-                <div style="margin-right: 20px">
-                    <el-button size="small" type="" @click="onCance">取消</el-button>
-                    <el-button size="small" type="primary" :disabled="isButtonDisabled" @click="onCreatePolicy" :loading="createLoading"
-                        >创建策略</el-button
-                    >
-                </div>
+
+        <div class="end-container end-width">
+            <div style="margin-right: 20px">
+                <el-button size="small" type="" @click="onCance">取消</el-button>
+                <el-button size="small" type="primary" :disabled="isButtonDisabled" @click="onCreatePolicy" :loading="createLoading"
+                    >创建策略</el-button
+                >
             </div>
-        </template>
+        </div>
     </el-card>
 </template>
 

@@ -74,7 +74,8 @@ export const SelectService = () => ajax(`/v1/uias/server/service`, 'GET')
 export const SelectActions = (params) => ajax('/v1/uias/server/actions', 'GET', params)
 // 创建策略 /v1/uias/policy
 export const CreatePolicy = (data) => ajax('/v1/uias/policy', 'POST', null, data)
-
+// 修改策略 /v1/uias/policy/:policy_id
+export const EditPolicy = (paths, data) => ajax(`/v1/uias/policy/${paths.policyId}`, 'PATCH', null, data)
 
 // 查看系统配置 /v1/uias/system/options
 export const SelectOptions = () => ajax(`/v1/uias/system/options`, 'GET')

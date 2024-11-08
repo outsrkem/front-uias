@@ -6,7 +6,7 @@
                     <span>创建用户</span>
                 </div>
             </template>
-            <div v-loading="pageLoading" element-loading-text="正在创建，请稍后" element-loading-background="rgba(122, 122, 122, 0.8)">
+            <div v-loading="pageLoading" element-loading-text="正在创建，请稍后">
                 <div class="outer-div">
                     <div class="row-container">
                         <div class="text-container">
@@ -130,14 +130,13 @@
                     </div>
                 </div>
             </div>
-            <template #footer>
-                <div class="end-container">
-                    <div style="margin-right: 20px">
-                        <el-button size="small" type="" @click="onCance()">取消</el-button>
-                        <el-button size="small" type="primary" @click="onCreateUser()" :loading="createLoading">创建用户</el-button>
-                    </div>
+
+            <div class="end-container">
+                <div style="margin-right: 20px">
+                    <el-button size="small" type="" @click="onCance()">取消</el-button>
+                    <el-button size="small" type="primary" @click="onCreateUser()" :loading="createLoading">创建用户</el-button>
                 </div>
-            </template>
+            </div>
         </el-card>
     </div>
 </template>

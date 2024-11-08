@@ -25,13 +25,7 @@
                 </div>
             </template>
             <!--内容开始-->
-            <el-table
-                :data="filteredAccount"
-                style="width: 100%"
-                v-loading="loading"
-                element-loading-text="加载中"
-                element-loading-spinner="el-icon-loading"
-            >
+            <el-table :data="filteredAccount" style="width: 100%" v-loading="loading">
                 <el-table-column label="账号名称" show-overflow-tooltip>
                     <template #default="scope">
                         <el-button link type="primary" @click="onSettingsUser(scope.row.id)">{{ scope.row.account }}</el-button>
@@ -281,11 +275,6 @@ export default {
 </script>
 
 <style scoped lang="less">
-.my_refresh {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
 .icon {
     display: flex;
     align-items: center;

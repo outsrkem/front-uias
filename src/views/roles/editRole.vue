@@ -1,8 +1,13 @@
 <template>
     <el-card style="margin-bottom: 20px">
         <template #header>
-            <div class="card-header">
-                <span>角色信息</span>
+            <div class="my_refresh">
+                <el-row>
+                    <span>角色信息</span>
+                </el-row>
+                <el-row>
+                    <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
+                </el-row>
             </div>
         </template>
         <el-descriptions :column="2">
@@ -20,7 +25,7 @@
             >
         </el-descriptions>
     </el-card>
-    <el-card>
+    <el-card v-loading="loading">
         <el-tabs v-model="activeName" @tab-change="tabChange">
             <el-tab-pane label="用户管理" name="first">
                 <div>
@@ -91,6 +96,7 @@ export default {
             ChoosingUser: [],
             ChoosingPolicies: [],
             removeUserMore: true, // 批量移除用户的按钮状态，禁用/启用
+            loading: true,
         };
     },
     methods: {
@@ -105,6 +111,7 @@ export default {
             const paths = { rid: role_id };
             SelectRoleInfo(paths).then((res) => {
                 this.rolrInfo = res.payload.role;
+                this.loading = false;
             });
         },
         loadSelectUserFromRole: function (role_id) {
@@ -126,6 +133,17 @@ export default {
                 .catch(() => {
                     this.policies = [];
                 });
+        },
+        onRefresh() {
+            // 添加延时，优化视觉体验感
+            this.loading = true;
+            clearTimeout(this.timeoutId);
+            const role_id = this.roleId;
+            this.timeoutId = setTimeout(() => {
+                this.loadSelectRoleInfo(role_id);
+                this.loadSelectUserFromRole(role_id);
+                this.loadSelectPoliciesFromRole(role_id);
+            }, this.$config.delayTime);
         },
         loadUnbindRoleAndUser: function (rid, uid) {
             const data = { roles: rid, users: uid };
@@ -230,10 +248,8 @@ export default {
         if (tabPane) {
             this.activeName = tabPane;
         }
-        const role_id = this.$route.query.rid;
-        this.loadSelectRoleInfo(role_id);
-        this.loadSelectUserFromRole(role_id);
-        this.loadSelectPoliciesFromRole(role_id);
+        this.roleId = this.$route.query.rid;
+        this.onRefresh();
     },
 };
 </script>

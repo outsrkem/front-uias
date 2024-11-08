@@ -13,14 +13,12 @@
                 <el-input v-model="roleForm.description" type="textarea" maxlength="128" show-word-limit placeholder="请输入角色描述" />
             </el-form-item>
         </el-form>
-        <template #footer>
-            <div class="end-container end-width">
-                <div style="margin-right: 20px">
-                    <el-button size="small" @click="onCountermand">取消</el-button>
-                    <el-button size="small" type="primary" @click="onCreateRoles">创建</el-button>
-                </div>
+        <div class="end-container end-width">
+            <div style="margin-right: 20px">
+                <el-button size="small" @click="onCountermand">取消</el-button>
+                <el-button size="small" type="primary" @click="onCreateRoles">创建</el-button>
             </div>
-        </template>
+        </div>
     </el-card>
 </template>
 

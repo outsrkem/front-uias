@@ -2,9 +2,17 @@
     <el-card style="margin-bottom: 20px">
         <template #header>
             <div class="card-header">
-                <span>用户信息</span>
+                <div class="my_refresh">
+                    <el-row>
+                        <span>用户信息</span>
+                    </el-row>
+                    <el-row>
+                        <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
+                    </el-row>
+                </div>
             </div>
         </template>
+
         <el-descriptions>
             <el-descriptions-item label="账号名称">{{ basicInfo.account }}</el-descriptions-item>
             <el-descriptions-item label="用户ID">{{ basicInfo.id }}</el-descriptions-item>
@@ -27,7 +35,7 @@
             <el-descriptions-item label="描述">{{ basicInfo.description }}</el-descriptions-item>
         </el-descriptions>
     </el-card>
-    <el-card>
+    <el-card v-loading="loading">
         <el-tabs v-model="activeName" @tab-change="tabChange">
             <el-tab-pane label="安全设置" name="first">
                 <SafetySet :vmodel="basicInfo"></SafetySet>
@@ -84,6 +92,7 @@ export default {
             activeName: "first",
             roles: [],
             policies: [],
+            loading: true,
         };
     },
     methods: {
@@ -162,9 +171,14 @@ export default {
             });
         },
         onRefresh() {
+            // 添加延时，优化视觉体验感
+            this.loading = true;
             const uid = this.$route.params.user_id;
-            this.loadAccountDetail(uid);
-            this.loadSelectRoleFromUser(uid);
+            clearTimeout(this.timeoutId);
+            this.timeoutId = setTimeout(() => {
+                this.loadAccountDetail(uid);
+                this.loadSelectRoleFromUser(uid);
+            }, this.$config.delayTime);
         },
     },
     created() {
