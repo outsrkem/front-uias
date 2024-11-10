@@ -11,18 +11,18 @@
             </div>
         </template>
         <el-descriptions :column="2">
-            <el-descriptions-item width="50%" label="角色名称"
-                ><el-tag>{{ rolrInfo.name }}</el-tag></el-descriptions-item
-            >
-            <el-descriptions-item label="角色ID"
-                ><el-tag>{{ rolrInfo.id }}</el-tag></el-descriptions-item
-            >
-            <el-descriptions-item label="描述"
-                ><el-tag>{{ rolrInfo.description }}</el-tag></el-descriptions-item
-            >
-            <el-descriptions-item label="创建时间"
-                ><el-tag>{{ formatDate(rolrInfo.create_time) }}</el-tag></el-descriptions-item
-            >
+            <el-descriptions-item width="50%" label="角色名称">
+                <el-tag>{{ rolrInfo.name }}</el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item label="角色ID">
+                <el-tag>{{ rolrInfo.id }}</el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item label="描述">
+                <el-tag>{{ rolrInfo.description }}</el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item label="创建时间">
+                <el-tag>{{ formatDate(rolrInfo.create_time) }}</el-tag>
+            </el-descriptions-item>
         </el-descriptions>
     </el-card>
     <el-card v-loading="loading">
@@ -34,10 +34,11 @@
                     <el-button size="small" type="primary" @click="onRefreshUserFromRole">刷新</el-button>
                 </div>
                 <div>
-                    <el-table :data="users" style="width: 100%" @selection-change="handleSelectionChangeUser">
+                    <el-table :data="users" @selection-change="handleSelectionChangeUser">
                         <el-table-column type="selection" width="55" />
-                        <el-table-column prop="account" label="用户名称" min-width="300" />
-                        <el-table-column prop="description" label="描述" min-width="400" show-overflow-tooltip />
+                        <el-table-column prop="account" label="账号名称" />
+                        <el-table-column prop="username" label="用户名" />
+                        <el-table-column prop="description" label="描述" show-overflow-tooltip />
                         <el-table-column label="操作">
                             <template #default="scope">
                                 <el-button link type="primary" @click="onUnbindRoleAndUser(scope.row.id)">移除</el-button>
@@ -53,10 +54,10 @@
                     <el-button size="small" type="primary">刷新</el-button>
                 </div>
                 <div>
-                    <el-table :data="policies" style="width: 100%" @selection-change="handleSelectionChangePolicies">
+                    <el-table :data="policies" @selection-change="handleSelectionChangePolicies">
                         <el-table-column type="selection" width="55" :selectable="selected" />
-                        <el-table-column prop="name" label="策略名称" min-width="300" />
-                        <el-table-column prop="description" label="描述" min-width="400" show-overflow-tooltip />
+                        <el-table-column prop="name" label="策略名称" />
+                        <el-table-column prop="description" label="描述" show-overflow-tooltip />
                         <el-table-column label="操作">
                             <template #default="scope">
                                 <el-button link type="primary" :disabled="!rolrInfo.editable" @click="onUnbindPolicies(scope.row.id)">移除</el-button>
