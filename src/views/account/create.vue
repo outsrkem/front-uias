@@ -280,7 +280,7 @@ export default {
                 .filter((item) => Object.prototype.hasOwnProperty.call(item, "account"))
                 .map((item) => ({ ...item, key: undefined }));
 
-            if (users.length === 0) {
+            if (users.length < 1) {
                 return;
             }
 
