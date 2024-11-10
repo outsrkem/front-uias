@@ -73,7 +73,7 @@
                                     <el-table-column label="操作">
                                         <template #default="scope">
                                             <el-button
-                                                style="margin-bottom: 18px"
+                                                style="margin-bottom: 16px"
                                                 @click="handleDeleteRow(accountData[scope.$index])"
                                                 link
                                                 type="primary"
