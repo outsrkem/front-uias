@@ -61,7 +61,7 @@
                                     </el-table-column>
                                     <el-table-column label="描述">
                                         <template #default="scope">
-                                            <el-form-item :prop="scope.$index + '.description'">
+                                            <el-form-item :prop="scope.$index + '.description'" :rules="fromRules.describes">
                                                 <el-input
                                                     v-model="accountData[scope.$index].description"
                                                     autocomplete="off"
@@ -98,8 +98,8 @@
                             <div class="text-top"><el-text>登录密码</el-text></div>
                         </div>
                         <div>
-                            <el-form :size="size" :model="basicinfo" ref="password-form" :rules="fromRules">
-                                <el-form-item prop="password" style="width: 480px" :inline="true">
+                            <el-form :size="size" :model="basicinfo" ref="password-form">
+                                <el-form-item prop="password" style="width: 480px" :inline="true" :rules="fromRules.password">
                                     <el-input v-model="basicinfo.password" type="password" autocomplete="off" placeholder="请输入密码" />
                                 </el-form-item>
                                 <el-checkbox v-model="basicinfo.pwd_reset" label="首次登录时重置密码" />
@@ -142,6 +142,7 @@
 </template>
 <script>
 import { GetRoles, CreateAccount, RoleBindingUser } from "@/api/index.js";
+
 export default {
     name: "CreateUser",
     data() {
@@ -161,12 +162,21 @@ export default {
                 describes: "描述(选填)",
             },
             fromRules: {
-                account: [{ required: true, type: "string", message: "账号不能为空", trigger: ["blur", "change"] }],
-                username: [{ required: true, type: "string", message: "用户名不能为空", trigger: ["blur", "change"] }],
+                account: [
+                    { required: true, message: "请输入账号名", trigger: "blur" },
+                    { pattern: /^[a-zA-Z][a-zA-Z0-9-_.]{1,31}$/, message: "字母、数字或-_.且只能字母开头，2到31位。" },
+                ],
+                username: [
+                    { required: true, message: "请输入用户名", trigger: "blur" },
+                    { pattern: /[\u4e00-\u9fa5a-zA-Z ]{2,32}$/, message: "只能由中文、英文，空格组成，2到31位。" },
+                ],
                 email: [{ type: "email", message: "请输入正确的电子邮件地址", trigger: ["blur", "change"] }],
-                mobile: [{ pattern: /^1[3456789][0-9]{9}$/, message: "请输入正确的手机号格式", trigger: ["blur", "change"] }],
-                describes: [{ type: "string", trigger: ["blur", "change"] }],
-                password: [{ required: true, type: "string", min: 6, message: "请输入密码，不少于6个字符", trigger: "change" }],
+                mobile: [{ pattern: /^1[3-9][0-9]{9}$/, message: "请输入正确的手机号格式", trigger: ["blur", "change"] }],
+                describes: [{ pattern: /^[^!@#$%^&*<>\\]+$/, message: "不能有 !@#$%^&*<>\\", trigger: "blur" }],
+                password: [
+                    { required: true, message: "请输入密码", trigger: "blur" },
+                    { type: "string", min: 6, message: "不少于6个字符" },
+                ],
                 roles: [{ type: "array", message: "不能超过10个角色", trigger: "change" }],
             },
             roles: [],
@@ -181,7 +191,7 @@ export default {
     },
     computed: {
         residueUser() {
-            // 计算可创建的剩余用户数目
+            // 计算可创建的剩余用户数目，用于页面显示
             return this.maxRow - this.accountData.length;
         },
     },
@@ -228,44 +238,57 @@ export default {
             // 按钮切换要放在数据变化之后
             this.switchButtonState();
         },
-        onCreateUser() {
-            this.$refs["account-form"].validate((valid) => {
-                // 如果表单验证失败，停止请求提交
-                if (!valid) {
-                    return;
-                }
-                // 检查选择的角色数目
-                if (this.ChoosingRole.length > 10) {
-                    this.$message.warning({ message: "角色选择不能超过10个", plain: true, showClose: true, duration: 2000 });
-                    return;
-                }
-                // return;
-                // 验证通过
-                this.onSwitchStatus(true); // 创建禁用按钮
-                this.basicinfo.user = [];
-                this.accountData.map((item) => {
-                    if (!Object.keys(item).includes("account")) {
-                        return;
-                    }
-                    let user = {};
-                    for (var k in item) {
-                        if (k === "key") {
-                            continue;
-                        }
-                        user[k] = item[k];
-                    }
-                    this.basicinfo.user.push(user);
+        // 验证账户表单
+        async validateAccountForm() {
+            return new Promise((resolve) => {
+                this.$refs["account-form"].validate((valid) => {
+                    resolve(valid);
                 });
-
-                if (this.basicinfo.user.length === 0) {
-                    return;
-                } else {
-                    const req_body = { basicinfo: this.basicinfo };
-                    this.loadCreateAccount(req_body);
-                }
             });
         },
-        loadGetRoles: function () {
+
+        // 验证密码表单
+        async validatePasswordForm() {
+            return new Promise((resolve) => {
+                this.$refs["password-form"].validate((valid) => {
+                    resolve(valid);
+                });
+            });
+        },
+        // 点击按钮，创建用户
+        async onCreateUser() {
+            // 验证用户信息
+            const accountValid = await this.validateAccountForm();
+            if (!accountValid) return;
+
+            // 验证密码
+            const passwordValid = await this.validatePasswordForm();
+            if (!passwordValid) return;
+
+            // 检查选择的角色数目
+            if (this.ChoosingRole.length > 10) {
+                this.$message.warning({ message: "角色选择不能超过10个", plain: true, showClose: true, duration: 2000 });
+                return;
+            }
+
+            // 验证通过，禁用创建按钮
+            this.onSwitchStatus(true);
+
+            // 准备请求体
+            // 使用 Object.prototype.hasOwnProperty.call
+            const users = this.accountData
+                .filter((item) => Object.prototype.hasOwnProperty.call(item, "account"))
+                .map((item) => ({ ...item, key: undefined }));
+
+            if (users.length === 0) {
+                return;
+            }
+
+            const req_body = { basicinfo: { ...this.basicinfo, user: users } };
+            this.loadCreateAccount(req_body);
+        },
+        // 查询角色
+        loadGetRoles() {
             GetRoles({ page_size: 100 })
                 .then((res) => {
                     let r = res.payload.items;
@@ -273,10 +296,9 @@ export default {
                 })
                 .catch((err) => {
                     if (err.status === 403) {
-                        this.$notify({ duration: 2000, title: "没有权限获取角色", type: "warning" });
+                        this.$message.warning({ message: "没有权限获取角色.", plain: true, showClose: true, duration: 2000 });
                     } else {
-                        let msg = err.data.metadata.message;
-                        this.$notify({ duration: 2000, title: "获取角色失败", message: msg, type: "error" });
+                        this.$message.error({ message: "获取角色失败.", plain: true, showClose: true, duration: 2000 });
                     }
                 });
         },
@@ -307,16 +329,16 @@ export default {
             RoleBindingUser(data)
                 .then(() => {
                     this.onSwitchStatus(false);
-                    this.$notify({ duration: 2000, title: "创建账号成功", type: "success" });
+                    this.$message.success({ message: "角色绑定成功.", plain: true, showClose: true, duration: 2000 });
                     this.$router.push({ name: "users" });
                 })
                 .catch((err) => {
                     this.onSwitchStatus(false);
                     if (err.status === 403) {
-                        this.$notify({ duration: 2000, title: "您没有权限绑定角色", type: "warning" });
+                        this.$message.warning({ message: "您没有权限绑定角色.", plain: true, showClose: true, duration: 2000 });
                     } else {
-                        let msg = err.data.metadata.message;
-                        this.$notify({ duration: 2000, title: "绑定角色失败", message: msg, type: "error" });
+                        let msg = err.data;
+                        this.$message.error({ message: msg, plain: true, showClose: true, duration: 2000 });
                     }
                 });
         },
