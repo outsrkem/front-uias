@@ -68,13 +68,17 @@
         </el-card>
         <!-- 修改用户详情开始 -->
         <el-dialog v-model="openEdirUser" title="编辑用户信息" width="30%" label-position="Right" :close-on-click-modal="false">
-            <div style="margin-left: 45px; margin-right: 50px">
-                <el-descriptions :column="1">
-                    <el-descriptions-item label="账号ID">{{ userInfo.id }}</el-descriptions-item>
-                    <el-descriptions-item label="账号名称">{{ userInfo.account }}</el-descriptions-item>
-                    <el-descriptions-item label="最近登录时间">{{ formatDate(userInfo.last_login_at) }}</el-descriptions-item>
-                </el-descriptions>
-                <el-form :model="editUserInfo" label-width="auto">
+            <div style="margin-left: 50px; margin-right: 50px">
+                <el-form :model="editUserInfo" label-width="auto" label-position="left">
+                    <el-form-item label="账号ID" style="margin-bottom: 0px">
+                        <el-text>{{ userInfo.id }}</el-text>
+                    </el-form-item>
+                    <el-form-item label="账号名称" style="margin-bottom: 0px">
+                        <el-text>{{ userInfo.account }}</el-text>
+                    </el-form-item>
+                    <el-form-item label="最近登录时间" style="margin-bottom: 5px">
+                        <el-text>{{ formatDate(userInfo.last_login_at) }}</el-text>
+                    </el-form-item>
                     <el-form-item label="状态">
                         <el-radio-group v-model="editUserInfo.enabled">
                             <el-radio value="true">启用</el-radio>
@@ -85,7 +89,14 @@
                         <el-input v-model="editUserInfo.username" />
                     </el-form-item>
                     <el-form-item label="描述">
-                        <el-input v-model="editUserInfo.description" type="textarea" maxlength="128" show-word-limit placeholder="请输入用户描述" />
+                        <el-input
+                            v-model="editUserInfo.description"
+                            type="textarea"
+                            :rows="3"
+                            maxlength="60"
+                            show-word-limit
+                            placeholder="请输入用户描述"
+                        />
                     </el-form-item>
                 </el-form>
                 <div style="display: flex; justify-content: flex-end; align-items: center">
@@ -202,7 +213,6 @@ export default {
         },
         onCurrentChange(p) {
             this.page = p;
-            //this.loadGetAccount(this.pageSize, p);
             if (this.searchAccountQuery === "") {
                 this.loadGetAccount(this.pageSize, p);
             } else {
@@ -217,7 +227,6 @@ export default {
             } else {
                 this.loadSearchAccount(this.searchAccountQuery, s, 1);
             }
-            //this.loadGetAccount(s, 1);
         },
         onSettingsUser(user_id) {
             this.$router.push({
@@ -246,7 +255,6 @@ export default {
         },
         // 修改用户信息
         onEditUserInfo(val) {
-            console.log(val);
             this.editUserId = val.id;
             this.userInfo = val;
             this.editUserInfo.username = val.username;
@@ -268,7 +276,6 @@ export default {
         },
     },
     created() {
-        // this.loadGetAccount(this.pageSize, this.page);
         this.onRefresh();
     },
 };
