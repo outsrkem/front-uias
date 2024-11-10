@@ -47,7 +47,7 @@ request.interceptors.response.use(function (response) {
         toLoginPage()
     } else if (status === 403) {
         // token 无权限访问
-        ElMessage.warning({message: '没有操作权限'})
+        ElMessage.warning({message: '没有操作权限', plain: true})
         return Promise.reject(error.response)
     } else if (status === 400) {
         // 客户端参数错误

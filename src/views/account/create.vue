@@ -89,7 +89,7 @@
                                     <el-icon :size="16" style="color: #191919"><CirclePlus /></el-icon>
                                     <el-text style="margin-left: 5px">添加用户</el-text>
                                 </el-button>
-                                <el-text style="color: #808080; margin-left: 10px">您本次还可以创建{{ maxRow }}个用户。</el-text>
+                                <el-text style="color: #808080; margin-left: 10px">您本次还可以创建{{ residueUser }}个用户。</el-text>
                             </div>
                         </div>
                     </div>
@@ -148,7 +148,7 @@ export default {
         return {
             size: "small",
             accountData: [],
-            maxRow: 10,
+            maxRow: 10, // 最大创建10个用户
             addButton: false,
             delButton: false,
             createLoading: false,
@@ -179,30 +179,54 @@ export default {
             },
         };
     },
+    computed: {
+        residueUser() {
+            // 计算可创建的剩余用户数目
+            return this.maxRow - this.accountData.length;
+        },
+    },
     methods: {
-        handAddRow() {
-            let index = this.accountData.length;
-            this.maxRow = this.maxRow - 1;
-            if (this.maxRow < 1) {
+        // 切换增加行，删除行的按钮状态
+        switchButtonState() {
+            if (this.accountData.length < this.maxRow) {
+                // 大于或者等于max行的时候不能再添加
+                this.addButton = false;
+            } else {
                 this.addButton = true;
             }
-            this.delButton = false;
-            this.accountData.push({ key: index });
-        },
-        handleDeleteRow(row) {
-            this.maxRow = this.maxRow + 1;
-            if (this.maxRow < 9) {
-                this.addButton = false;
-            }
-            if (this.maxRow > 8) {
+            if (this.accountData.length > 1) {
+                // 只有1行的时候不能删除
+                this.delButton = false;
+            } else {
                 this.delButton = true;
             }
+        },
+        // 创建按钮和页面状态切换
+        onSwitchStatus(val) {
+            if (val) {
+                this.createLoading = true; // 创建禁用按钮
+                this.pageLoading = true;
+            } else {
+                this.createLoading = false; // 启用禁用按钮
+                this.pageLoading = false;
+            }
+        },
+        // 添加一个创建的用户行
+        handAddRow() {
+            let index = this.accountData.length;
+            this.accountData.push({ key: index });
+            // 按钮切换要放在数据变化之后
+            this.switchButtonState();
+        },
+        handleDeleteRow(row) {
             let datas = this.accountData;
             for (var i = 0; i < datas.length; i++) {
                 if (datas[i].key == row.key) {
                     datas.splice(i, 1);
                 }
             }
+            // 按钮切换要放在数据变化之后
+            this.switchButtonState();
         },
         onCreateUser() {
             this.$refs["account-form"].validate((valid) => {
@@ -210,10 +234,9 @@ export default {
                 if (!valid) {
                     return;
                 }
-
                 // 检查选择的角色数目
                 if (this.ChoosingRole.length > 10) {
-                    this.$notify({ duration: 2000, title: "角色选择不能超过10个", type: "warning" });
+                    this.$message.warning({ message: "角色选择不能超过10个", plain: true, showClose: true, duration: 2000 });
                     return;
                 }
                 // return;
@@ -263,22 +286,19 @@ export default {
                 .then((res) => {
                     let u = res.payload.users;
                     u.map((item) => {
-                        // 获取用户id, 用于后续绑定角色
-                        uids.push(item["id"]);
+                        uids.push(item["id"]); // 获取用户id, 用于后续绑定角色
                     });
                     if (this.ChoosingRole.length > 0) {
                         this.loadRoleBindingUser(this.ChoosingRole, uids);
                     } else {
                         this.$router.push({ name: "users" });
                     }
+                    this.$message.success({ message: "创建用户成功.", plain: true, showClose: true, duration: 2000 });
                 })
                 .catch((err) => {
                     this.onSwitchStatus(false);
-                    if (err.status === 403) {
-                        this.$notify({ duration: 2000, title: "您没有权限创建账号", type: "warning" });
-                    } else {
-                        let msg = err.data.metadata.message;
-                        this.$notify({ duration: 2000, title: "创建账号失败", message: msg, type: "error" });
+                    if (err.status !== 403) {
+                        this.$message.error({ message: err.data, plain: true, showClose: true, duration: 2000 });
                     }
                 });
         },
@@ -299,15 +319,6 @@ export default {
                         this.$notify({ duration: 2000, title: "绑定角色失败", message: msg, type: "error" });
                     }
                 });
-        },
-        onSwitchStatus(val) {
-            if (val) {
-                this.createLoading = true; // 创建禁用按钮
-                this.pageLoading = true;
-            } else {
-                this.createLoading = false; // 启用禁用按钮
-                this.pageLoading = false;
-            }
         },
         //取消创建
         onCance() {
