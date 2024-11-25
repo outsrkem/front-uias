@@ -1,12 +1,12 @@
 <template>
-    <el-card style="margin-bottom: 20px">
+    <el-card style="margin-bottom: 10px">
         <template #header>
             <div class="my_refresh">
                 <el-row>
                     <span>策略信息</span>
                 </el-row>
                 <el-row>
-                    <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
+                    <el-button size="small" type="primary" :icon="Refresh" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
                 </el-row>
             </div>
         </template>
@@ -53,10 +53,16 @@
 </template>
 
 <script>
+import { Refresh } from "@element-plus/icons-vue";
 import { formatTime } from "@/utils/date.js";
 import { SelectPolicyInfo, SelectRolesFromPolicy } from "@/api/index.js";
 export default {
     name: "PolicyInfoIndex",
+    setup() {
+        return {
+            Refresh,
+        };
+    },
     data() {
         return {
             loading: true,

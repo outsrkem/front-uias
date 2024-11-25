@@ -21,8 +21,7 @@
                                                 <el-input
                                                     v-model="accountData[scope.$index].account"
                                                     autocomplete="off"
-                                                    :placeholder="placeholder.account"
-                                                ></el-input>
+                                                    :placeholder="placeholder.account"></el-input>
                                             </el-form-item>
                                         </template>
                                     </el-table-column>
@@ -32,8 +31,7 @@
                                                 <el-input
                                                     v-model="accountData[scope.$index].username"
                                                     autocomplete="off"
-                                                    :placeholder="placeholder.username"
-                                                ></el-input>
+                                                    :placeholder="placeholder.username"></el-input>
                                             </el-form-item>
                                         </template>
                                     </el-table-column>
@@ -43,8 +41,7 @@
                                                 <el-input
                                                     v-model="accountData[scope.$index].email"
                                                     autocomplete="off"
-                                                    :placeholder="placeholder.email"
-                                                ></el-input>
+                                                    :placeholder="placeholder.email"></el-input>
                                             </el-form-item>
                                         </template>
                                     </el-table-column>
@@ -54,8 +51,7 @@
                                                 <el-input
                                                     v-model="accountData[scope.$index].mobile"
                                                     autocomplete="off"
-                                                    :placeholder="placeholder.mobile"
-                                                ></el-input>
+                                                    :placeholder="placeholder.mobile"></el-input>
                                             </el-form-item>
                                         </template>
                                     </el-table-column>
@@ -65,8 +61,7 @@
                                                 <el-input
                                                     v-model="accountData[scope.$index].description"
                                                     autocomplete="off"
-                                                    :placeholder="placeholder.describes"
-                                                ></el-input>
+                                                    :placeholder="placeholder.describes"></el-input>
                                             </el-form-item>
                                         </template>
                                     </el-table-column>
@@ -120,8 +115,7 @@
                                         collapse-tags
                                         collapse-tags-tooltip
                                         :max-collapse-tags="10"
-                                        placeholder="请选择角色，不能超过10个"
-                                    >
+                                        placeholder="请选择角色，不能超过10个">
                                         <el-option v-for="item in roles" :key="item.value" :label="item.name" :value="item.id" />
                                     </el-select>
                                 </el-form-item>
@@ -276,10 +270,7 @@ export default {
 
             // 准备请求体
             // 使用 Object.prototype.hasOwnProperty.call
-            const users = this.accountData
-                .filter((item) => Object.prototype.hasOwnProperty.call(item, "account"))
-                .map((item) => ({ ...item, key: undefined }));
-
+            const users = this.accountData.filter((item) => Object.prototype.hasOwnProperty.call(item, "account")).map((item) => ({ ...item, key: undefined }));
             if (users.length < 1) {
                 return;
             }
@@ -361,7 +352,7 @@ export default {
 }
 .row-container {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
 }
 // 行之间的间隙，第一个行不需要，第二个及后面的行顶部增加宽度
 .row-space {

@@ -1,5 +1,5 @@
 <template>
-    <el-card style="margin-bottom: 20px">
+    <el-card style="margin-bottom: 10px">
         <template #header>
             <div class="card-header">
                 <div class="my_refresh">
@@ -7,7 +7,7 @@
                         <span>用户信息</span>
                     </el-row>
                     <el-row>
-                        <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
+                        <el-button size="small" type="primary" :icon="Refresh" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
                     </el-row>
                 </div>
             </div>
@@ -19,13 +19,13 @@
             <el-descriptions-item label="状态">
                 <span class="icon" v-if="basicInfo.enabled">
                     <el-text>
-                        <el-icon :size="14" style="color: #50d4ab; padding-right: 10px"><SuccessFilled /></el-icon>
+                        <el-icon class="table-icon-line table-icon-enabled"><SuccessFilled /></el-icon>
                         <span>启用</span>
                     </el-text>
                 </span>
                 <span class="icon" v-else>
                     <el-text>
-                        <el-icon :size="14" style="color: #adb0b8; padding-right: 10px"><RemoveFilled /></el-icon>
+                        <el-icon class="table-icon-line table-icon-disabled"><RemoveFilled /></el-icon>
                         <span>禁用</span>
                     </el-text>
                 </span>
@@ -51,13 +51,17 @@
                         <el-table-column prop="description" label="描述" min-width="400" show-overflow-tooltip />
                         <el-table-column label="操作" min-width="200">
                             <template #default="scope">
-                                <el-button link type="primary" :disabled="!basicInfo.editable" @click="onRemoveRoleFromUser(scope.row)"
-                                    >移除</el-button
-                                >
+                                <el-button link type="primary" :disabled="!basicInfo.editable" @click="onRemoveRoleFromUser(scope.row)">移除</el-button>
                             </template>
                         </el-table-column>
                     </el-table>
                 </div>
+            </el-tab-pane>
+            <el-tab-pane label="访问凭据" name="credential">
+                <CredentialTab :vdata="user"></CredentialTab>
+            </el-tab-pane>
+            <el-tab-pane label="标签管理" name="annotation">
+                <AnnotationTab :vdata="user"></AnnotationTab>
             </el-tab-pane>
             <el-tab-pane label="授权记录" name="third">
                 <div>
@@ -77,13 +81,24 @@
 </template>
 
 <script>
+import { Refresh } from "@element-plus/icons-vue";
 import SafetySet from "./safetyset.vue";
+import CredentialTab from "./credential.vue";
+import AnnotationTab from "./annotation.vue";
 import { formatTime } from "@/utils/date.js";
+import { msgcon } from "@/utils/message.js";
 import { AccountDetail, SelectRoleFromUser, SelectPoliciesFromRole, UnbindRoleAndUser } from "@/api/index.js";
 export default {
     name: "SettingsIndex",
     components: {
         SafetySet,
+        CredentialTab,
+        AnnotationTab,
+    },
+    setup() {
+        return {
+            Refresh,
+        };
     },
     data() {
         return {
@@ -93,6 +108,9 @@ export default {
             roles: [],
             policies: [],
             loading: true,
+            user: {
+                id: "",
+            },
         };
     },
     methods: {
@@ -138,11 +156,11 @@ export default {
             const data = { roles: roles, users: users };
             UnbindRoleAndUser(data)
                 .then(() => {
-                    this.$notify({ title: "移除成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("移除成功"));
                     this.onRefreshRole();
                 })
                 .catch((err) => {
-                    this.$notify({ title: "Warning", duration: 9000, message: err, type: "warning" });
+                    this.$message.warning(msgcon(err));
                 });
         },
         onRefreshRole() {
@@ -188,6 +206,7 @@ export default {
         }
         const uid = this.$route.params.user_id;
         this.userId = uid;
+        this.user.id = uid;
         this.loadSelectRoleFromUser(uid);
         this.loadAccountDetail(uid);
     },

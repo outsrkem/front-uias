@@ -5,7 +5,7 @@
                 <span>新建策略</span>
             </div>
         </template>
-        <el-form size="small" :model="policyForm" :rules="fromRules" ref="policy-from" label-width="100px" style="max-width: 80%">
+        <el-form size="small" :model="policyForm" :rules="fromRules" ref="policy-from" label-width="100px" style="max-width: 60%">
             <el-form-item label="策略名称" prop="name">
                 <el-input v-model="policyForm.name" />
             </el-form-item>
@@ -35,49 +35,52 @@
                 <div v-if="DisplayTips2">
                     <el-tag type="danger">该服务没有action</el-tag>
                 </div>
-                <div v-if="actions.ListOnly.length > 0" style="margin-bottom: 10px">
-                    <el-tag type="primary">列表</el-tag>
-                    <el-checkbox-group v-model="selectedData.actions">
-                        <el-checkbox v-for="(item, index) in actions.ListOnly" :key="index" :value="item.name" name="type">{{
-                            item.description
-                        }}</el-checkbox>
-                    </el-checkbox-group>
-                </div>
-                <div v-if="actions.ReadOnly.length > 0" style="margin-bottom: 10px">
-                    <el-tag type="primary">只读</el-tag>
-                    <el-checkbox-group v-model="selectedData.actions">
-                        <el-checkbox v-for="(item, index) in actions.ReadOnly" :key="index" :value="item.name" name="type">{{
-                            item.description
-                        }}</el-checkbox>
-                    </el-checkbox-group>
-                </div>
-                <div v-if="actions.ReadWrite.length > 0">
-                    <el-tag type="primary">可写</el-tag>
-                    <el-checkbox-group v-model="selectedData.actions">
-                        <el-checkbox v-for="(item, index) in actions.ReadWrite" :key="index" :value="item.name" name="type">{{
-                            item.description
-                        }}</el-checkbox>
-                    </el-checkbox-group>
+                <div style="flex-direction: column">
+                    <div v-if="actions.ListOnly.length > 0" style="margin-bottom: 10px">
+                        <el-tag type="primary">列表</el-tag>
+                        <el-checkbox-group class="action-group" v-model="selectedData.actions">
+                            <div class="row" v-for="(item, index) in actions.ListOnly" :key="index">
+                                <el-checkbox :value="item.name">{{ item.title }}</el-checkbox>
+                            </div>
+                        </el-checkbox-group>
+                    </div>
+                    <div v-if="actions.ReadOnly.length > 0" style="margin-bottom: 10px">
+                        <el-tag type="primary">只读</el-tag>
+                        <el-checkbox-group class="action-group" v-model="selectedData.actions">
+                            <div class="row" v-for="(item, index) in actions.ReadOnly" :key="index">
+                                <el-checkbox :value="item.name">{{ item.title }}</el-checkbox>
+                            </div>
+                        </el-checkbox-group>
+                    </div>
+                    <div v-if="actions.ReadWrite.length > 0">
+                        <el-tag type="primary">可写</el-tag>
+                        <el-checkbox-group class="action-group" v-model="selectedData.actions">
+                            <div class="row" v-for="(item, index) in actions.ReadWrite" :key="index">
+                                <el-checkbox :value="item.name">{{ item.title }}</el-checkbox>
+                            </div>
+                        </el-checkbox-group>
+                    </div>
                 </div>
             </el-form-item>
 
             <el-form-item label="策略描述">
-                <el-input v-model="policyForm.description" type="textarea" maxlength="128" show-word-limit placeholder="请输入策略描述" />
+                <el-input v-model="policyForm.description" type="textarea" maxlength="60" show-word-limit placeholder="请输入策略描述" />
             </el-form-item>
         </el-form>
 
         <div class="end-container end-width">
             <div style="margin-right: 20px">
                 <el-button size="small" type="" @click="onCance">取消</el-button>
-                <el-button size="small" type="primary" :disabled="isButtonDisabled" @click="onCreatePolicy" :loading="createLoading"
-                    >创建策略</el-button
-                >
+                <el-button size="small" type="primary" :disabled="isButtonDisabled" @click="onCreatePolicy" :loading="createLoading">
+                    创建策略
+                </el-button>
             </div>
         </div>
     </el-card>
 </template>
 
 <script>
+import { msgcon } from "@/utils/message.js";
 import { SelectService, SelectActions, CreatePolicy } from "@/api/index.js";
 export default {
     name: "CreatePolicyIndex",
@@ -152,6 +155,7 @@ export default {
                         let act = {
                             id: item.id,
                             name: item.actionInfo.name,
+                            title: item.actionInfo.title,
                             description: item.actionInfo.description,
                             status: item.actionInfo.status,
                             group: item.actionInfo.group,
@@ -162,6 +166,7 @@ export default {
                             let act = {
                                 id: item.id,
                                 name: item.actionInfo.name,
+                                title: item.actionInfo.title,
                                 description: item.actionInfo.description,
                                 status: item.actionInfo.status,
                                 group: item.actionInfo.group,
@@ -171,6 +176,7 @@ export default {
                             let act = {
                                 id: item.id,
                                 name: item.actionInfo.name,
+                                title: item.actionInfo.title,
                                 description: item.actionInfo.description,
                                 status: item.actionInfo.status,
                                 group: item.actionInfo.group,
@@ -189,11 +195,11 @@ export default {
         loadCreatePolicy: function (data) {
             CreatePolicy(data)
                 .then(() => {
-                    this.$notify({ title: "创建成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("创建成功"));
                     this.$router.push({ name: "policies" });
                 })
                 .catch(() => {
-                    this.$notify({ title: "创建失败", duration: 2000, type: "warning" });
+                    this.$message.error(msgcon("创建失败"));
                     this.createLoading = false;
                 });
         },

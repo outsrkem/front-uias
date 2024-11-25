@@ -7,7 +7,7 @@
         </template>
         <div style="min-height: 300px" v-loading="st.ld.da">
             <div v-if="design.visual">
-                <el-form size="small" :model="fronData" label-width="100px" style="max-width: 80%">
+                <el-form size="small" :model="fronData" label-width="100px" style="max-width: 60%">
                     <el-form-item label="策略名称" prop="name">
                         <el-input v-model="fronData.name" />
                     </el-form-item>
@@ -21,39 +21,36 @@
 
                     <el-form-item label="选择服务">
                         <el-select v-model="fronData.service" placeholder="请选择服务" @change="handleSelectService">
-                            <el-option
-                                v-for="(item, index) in initData.service"
-                                :key="index"
-                                :label="item.title + '(' + item.name + ')'"
-                                :value="item.id"
-                            />
+                            <el-option v-for="(item, index) in initData.service" :key="index" :label="item.title + '(' + item.name + ')'" :value="item.id" />
                         </el-select>
                     </el-form-item>
 
                     <el-form-item label="选择操作">
-                        <div v-if="initData.actions.ListOnly.length > 0" style="margin-bottom: 10px">
-                            <el-tag type="primary">列表</el-tag>
-                            <el-checkbox-group v-model="fronData.permit.action">
-                                <el-checkbox v-for="(item, index) in initData.actions.ListOnly" :key="index" :value="item.name" name="type">{{
-                                    item.description
-                                }}</el-checkbox>
-                            </el-checkbox-group>
-                        </div>
-                        <div v-if="initData.actions.ReadOnly.length > 0" style="margin-bottom: 10px">
-                            <el-tag type="primary">只读</el-tag>
-                            <el-checkbox-group v-model="fronData.permit.action">
-                                <el-checkbox v-for="(item, index) in initData.actions.ReadOnly" :key="index" :value="item.name" name="type">{{
-                                    item.description
-                                }}</el-checkbox>
-                            </el-checkbox-group>
-                        </div>
-                        <div v-if="initData.actions.ReadWrite.length > 0">
-                            <el-tag type="primary">可写</el-tag>
-                            <el-checkbox-group v-model="fronData.permit.action">
-                                <el-checkbox v-for="(item, index) in initData.actions.ReadWrite" :key="index" :value="item.name" name="type">{{
-                                    item.description
-                                }}</el-checkbox>
-                            </el-checkbox-group>
+                        <div style="flex-direction: column">
+                            <div v-if="initData.actions.ListOnly.length > 0" style="margin-bottom: 10px">
+                                <el-tag type="primary">列表</el-tag>
+                                <el-checkbox-group class="action-group" v-model="fronData.permit.action">
+                                    <div class="row" v-for="(item, index) in initData.actions.ListOnly" :key="index">
+                                        <el-checkbox :value="item.name">{{ item.title }}</el-checkbox>
+                                    </div>
+                                </el-checkbox-group>
+                            </div>
+                            <div v-if="initData.actions.ReadOnly.length > 0" style="margin-bottom: 10px">
+                                <el-tag type="primary">只读</el-tag>
+                                <el-checkbox-group class="action-group" v-model="fronData.permit.action">
+                                    <div class="row" v-for="(item, index) in initData.actions.ReadOnly" :key="index">
+                                        <el-checkbox :value="item.name">{{ item.title }}</el-checkbox>
+                                    </div>
+                                </el-checkbox-group>
+                            </div>
+                            <div v-if="initData.actions.ReadWrite.length > 0">
+                                <el-tag type="primary">可写</el-tag>
+                                <el-checkbox-group class="action-group" v-model="fronData.permit.action">
+                                    <div class="row" v-for="(item, index) in initData.actions.ReadWrite" :key="index">
+                                        <el-checkbox :value="item.name">{{ item.title }}</el-checkbox>
+                                    </div>
+                                </el-checkbox-group>
+                            </div>
                         </div>
                     </el-form-item>
 
@@ -62,9 +59,10 @@
                     </el-form-item>
                 </el-form>
             </div>
+
             <div v-if="design.vjson">
                 <div>
-                    <el-form size="small" :model="fronData" label-width="100px" style="max-width: 80%">
+                    <el-form size="small" :model="fronData" label-width="100px" style="max-width: 60%">
                         <el-form-item label="策略名称" prop="name">
                             <el-input v-model="fronData.name" />
                         </el-form-item>
@@ -90,10 +88,10 @@
 </template>
 
 <script>
+import { msgcon } from "@/utils/message.js";
 import { SelectPolicyInfo, SelectService, SelectActions, EditPolicy } from "@/api/index.js";
 export default {
     name: "EditPolicyIndex",
-
     data() {
         return {
             // 表单中填充的数据
@@ -196,6 +194,7 @@ export default {
                     let act = {
                         id: item.id,
                         name: item.actionInfo.name,
+                        title: item.actionInfo.title,
                         description: item.actionInfo.description,
                         status: item.actionInfo.status,
                         group: item.actionInfo.group,
@@ -206,6 +205,7 @@ export default {
                         let act = {
                             id: item.id,
                             name: item.actionInfo.name,
+                            title: item.actionInfo.title,
                             description: item.actionInfo.description,
                             status: item.actionInfo.status,
                             group: item.actionInfo.group,
@@ -215,6 +215,7 @@ export default {
                         let act = {
                             id: item.id,
                             name: item.actionInfo.name,
+                            title: item.actionInfo.title,
                             description: item.actionInfo.description,
                             status: item.actionInfo.status,
                             group: item.actionInfo.group,
@@ -288,19 +289,19 @@ export default {
 
             const data = this.assembleData();
             if (data.policy.permit.Statement[0].Action.length < 1) {
-                this.$message({ message: "至少选择一个操作", type: "warning", plain: true, showClose: true, duration: 3000 });
+                this.$message.warning(msgcon("至少选择一个操作"));
                 this.st.bt.ld = false; // 按钮加载状态
                 return;
             }
             EditPolicy({ policyId: this.policyId }, data)
                 .then(() => {
-                    this.$message({ message: "修改策略成功.", type: "success", plain: true, showClose: true, duration: 1000 });
+                    this.$message.success(msgcon("修改策略成功"));
                     this.st.bt.ld = false; // 按钮加载状态
                     this.onCance();
                 })
                 .catch((err) => {
                     let msg = err.data;
-                    this.$message({ message: msg, type: "error", plain: true, showClose: true, duration: 3000 });
+                    this.$message.error(msgcon(msg));
                     this.st.bt.ld = false; // 按钮加载状态
                 });
         },

@@ -56,6 +56,7 @@
 <script>
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
+import { msgcon } from "@/utils/message.js";
 import { GetAccount, RoleBindingUser, SearchAccount } from "@/api/index.js";
 export default {
     name: "AddUsersIndex",
@@ -138,11 +139,12 @@ export default {
             const data = { roles: rid, users: uid };
             RoleBindingUser(data)
                 .then(() => {
-                    this.$notify({ title: "添加成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("添加成功 "));
                     this.onCance();
                 })
                 .catch((err) => {
-                    this.$notify({ title: "Warning", duration: 9000, message: err.response.data.meta_info.res_msg, type: "warning" });
+                    let msg = err.response.data.meta_info.res_msg;
+                    this.$message.warning(msgcon(msg));
                 });
         },
     },

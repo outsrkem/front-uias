@@ -20,7 +20,7 @@
                 <div class="value">
                     <div class="icon">
                         <el-text>
-                            <el-icon style="color: #ffb700; padding-right: 10px"><WarningFilled /></el-icon>
+                            <el-icon style="color: #ffb700; padding-right: 5px"><WarningFilled /></el-icon>
                             <span>未绑定</span>
                         </el-text>
                     </div>
@@ -39,7 +39,7 @@
                 <div class="value">
                     <div class="icon">
                         <el-text>
-                            <el-icon style="color: #ffb700; padding-right: 10px"><WarningFilled /></el-icon>
+                            <el-icon style="color: #ffb700; padding-right: 5px"><WarningFilled /></el-icon>
                             <span>关闭</span>
                         </el-text>
                     </div>
@@ -85,6 +85,7 @@
 </template>
 
 <script>
+import { msgcon } from "@/utils/message.js";
 import { EditAccount } from "@/api/index.js";
 export default {
     name: "SafetySet",
@@ -150,13 +151,13 @@ export default {
             EditAccount(paths, rwa)
                 .then(() => {
                     // this.$parent.onRefresh() // 这个不生效，不知道为什么
-                    this.$notify({ title: "操作成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("操作成功"));
                     this.inputDialog.visible = false;
                     this.radioDialog.visible = false;
                 })
                 .catch((err) => {
                     let msg = err.data.metadata.message;
-                    this.$notify({ duration: 5000, title: "操作失败", message: msg, type: "error" });
+                    this.$message.error(msgcon(msg));
                 });
         },
         onChangeMobile() {

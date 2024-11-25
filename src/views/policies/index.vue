@@ -8,7 +8,7 @@
                     </el-row>
                     <el-row>
                         <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreatePolicy()">新建策略</el-button>
-                        <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
+                        <el-button size="small" type="primary" :icon="Refresh" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
                     </el-row>
                 </div>
             </template>
@@ -31,7 +31,7 @@
                 <el-table-column label="操作">
                     <template #default="scope">
                         <el-button link type="primary" :disabled="!scope.row.editable" @click="onSelectService(scope.row)">编辑</el-button>
-                        <el-button link type="primary" :disabled="!scope.row.deletable" @click="onDeletePolicies(scope.row.id)">删除</el-button>
+                        <el-button link type="primary" :disabled="!scope.row.deletable" @click="onDeletePolicies(scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -43,17 +43,24 @@
                 </div>
             </div>
         </el-card>
+        <DeletePolicy ref="DeletePolicy" :vdata="delPolicy.data"></DeletePolicy>
     </div>
 </template>
 
 <script>
+import { Refresh } from "@element-plus/icons-vue";
 import Pagination from "@/components/pagination/pagination";
+import DeletePolicy from "./deletepolicy.vue";
 import { formatTime } from "@/utils/date.js";
-import { GetPolicies, DeletePolicies } from "@/api/index.js";
-// import { login } from '@/api/index.js'
+import { GetPolicies } from "@/api/index.js";
 export default {
     name: "PoliciesIndex",
-    components: { Pagination },
+    components: { Pagination, DeletePolicy },
+    setup() {
+        return {
+            Refresh,
+        };
+    },
     data() {
         return {
             tableData: [],
@@ -61,6 +68,9 @@ export default {
             pageTotal: 0,
             pageSize: 10,
             page: 1,
+            delPolicy: {
+                data: [],
+            },
         };
     },
     methods: {
@@ -76,18 +86,6 @@ export default {
                 this.tableData = [];
                 this.loading = false;
             }
-        },
-        loadDeletePolicies: function (data) {
-            DeletePolicies(data)
-                .then(() => {
-                    this.onRefresh();
-                    this.$notify({ title: "操作成功", duration: 2000, type: "success" });
-                })
-                .catch((err) => {
-                    let msg = err.data.metadata.message;
-                    this.$notify({ title: "操作失败", duration: 5000, message: msg, type: "error" });
-                    this.onRefresh();
-                });
         },
         formatDate(time) {
             return formatTime(time);
@@ -122,15 +120,13 @@ export default {
             this.$router.push({ name: "policyInfo", params: { policy_id: id } });
         },
         // 点击删除策略按钮
-        onDeletePolicies(id) {
-            let pid = [];
-            pid.push(id);
-            let data = { policy_ids: pid };
-            this.loadDeletePolicies(data);
+        onDeletePolicies(val) {
+            this.$refs.DeletePolicy.openDeletePoliciesDialog();
+            this.delPolicy.data = [];
+            this.delPolicy.data.push(val);
         },
     },
     created() {
-        // this.loadGetPolicies(this.pageSize, this.page);
         this.onRefresh();
     },
 };

@@ -1,28 +1,20 @@
 <template>
-    <el-card style="margin-bottom: 20px">
+    <el-card style="margin-bottom: 10px">
         <template #header>
             <div class="my_refresh">
                 <el-row>
                     <span>角色信息</span>
                 </el-row>
                 <el-row>
-                    <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
+                    <el-button size="small" type="primary" :icon="Refresh" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
                 </el-row>
             </div>
         </template>
         <el-descriptions :column="2">
-            <el-descriptions-item width="50%" label="角色名称">
-                <el-tag>{{ rolrInfo.name }}</el-tag>
-            </el-descriptions-item>
-            <el-descriptions-item label="角色ID">
-                <el-tag>{{ rolrInfo.id }}</el-tag>
-            </el-descriptions-item>
-            <el-descriptions-item label="描述">
-                <el-tag>{{ rolrInfo.description }}</el-tag>
-            </el-descriptions-item>
-            <el-descriptions-item label="创建时间">
-                <el-tag>{{ formatDate(rolrInfo.create_time) }}</el-tag>
-            </el-descriptions-item>
+            <el-descriptions-item width="50%" label="角色名称"> {{ rolrInfo.name }} </el-descriptions-item>
+            <el-descriptions-item label="角色ID"> {{ rolrInfo.id }} </el-descriptions-item>
+            <el-descriptions-item label="描述"> {{ rolrInfo.description }} </el-descriptions-item>
+            <el-descriptions-item label="创建时间"> {{ formatDate(rolrInfo.create_time) }} </el-descriptions-item>
         </el-descriptions>
     </el-card>
     <el-card v-loading="loading">
@@ -80,11 +72,18 @@
 </template>
 
 <script>
+import { Refresh } from "@element-plus/icons-vue";
 import { formatTime } from "@/utils/date.js";
+import { msgcon } from "@/utils/message.js";
 import { SelectRoleInfo, SelectUserFromRole, SelectPoliciesFromRole, UnbindRoleAndUser, UnbindRoleAndPolicies } from "@/api/index.js";
 
 export default {
     name: "EditRoleIndex",
+    setup() {
+        return {
+            Refresh,
+        };
+    },
     data() {
         return {
             rolrInfo: {},
@@ -150,11 +149,11 @@ export default {
             const data = { roles: rid, users: uid };
             UnbindRoleAndUser(data)
                 .then(() => {
-                    this.$notify({ title: "移除成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("移除成功"));
                     this.onRefreshUserFromRole();
                 })
                 .catch((err) => {
-                    this.$notify({ title: "Warning", duration: 9000, message: err, type: "warning" });
+                    this.$message.warning(msgcon(err));
                 });
         },
         // 角色和策略解绑
@@ -162,11 +161,11 @@ export default {
             const data = { roles: roles, policies: policies };
             UnbindRoleAndPolicies(data)
                 .then(() => {
-                    this.$notify({ title: "移除成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("移除成功"));
                     this.onRefreshPoliciesFromRole();
                 })
-                .catch(() => {
-                    this.$notify({ title: "Warning", duration: 9000, type: "warning" });
+                .catch((err) => {
+                    this.$message.warning(msgcon(err));
                 });
         },
         // 角色和用户解绑(单个)
@@ -178,7 +177,7 @@ export default {
         onUnbindUserMore() {
             const role_id = this.$route.query.rid;
             if (this.ChoosingUser.length === 0) {
-                this.$notify({ title: "没有选择要移除的用户", duration: 9000, type: "warning" });
+                this.$message.warning(msgcon("没有选择要移除的用户"));
                 return;
             }
             this.loadUnbindRoleAndUser(role_id.split(), this.ChoosingUser);
@@ -192,7 +191,7 @@ export default {
         onUnbindPoliciesMore() {
             const role_id = this.$route.query.rid;
             if (this.ChoosingPolicies.length === 0) {
-                this.$notify({ title: "没有选择要移除的策略", duration: 9000, type: "warning" });
+                this.$message.warning(msgcon("没有选择要移除的策略"));
                 return;
             }
             this.loadUnbindRoleAndPolicies(role_id.split(), this.ChoosingPolicies);

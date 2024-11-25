@@ -17,10 +17,9 @@
                             style="width: 400px"
                             placeholder="按账号名称搜索（默认当前页搜索，回车进行远程搜索）"
                             clearable
-                            @change="onSearch()"
-                        />
+                            @change="onSearch()" />
                         <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateUser()">创建用户</el-button>
-                        <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
+                        <el-button size="small" type="primary" :icon="Refresh" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
                     </el-row>
                 </div>
             </template>
@@ -35,12 +34,12 @@
                 <el-table-column prop="description" label="描述" show-overflow-tooltip />
                 <el-table-column label="状态">
                     <template #default="scope">
-                        <div class="icon" v-if="scope.row.enabled" style="display: flex; align-items: center">
-                            <el-icon :size="16" style="color: #50d4ab; padding-right: 10px"><SuccessFilled /></el-icon>
+                        <div class="icon" v-if="scope.row.enabled">
+                            <el-icon class="table-icon-line table-icon-enabled"><SuccessFilled /></el-icon>
                             <span>启用</span>
                         </div>
                         <div class="icon" v-else>
-                            <el-icon :size="16" style="color: #adb0b8; padding-right: 10px"><RemoveFilled /></el-icon>
+                            <el-icon class="table-icon-line table-icon-disabled"><RemoveFilled /></el-icon>
                             <span>禁用</span>
                         </div>
                     </template>
@@ -68,7 +67,7 @@
         </el-card>
         <!-- 修改用户详情开始 -->
         <el-dialog v-model="openEdirUser" title="编辑用户信息" width="560px" :close-on-click-modal="false" draggable>
-            <div style="margin-left: 50px; margin-right: 50px">
+            <div style="margin-left: 20px; margin-right: 20px">
                 <el-form :model="editUserInfo" label-width="auto" label-position="left">
                     <el-form-item label="账号ID" style="margin-bottom: 0px">
                         <el-text>{{ userInfo.id }}</el-text>
@@ -86,14 +85,7 @@
                         <el-input v-model="editUserInfo.username" />
                     </el-form-item>
                     <el-form-item label="描述">
-                        <el-input
-                            v-model="editUserInfo.description"
-                            type="textarea"
-                            :rows="3"
-                            maxlength="60"
-                            show-word-limit
-                            placeholder="请输入用户描述"
-                        />
+                        <el-input v-model="editUserInfo.description" type="textarea" :rows="3" maxlength="60" show-word-limit />
                     </el-form-item>
                 </el-form>
                 <div style="display: flex; justify-content: flex-end; align-items: center">
@@ -110,8 +102,10 @@
 </template>
 
 <script>
+import { Refresh } from "@element-plus/icons-vue";
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
+import { msgcon } from "@/utils/message.js";
 import DeleteUser from "./deleteUser.vue";
 import { GetAccount, EditAccount, SearchAccount } from "@/api/index.js";
 export default {
@@ -119,6 +113,11 @@ export default {
     components: {
         Pagination,
         DeleteUser,
+    },
+    setup() {
+        return {
+            Refresh,
+        };
     },
     data() {
         return {
@@ -184,12 +183,12 @@ export default {
             EditAccount(paths, data)
                 .then(() => {
                     this.openEdirUser = false;
-                    this.$notify({ title: "操作成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("操作成功"));
                     this.onRefresh();
                 })
                 .catch((err) => {
                     let msg = err.data.metadata.message;
-                    this.$notify({ title: "操作失败", duration: 5000, message: msg, type: "error" });
+                    this.$message.error(msgcon("操作失败" + msg));
                     this.onRefresh();
                 });
         },
