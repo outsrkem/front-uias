@@ -48,6 +48,7 @@
 </template>
 
 <script>
+import { msgcon } from "@/utils/message.js";
 import { SelectOptions, UpdateOptions } from "@/api/index.js";
 export default {
     name: "OptionsIndex",
@@ -77,12 +78,12 @@ export default {
             // 更新请求
             UpdateOptions(data)
                 .then(() => {
-                    this.$notify({ title: "更新成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("更新成功"));
                     this.onRefresh();
                 })
                 .catch((err) => {
                     let msg = err.data.metadata.message;
-                    this.$notify({ title: "更新失败", duration: 5000, message: msg, type: "error" });
+                    this.$message.error(msgcon("更新失败 " + msg));
                     this.onRefresh();
                 });
         },

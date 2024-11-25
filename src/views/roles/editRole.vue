@@ -81,6 +81,7 @@
 
 <script>
 import { formatTime } from "@/utils/date.js";
+import { msgcon } from "@/utils/message.js";
 import { SelectRoleInfo, SelectUserFromRole, SelectPoliciesFromRole, UnbindRoleAndUser, UnbindRoleAndPolicies } from "@/api/index.js";
 
 export default {
@@ -150,11 +151,11 @@ export default {
             const data = { roles: rid, users: uid };
             UnbindRoleAndUser(data)
                 .then(() => {
-                    this.$notify({ title: "移除成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("移除成功"));
                     this.onRefreshUserFromRole();
                 })
                 .catch((err) => {
-                    this.$notify({ title: "Warning", duration: 9000, message: err, type: "warning" });
+                    this.$message.warning(msgcon(err));
                 });
         },
         // 角色和策略解绑
@@ -162,11 +163,11 @@ export default {
             const data = { roles: roles, policies: policies };
             UnbindRoleAndPolicies(data)
                 .then(() => {
-                    this.$notify({ title: "移除成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("移除成功"));
                     this.onRefreshPoliciesFromRole();
                 })
-                .catch(() => {
-                    this.$notify({ title: "Warning", duration: 9000, type: "warning" });
+                .catch((err) => {
+                    this.$message.warning(msgcon(err));
                 });
         },
         // 角色和用户解绑(单个)
@@ -178,7 +179,7 @@ export default {
         onUnbindUserMore() {
             const role_id = this.$route.query.rid;
             if (this.ChoosingUser.length === 0) {
-                this.$notify({ title: "没有选择要移除的用户", duration: 9000, type: "warning" });
+                this.$message.warning(msgcon("没有选择要移除的用户"));
                 return;
             }
             this.loadUnbindRoleAndUser(role_id.split(), this.ChoosingUser);
@@ -192,7 +193,7 @@ export default {
         onUnbindPoliciesMore() {
             const role_id = this.$route.query.rid;
             if (this.ChoosingPolicies.length === 0) {
-                this.$notify({ title: "没有选择要移除的策略", duration: 9000, type: "warning" });
+                this.$message.warning(msgcon("没有选择要移除的策略"));
                 return;
             }
             this.loadUnbindRoleAndPolicies(role_id.split(), this.ChoosingPolicies);

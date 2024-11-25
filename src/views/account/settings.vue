@@ -79,6 +79,7 @@
 <script>
 import SafetySet from "./safetyset.vue";
 import { formatTime } from "@/utils/date.js";
+import { msgcon } from "@/utils/message.js";
 import { AccountDetail, SelectRoleFromUser, SelectPoliciesFromRole, UnbindRoleAndUser } from "@/api/index.js";
 export default {
     name: "SettingsIndex",
@@ -138,11 +139,11 @@ export default {
             const data = { roles: roles, users: users };
             UnbindRoleAndUser(data)
                 .then(() => {
-                    this.$notify({ title: "移除成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("移除成功"));
                     this.onRefreshRole();
                 })
                 .catch((err) => {
-                    this.$notify({ title: "Warning", duration: 9000, message: err, type: "warning" });
+                    this.$message.warning(msgcon(err));
                 });
         },
         onRefreshRole() {

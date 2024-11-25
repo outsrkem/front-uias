@@ -35,6 +35,7 @@
 </template>
 
 <script>
+import { msgcon } from "@/utils/message.js";
 import { formatTime } from "@/utils/date.js";
 import { DeleteAccount } from "@/api/index.js";
 export default {
@@ -64,11 +65,11 @@ export default {
                 .then(() => {
                     this.dialogVisible = false;
                     this.$parent.onRefresh();
-                    this.$notify({ duration: 2000, title: "删除成功", type: "success" });
+                    this.$message.success(msgcon("删除成功"));
                 })
                 .catch((err) => {
                     let msg = err.data.metadata.message;
-                    this.$notify({ duration: 5000, title: "删除失败", message: msg, type: "error" });
+                    this.$message.error(msgcon("删除失败" + msg));
                 });
         },
         onDeleteUser() {

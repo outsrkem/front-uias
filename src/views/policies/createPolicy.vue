@@ -78,6 +78,7 @@
 </template>
 
 <script>
+import { msgcon } from "@/utils/message.js";
 import { SelectService, SelectActions, CreatePolicy } from "@/api/index.js";
 export default {
     name: "CreatePolicyIndex",
@@ -189,11 +190,11 @@ export default {
         loadCreatePolicy: function (data) {
             CreatePolicy(data)
                 .then(() => {
-                    this.$notify({ title: "创建成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("创建成功"));
                     this.$router.push({ name: "policies" });
                 })
                 .catch(() => {
-                    this.$notify({ title: "创建失败", duration: 2000, type: "warning" });
+                    this.$message.error(msgcon("创建失败"));
                     this.createLoading = false;
                 });
         },
