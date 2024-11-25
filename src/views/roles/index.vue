@@ -66,6 +66,7 @@
 <script>
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
+import { msgcon } from "@/utils/message.js";
 import { GetRoles, EditRole, DeleteRoles } from "@/api/index.js";
 
 export default {
@@ -111,23 +112,23 @@ export default {
                 .then(() => {
                     this.onRefresh();
                     this.openEdirRole = false;
-                    this.$notify({ title: "操作成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("修改角色成功"));
                 })
                 .catch((err) => {
                     let msg = err.data.metadata.message;
-                    this.$notify({ title: "操作失败", duration: 5000, message: msg, type: "error" });
+                    this.$message.error(msgcon("操作失败 " + msg));
                     this.onRefresh();
                 });
         },
         loadDeleteRole: function (data) {
             DeleteRoles(data)
                 .then(() => {
-                    this.$notify({ title: "操作成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("删除角色成功"));
                     this.onRefresh();
                 })
                 .catch((err) => {
                     let msg = err.data.metadata.message;
-                    this.$notify({ title: "操作失败", duration: 5000, message: msg, type: "error" });
+                    this.$message.error(msgcon("操作失败 " + msg));
                 });
         },
         formatDate(time) {

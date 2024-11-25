@@ -23,6 +23,7 @@
 </template>
 
 <script>
+import { msgcon } from "@/utils/message.js";
 import { CreateRoles } from "@/api/index.js";
 export default {
     name: "CreateRoleIndex",
@@ -57,11 +58,12 @@ export default {
         loadCreateRoles: function (data) {
             CreateRoles(data)
                 .then(() => {
+                    this.$message.success(msgcon("创建角色成功"));
                     this.$router.push({ path: "/roles" });
                 })
                 .catch((err) => {
                     let msg = err.data.metadata.message;
-                    this.$notify({ duration: 5000, title: "操作失败", message: msg, type: "error" });
+                    this.$message.error(msgcon("操作失败 " + msg));
                 });
         },
     },

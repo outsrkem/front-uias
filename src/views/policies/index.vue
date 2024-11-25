@@ -49,6 +49,7 @@
 <script>
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
+import { msgcon } from "@/utils/message.js";
 import { GetPolicies, DeletePolicies } from "@/api/index.js";
 // import { login } from '@/api/index.js'
 export default {
@@ -81,11 +82,11 @@ export default {
             DeletePolicies(data)
                 .then(() => {
                     this.onRefresh();
-                    this.$notify({ title: "操作成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("删除策略成功"));
                 })
                 .catch((err) => {
                     let msg = err.data.metadata.message;
-                    this.$notify({ title: "操作失败", duration: 5000, message: msg, type: "error" });
+                    this.$message.error(msgcon(msg));
                     this.onRefresh();
                 });
         },

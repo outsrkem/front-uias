@@ -112,6 +112,7 @@
 <script>
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
+import { msgcon } from "@/utils/message.js";
 import DeleteUser from "./deleteUser.vue";
 import { GetAccount, EditAccount, SearchAccount } from "@/api/index.js";
 export default {
@@ -184,12 +185,12 @@ export default {
             EditAccount(paths, data)
                 .then(() => {
                     this.openEdirUser = false;
-                    this.$notify({ title: "操作成功", duration: 2000, type: "success" });
+                    this.$message.success(msgcon("操作成功"));
                     this.onRefresh();
                 })
                 .catch((err) => {
                     let msg = err.data.metadata.message;
-                    this.$notify({ title: "操作失败", duration: 5000, message: msg, type: "error" });
+                    this.$message.error(msgcon("操作失败" + msg));
                     this.onRefresh();
                 });
         },

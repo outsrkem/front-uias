@@ -90,6 +90,7 @@
 </template>
 
 <script>
+import { msgcon } from "@/utils/message.js";
 import { SelectPolicyInfo, SelectService, SelectActions, EditPolicy } from "@/api/index.js";
 export default {
     name: "EditPolicyIndex",
@@ -288,19 +289,19 @@ export default {
 
             const data = this.assembleData();
             if (data.policy.permit.Statement[0].Action.length < 1) {
-                this.$message({ message: "至少选择一个操作", type: "warning", plain: true, showClose: true, duration: 3000 });
+                this.$message.warning(msgcon("至少选择一个操作"));
                 this.st.bt.ld = false; // 按钮加载状态
                 return;
             }
             EditPolicy({ policyId: this.policyId }, data)
                 .then(() => {
-                    this.$message({ message: "修改策略成功.", type: "success", plain: true, showClose: true, duration: 1000 });
+                    this.$message.success(msgcon("修改策略成功"));
                     this.st.bt.ld = false; // 按钮加载状态
                     this.onCance();
                 })
                 .catch((err) => {
                     let msg = err.data;
-                    this.$message({ message: msg, type: "error", plain: true, showClose: true, duration: 3000 });
+                    this.$message.error(msgcon(msg));
                     this.st.bt.ld = false; // 按钮加载状态
                 });
         },
