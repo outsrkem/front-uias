@@ -41,13 +41,13 @@
         </el-card>
         <!-- 修改角色详情开始 -->
         <el-dialog v-model="openEdirRole" title="编辑角色信息" width="560px" :close-on-click-modal="false" draggable>
-            <div style="margin-left: 50px; margin-right: 50px">
+            <div style="margin-left: 20px; margin-right: 20px">
                 <el-form label-width="auto" :model="roleInfo" :rules="fromRules" ref="role-from" :hide-required-asterisk="true">
                     <el-form-item label="角色名称" prop="name">
                         <el-input v-model="roleInfo.name" placeholder="请输入角色名称" />
                     </el-form-item>
                     <el-form-item label="角色描述">
-                        <el-input v-model="roleInfo.description" type="textarea" show-word-limit placeholder="请输入角色描述" />
+                        <el-input v-model="roleInfo.description" type="textarea" :rows="3" maxlength="60" show-word-limit />
                     </el-form-item>
                 </el-form>
 

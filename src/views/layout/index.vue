@@ -1,31 +1,35 @@
 <template>
-    <el-container class="layout-container">
-        <el-aside class="aside" width="auth">
-            <app-aside />
-        </el-aside>
+    <div class="custom-layout">
         <el-container>
-            <el-header class="header">
-                <div>
-                    <el-row>
-                        <el-text class="header-text line-spacing">认证中心</el-text>
+            <el-header class="header-content">
+                <el-row>
+                    <el-space :size="10" spacer="">
+                        <span style="padding-left: 160px"></span>
                         <el-link class="header-text line-spacing" href="/console">控制台</el-link>
-                    </el-row>
-                </div>
-                <div>
-                    <el-row>
-                        <el-text class="header-text line-spacing">{{ dateMessage }}</el-text>
-                        <el-text class="header-text line-spacing">欢迎您，{{ userInfo.username }}</el-text>
-                        <el-button class="header-text line-spacing" link @click="onUserCenter">个人中心</el-button>
-                        <el-button class="header-text line-spacing" link @click="Logout">退出</el-button>
-                    </el-row>
-                </div>
+                    </el-space>
+                </el-row>
+                <el-row>
+                    <div>
+                        <el-space :size="20" spacer="">
+                            <el-text class="header-text line-spacing">{{ dateMessage }}</el-text>
+                            <el-text class="header-text line-spacing">欢迎您，{{ userInfo.username }}</el-text>
+                            <el-button class="header-text line-spacing" link @click="onUserCenter">个人信息</el-button>
+                            <el-button link @click="Logout">退出</el-button>
+                        </el-space>
+                    </div>
+                </el-row>
             </el-header>
-            <el-main class="main">
-                <!-- 子路由出口 -->
-                <router-view />
-            </el-main>
+            <el-container class="main-content">
+                <el-aside class="aside" width="auth">
+                    <app-aside class="aside-menu" />
+                </el-aside>
+                <el-main class="main">
+                    <!-- 子路由出口 -->
+                    <router-view />
+                </el-main>
+            </el-container>
         </el-container>
-    </el-container>
+    </div>
 </template>
 
 <script>
@@ -78,7 +82,7 @@ export default {
             // const seconds = String(now.getSeconds()).padStart(2, "0");
             const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
             const _weekday = weekdays[now.getDay()];
-            this.dateMessage = `今天是${year}年${month}月${day}日，${_weekday}。`;
+            this.dateMessage = `今天是${year}年${month}月${day}日 ${_weekday}`;
         },
     },
     created() {
@@ -89,38 +93,36 @@ export default {
 </script>
 
 <style scoped lang="less">
-.layout-container {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
+.custom-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
-.aside {
-    width: "auth";
-    padding-top: 50px;
-}
-
-.header {
-    height: 32px;
+.header-content {
+    height: 50px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #ccc;
-    //background-color: #282b23;
-    .header-text {
-        color: #282b23;
-    }
-    .line-spacing {
-        margin-left: 8px;
-        margin-right: 8px;
-    }
+    background-color: #ffffff;
+    z-index: 1000;
 }
-.main {
-    background-color: #e9eef3;
-    padding-left: 10px;
-    padding-top: 10px;
-    padding-right: 10px;
-    padding-bottom: 10px;
+.main-content {
+    margin-top: 50px;
+    position: fixed;
+    flex-grow: 1;
+    width: 100%;
+    height: calc(100% - 50px);
+    overflow-y: auto;
+    .aside {
+        background-color: #d3dce6;
+        .aside-menu {
+            height: 100%;
+        }
+    }
+    .main {
+        background-color: #e9eef3;
+        padding: 10px;
+    }
 }
 </style>
