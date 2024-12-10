@@ -1,18 +1,6 @@
-////
-//body{
-//  background-color: #ffffff;
-//}
-
-// 卡片样式修改(全局)
-// .el-card {
-//     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) !important;
-//   }
-  
-//   .el-breadcrumb {
-//     margin-bottom: 15px;
-//     font-size: 14px;
-//   }
-  
+body {
+    margin: 0px;
+}
 
 .end-container {
     display: flex;
@@ -24,9 +12,6 @@
     min-width: 1200px;
 }
 
-.el-header {
-    min-width: 1200px;
-}
 .pagination {
     padding-top: 18px;
 }
@@ -35,4 +20,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+// 策略管理-策略action
+.action-group{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    .row{
+       margin-right: 30px;
+    }
 }

@@ -7,7 +7,7 @@
         </template>
         <div style="min-height: 300px" v-loading="st.ld.da">
             <div v-if="design.visual">
-                <el-form size="small" :model="fronData" label-width="100px" style="max-width: 80%">
+                <el-form size="small" :model="fronData" label-width="100px" style="max-width: 60%">
                     <el-form-item label="策略名称" prop="name">
                         <el-input v-model="fronData.name" />
                     </el-form-item>
@@ -31,29 +31,31 @@
                     </el-form-item>
 
                     <el-form-item label="选择操作">
-                        <div v-if="initData.actions.ListOnly.length > 0" style="margin-bottom: 10px">
-                            <el-tag type="primary">列表</el-tag>
-                            <el-checkbox-group v-model="fronData.permit.action">
-                                <el-checkbox v-for="(item, index) in initData.actions.ListOnly" :key="index" :value="item.name" name="type">{{
-                                    item.description
-                                }}</el-checkbox>
-                            </el-checkbox-group>
-                        </div>
-                        <div v-if="initData.actions.ReadOnly.length > 0" style="margin-bottom: 10px">
-                            <el-tag type="primary">只读</el-tag>
-                            <el-checkbox-group v-model="fronData.permit.action">
-                                <el-checkbox v-for="(item, index) in initData.actions.ReadOnly" :key="index" :value="item.name" name="type">{{
-                                    item.description
-                                }}</el-checkbox>
-                            </el-checkbox-group>
-                        </div>
-                        <div v-if="initData.actions.ReadWrite.length > 0">
-                            <el-tag type="primary">可写</el-tag>
-                            <el-checkbox-group v-model="fronData.permit.action">
-                                <el-checkbox v-for="(item, index) in initData.actions.ReadWrite" :key="index" :value="item.name" name="type">{{
-                                    item.description
-                                }}</el-checkbox>
-                            </el-checkbox-group>
+                        <div style="flex-direction: column">
+                            <div v-if="initData.actions.ListOnly.length > 0" style="margin-bottom: 10px">
+                                <el-tag type="primary">列表</el-tag>
+                                <el-checkbox-group class="action-group" v-model="fronData.permit.action">
+                                    <div class="row" v-for="(item, index) in initData.actions.ListOnly" :key="index">
+                                        <el-checkbox :value="item.name">{{ item.description }}</el-checkbox>
+                                    </div>
+                                </el-checkbox-group>
+                            </div>
+                            <div v-if="initData.actions.ReadOnly.length > 0" style="margin-bottom: 10px">
+                                <el-tag type="primary">只读</el-tag>
+                                <el-checkbox-group class="action-group" v-model="fronData.permit.action">
+                                    <div class="row" v-for="(item, index) in initData.actions.ReadOnly" :key="index">
+                                        <el-checkbox :value="item.name">{{ item.description }}</el-checkbox>
+                                    </div>
+                                </el-checkbox-group>
+                            </div>
+                            <div v-if="initData.actions.ReadWrite.length > 0">
+                                <el-tag type="primary">可写</el-tag>
+                                <el-checkbox-group class="action-group" v-model="fronData.permit.action">
+                                    <div class="row" v-for="(item, index) in initData.actions.ReadWrite" :key="index">
+                                        <el-checkbox :value="item.name">{{ item.description }}</el-checkbox>
+                                    </div>
+                                </el-checkbox-group>
+                            </div>
                         </div>
                     </el-form-item>
 
@@ -62,9 +64,10 @@
                     </el-form-item>
                 </el-form>
             </div>
+
             <div v-if="design.vjson">
                 <div>
-                    <el-form size="small" :model="fronData" label-width="100px" style="max-width: 80%">
+                    <el-form size="small" :model="fronData" label-width="100px" style="max-width: 60%">
                         <el-form-item label="策略名称" prop="name">
                             <el-input v-model="fronData.name" />
                         </el-form-item>
