@@ -68,7 +68,7 @@
         </el-card>
         <!-- 修改用户详情开始 -->
         <el-dialog v-model="openEdirUser" title="编辑用户信息" width="560px" :close-on-click-modal="false" draggable>
-            <div style="margin-left: 50px; margin-right: 50px">
+            <div style="margin-left: 20px; margin-right: 20px">
                 <el-form :model="editUserInfo" label-width="auto" label-position="left">
                     <el-form-item label="账号ID" style="margin-bottom: 0px">
                         <el-text>{{ userInfo.id }}</el-text>
@@ -86,14 +86,7 @@
                         <el-input v-model="editUserInfo.username" />
                     </el-form-item>
                     <el-form-item label="描述">
-                        <el-input
-                            v-model="editUserInfo.description"
-                            type="textarea"
-                            :rows="3"
-                            maxlength="60"
-                            show-word-limit
-                            placeholder="请输入用户描述"
-                        />
+                        <el-input v-model="editUserInfo.description" type="textarea" :rows="3" maxlength="60" show-word-limit />
                     </el-form-item>
                 </el-form>
                 <div style="display: flex; justify-content: flex-end; align-items: center">
