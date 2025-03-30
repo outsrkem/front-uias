@@ -1,5 +1,5 @@
 <template>
-    <el-card style="margin-bottom: 20px">
+    <el-card style="margin-bottom: 10px">
         <template #header>
             <div class="card-header">
                 <div class="my_refresh">
@@ -40,6 +40,9 @@
             <el-tab-pane label="安全设置" name="first">
                 <SafetySet :vmodel="basicInfo"></SafetySet>
             </el-tab-pane>
+            <el-tab-pane label="访问凭据" name="credential">
+                <CredentialTab :vdata="user"></CredentialTab>
+            </el-tab-pane>
             <el-tab-pane label="所属角色" name="second">
                 <div>
                     <el-button size="small" type="primary" :disabled="!basicInfo.editable" @click="onUserBindRole">加入角色</el-button>
@@ -78,6 +81,7 @@
 
 <script>
 import SafetySet from "./safetyset.vue";
+import CredentialTab from "./credential.vue";
 import { formatTime } from "@/utils/date.js";
 import { msgcon } from "@/utils/message.js";
 import { AccountDetail, SelectRoleFromUser, SelectPoliciesFromRole, UnbindRoleAndUser } from "@/api/index.js";
@@ -85,6 +89,7 @@ export default {
     name: "SettingsIndex",
     components: {
         SafetySet,
+        CredentialTab,
     },
     data() {
         return {
@@ -94,6 +99,9 @@ export default {
             roles: [],
             policies: [],
             loading: true,
+            user: {
+                id: "",
+            },
         };
     },
     methods: {
@@ -189,6 +197,7 @@ export default {
         }
         const uid = this.$route.params.user_id;
         this.userId = uid;
+        this.user.id = uid;
         this.loadSelectRoleFromUser(uid);
         this.loadAccountDetail(uid);
     },

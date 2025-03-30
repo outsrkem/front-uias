@@ -1,5 +1,5 @@
 <template>
-    <el-card style="margin-bottom: 20px">
+    <el-card style="margin-bottom: 10px">
         <template #header>
             <div class="my_refresh">
                 <el-row>

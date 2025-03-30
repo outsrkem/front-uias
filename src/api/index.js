@@ -81,3 +81,14 @@ export const EditPolicy = (paths, data) => ajax(`/v1/uias/policy/${paths.policyI
 export const SelectOptions = () => ajax(`/v1/uias/system/options`, 'GET')
 // 更新系统配置 /v1/uias/system/options
 export const UpdateOptions = (data) => ajax('/v1/uias/system/options', 'PATCH', null, data)
+
+
+// 凭据管理
+// 查询凭据 GET /v1/uias/user/center/:user_id/credential
+export const GetCredential = (paths) => ajax(`/v1/uias/user/center/${paths.uid}/credential`, 'GET', null)
+// 删除凭据 DELETE /v1/uias/user/center/:user_id/credential
+export const DeleteCredential = (paths,data) => ajax(`/v1/uias/user/center/${paths.uid}/credential`, 'DELETE', null, data)
+// 修改凭据 PATCH /v1/uias/user/center/:user_id/credential
+export const EditCredential = (paths,data) => ajax(`/v1/uias/user/center/${paths.uid}/credential`, 'PATCH', null, data)
+// 创建凭据 POST /v1/uias/user/center/:user_id/credential
+export const CreateCredential = (paths,data) => ajax(`/v1/uias/user/center/${paths.uid}/credential`, 'POST', null, data)
