@@ -29,7 +29,11 @@
                 element-loading-text="加载中"
                 element-loading-spinner="el-icon-loading"
             >
-                <el-table-column prop="access" label="密钥ID" />
+                <el-table-column prop="access" label="密钥ID">
+                    <template #default="scope">
+                        <span class="access-text">{{ scope.row.access }}</span>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="description" label="描述" show-overflow-tooltip />
                 <el-table-column prop="status" label="状态">
                     <template #default="scope">
@@ -435,5 +439,9 @@ export default {
     border-radius: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease; /* 文字也加过渡 */
+}
+.access-text {
+    font-family: "Consolas", Courier, monospace;
+    font-size: 16px; /* 可根据需要调整 */
 }
 </style>

@@ -11,18 +11,10 @@
             </div>
         </template>
         <el-descriptions :column="2">
-            <el-descriptions-item width="50%" label="角色名称">
-                <el-tag>{{ rolrInfo.name }}</el-tag>
-            </el-descriptions-item>
-            <el-descriptions-item label="角色ID">
-                <el-tag>{{ rolrInfo.id }}</el-tag>
-            </el-descriptions-item>
-            <el-descriptions-item label="描述">
-                <el-tag>{{ rolrInfo.description }}</el-tag>
-            </el-descriptions-item>
-            <el-descriptions-item label="创建时间">
-                <el-tag>{{ formatDate(rolrInfo.create_time) }}</el-tag>
-            </el-descriptions-item>
+            <el-descriptions-item width="50%" label="角色名称"> {{ rolrInfo.name }} </el-descriptions-item>
+            <el-descriptions-item label="角色ID"> {{ rolrInfo.id }} </el-descriptions-item>
+            <el-descriptions-item label="描述"> {{ rolrInfo.description }} </el-descriptions-item>
+            <el-descriptions-item label="创建时间"> {{ formatDate(rolrInfo.create_time) }} </el-descriptions-item>
         </el-descriptions>
     </el-card>
     <el-card v-loading="loading">

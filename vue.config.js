@@ -8,7 +8,7 @@ module.exports = defineConfig({
     devServer: {
         proxy: {
           '/': {
-            target: 'https://uias-devops.outsrkem.top:30078/',
+            target: 'https://10.10.10.16:30078/',
             changeOrigin: true,
             secure: false,
             pathRewrite: {

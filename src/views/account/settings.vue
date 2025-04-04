@@ -43,6 +43,9 @@
             <el-tab-pane label="访问凭据" name="credential">
                 <CredentialTab :vdata="user"></CredentialTab>
             </el-tab-pane>
+            <el-tab-pane label="标签管理" name="annotation">
+                <AnnotationTab :vdata="user"></AnnotationTab>
+            </el-tab-pane>
             <el-tab-pane label="所属角色" name="second">
                 <div>
                     <el-button size="small" type="primary" :disabled="!basicInfo.editable" @click="onUserBindRole">加入角色</el-button>
@@ -82,6 +85,7 @@
 <script>
 import SafetySet from "./safetyset.vue";
 import CredentialTab from "./credential.vue";
+import AnnotationTab from "./annotation.vue";
 import { formatTime } from "@/utils/date.js";
 import { msgcon } from "@/utils/message.js";
 import { AccountDetail, SelectRoleFromUser, SelectPoliciesFromRole, UnbindRoleAndUser } from "@/api/index.js";
@@ -90,6 +94,7 @@ export default {
     components: {
         SafetySet,
         CredentialTab,
+        AnnotationTab,
     },
     data() {
         return {

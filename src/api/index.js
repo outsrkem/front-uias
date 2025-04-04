@@ -92,3 +92,9 @@ export const DeleteCredential = (paths,data) => ajax(`/v1/uias/user/center/${pat
 export const EditCredential = (paths,data) => ajax(`/v1/uias/user/center/${paths.uid}/credential`, 'PATCH', null, data)
 // 创建凭据 POST /v1/uias/user/center/:user_id/credential
 export const CreateCredential = (paths,data) => ajax(`/v1/uias/user/center/${paths.uid}/credential`, 'POST', null, data)
+
+// 标签管理
+// 查询标签 GET /v1/uias/user/:userId/annotation
+export const GetAnnotation = (paths) => ajax(`/v1/uias/user/${paths.uid}/annotation`, 'GET', null)
+// 删除标签 /v1/uias/user/:userId/annotation
+export const DelAnnotation = (paths,data) => ajax(`/v1/uias/user/${paths.uid}/annotation`, 'DELETE', null, data)
