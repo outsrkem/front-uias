@@ -47,8 +47,8 @@
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column prop="created_at" label="创建时间">
-                    <template #default="scope">{{ formatDate(scope.row.created_at) }}</template>
+                <el-table-column prop="create_time" label="创建时间">
+                    <template #default="scope">{{ formatDate(scope.row.create_time) }}</template>
                 </el-table-column>
                 <el-table-column prop="last_use_at" label="最近使用时间">
                     <template #default="scope">{{ formatDate(scope.row.last_use_at) }}</template>

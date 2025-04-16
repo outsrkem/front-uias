@@ -40,7 +40,7 @@
                         <el-tag type="primary">列表</el-tag>
                         <el-checkbox-group class="action-group" v-model="selectedData.actions">
                             <div class="row" v-for="(item, index) in actions.ListOnly" :key="index">
-                                <el-checkbox :value="item.name">{{ item.description }}</el-checkbox>
+                                <el-checkbox :value="item.name">{{ item.title }}</el-checkbox>
                             </div>
                         </el-checkbox-group>
                     </div>
@@ -48,7 +48,7 @@
                         <el-tag type="primary">只读</el-tag>
                         <el-checkbox-group class="action-group" v-model="selectedData.actions">
                             <div class="row" v-for="(item, index) in actions.ReadOnly" :key="index">
-                                <el-checkbox :value="item.name">{{ item.description }}</el-checkbox>
+                                <el-checkbox :value="item.name">{{ item.title }}</el-checkbox>
                             </div>
                         </el-checkbox-group>
                     </div>
@@ -56,7 +56,7 @@
                         <el-tag type="primary">可写</el-tag>
                         <el-checkbox-group class="action-group" v-model="selectedData.actions">
                             <div class="row" v-for="(item, index) in actions.ReadWrite" :key="index">
-                                <el-checkbox :value="item.name">{{ item.description }}</el-checkbox>
+                                <el-checkbox :value="item.name">{{ item.title }}</el-checkbox>
                             </div>
                         </el-checkbox-group>
                     </div>
@@ -155,6 +155,7 @@ export default {
                         let act = {
                             id: item.id,
                             name: item.actionInfo.name,
+                            title: item.actionInfo.title,
                             description: item.actionInfo.description,
                             status: item.actionInfo.status,
                             group: item.actionInfo.group,
@@ -165,6 +166,7 @@ export default {
                             let act = {
                                 id: item.id,
                                 name: item.actionInfo.name,
+                                title: item.actionInfo.title,
                                 description: item.actionInfo.description,
                                 status: item.actionInfo.status,
                                 group: item.actionInfo.group,
@@ -174,6 +176,7 @@ export default {
                             let act = {
                                 id: item.id,
                                 name: item.actionInfo.name,
+                                title: item.actionInfo.title,
                                 description: item.actionInfo.description,
                                 status: item.actionInfo.status,
                                 group: item.actionInfo.group,
