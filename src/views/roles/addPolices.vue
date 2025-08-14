@@ -15,7 +15,7 @@
                         <div v-else><span>自定义策略</span></div>
                     </template>
                 </el-table-column>
-                <el-table-column prop="description" label="描述" />
+                <el-table-column prop="description" label="描述" show-overflow-tooltip />
             </el-table>
         </div>
         <template #footer>
@@ -36,6 +36,7 @@
 
 <script>
 import Pagination from "@/components/pagination/pagination";
+import { convertToLimitOffset } from "../../utils/common.js";
 import { formatTime } from "@/utils/date.js";
 import { msgcon } from "@/utils/message.js";
 import { GetPolicies, RoleBindingPolicies } from "@/api/index.js";
@@ -84,7 +85,7 @@ export default {
             this.loadRoleBindingPolicies(this.ChoosingRole, this.bindPolicies);
         },
         loadGetPolicies: function (page_size, page) {
-            const params = { page_size: page_size, page: page };
+            const params = convertToLimitOffset(page, page_size);
             GetPolicies(params).then((res) => {
                 this.allPolicies = res.payload.items;
                 this.pageTotal = res.payload.page_info.total;

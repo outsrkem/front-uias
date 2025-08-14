@@ -10,8 +10,7 @@
                     style="width: 400px"
                     placeholder="按账号搜索（默认当前页搜索，回车进行远程搜索）"
                     clearable
-                    @change="onSearch()"
-                />
+                    @change="onSearch()" />
             </div>
         </template>
         <div>
@@ -19,7 +18,7 @@
                 <el-table-column type="selection" width="55" :selectable="selected" />
                 <el-table-column prop="account" label="账号名称" />
                 <el-table-column prop="username" label="用户名" />
-                <el-table-column prop="description" label="描述" />
+                <el-table-column prop="description" label="描述" show-overflow-tooltip />
                 <el-table-column label="状态">
                     <template #default="scope">
                         <div class="icon" v-if="scope.row.enabled" style="display: flex; align-items: center">
@@ -55,6 +54,7 @@
 
 <script>
 import Pagination from "@/components/pagination/pagination";
+import { convertToLimitOffset } from "../../utils/common.js";
 import { formatTime } from "@/utils/date.js";
 import { msgcon } from "@/utils/message.js";
 import { GetAccount, RoleBindingUser, SearchAccount } from "@/api/index.js";
@@ -121,7 +121,7 @@ export default {
             this.loadRoleBindingUser(this.ChoosingRole, this.bindUser);
         },
         loadGetAccount: function (page_size, page) {
-            const params = { page_size: page_size, page: page };
+            const params = convertToLimitOffset(page, page_size);
             GetAccount(params).then((res) => {
                 this.allUsers = res.payload.items;
                 this.pageTotal = res.payload.page_info.total;
