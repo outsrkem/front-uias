@@ -6,9 +6,6 @@
                     <el-row>
                         <span>用户管理</span>
                         <span style="padding-left: 5px; padding-right: 5px"></span>
-
-                        <!-- <span style="padding-left: 5px; padding-right: 5px"></span> -->
-                        <!-- <el-input size="small" v-model="searchUsernameQuery" style="width: 200px" placeholder="按用户名搜索" clearable /> -->
                     </el-row>
                     <el-row>
                         <el-input
@@ -105,6 +102,7 @@
 import { Refresh } from "@element-plus/icons-vue";
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
+import { convertToLimitOffset } from "../../utils/common.js";
 import { msgcon } from "@/utils/message.js";
 import DeleteUser from "./deleteUser.vue";
 import { GetAccount, EditAccount, SearchAccount } from "@/api/index.js";
@@ -160,7 +158,7 @@ export default {
     methods: {
         loadGetAccount: async function (page_size, page) {
             try {
-                const params = { page_size: page_size, page: page };
+                const params = convertToLimitOffset(page, page_size);
                 const res = await GetAccount(params);
                 this.tableData = res.payload.items;
                 this.loading = false;
@@ -170,8 +168,8 @@ export default {
                 this.loading = false;
             }
         },
-        loadSearchAccount: function (k, s = 10, p = 1) {
-            const params = { k: k, p: p, s: s };
+        loadSearchAccount: function (k, page_size = 10, page = 1) {
+            const params = { k: k, ...convertToLimitOffset(page, page_size) };
             SearchAccount(params).then((res) => {
                 this.tableData = res.payload.items;
                 this.pageTotal = res.payload.page_info.total;

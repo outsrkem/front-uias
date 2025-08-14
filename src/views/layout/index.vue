@@ -20,13 +20,13 @@
                 </el-row>
             </el-header>
             <el-container class="main-content">
-                <el-aside class="aside" width="auth">
+                <el-aside class="aside" width="200px">
                     <app-aside class="aside-menu" />
                 </el-aside>
-                <el-main class="main">
+                <div class="main">
                     <!-- 子路由出口 -->
                     <router-view />
-                </el-main>
+                </div>
             </el-container>
         </el-container>
     </div>
@@ -111,21 +111,24 @@ export default {
     background-color: #ffffff;
 }
 .main-content {
-    margin-top: 50px;
-    position: fixed;
     flex-grow: 1;
     width: 100%;
     height: calc(100% - 50px);
-    overflow-y: auto;
     .aside {
         background-color: #d3dce6;
+        flex-shrink: 0;
         .aside-menu {
             height: 100%;
         }
     }
     .main {
         background-color: #e9eef3;
-        padding: 10px;
+        padding: 10px !important;
+        box-sizing: border-box;
+        display: block;
+        flex: 1;
+        flex-basis: auto;
+        padding: var(--el-main-padding);
     }
 }
 </style>
