@@ -51,6 +51,7 @@
 import { Refresh } from "@element-plus/icons-vue";
 import { msgcon } from "@/utils/message.js";
 import { SelectOptions, UpdateOptions } from "@/api/index.js";
+import { withDelay } from "../../utils/common.js";
 export default {
     name: "OptionsIndex",
     setup() {
@@ -71,7 +72,7 @@ export default {
     },
     methods: {
         loadSelectOptions: function () {
-            SelectOptions()
+            withDelay(() => SelectOptions())
                 .then((res) => {
                     this.options = res.payload.system.options;
                     this.statusSwitch(false);

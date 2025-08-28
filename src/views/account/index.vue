@@ -102,7 +102,7 @@
 import { Refresh } from "@element-plus/icons-vue";
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
-import { convertToLimitOffset } from "../../utils/common.js";
+import { withDelay, convertToLimitOffset } from "../../utils/common.js";
 import { msgcon } from "@/utils/message.js";
 import DeleteUser from "./deleteUser.vue";
 import { GetAccount, EditAccount, SearchAccount } from "@/api/index.js";
@@ -159,7 +159,7 @@ export default {
         loadGetAccount: async function (page_size, page) {
             try {
                 const params = convertToLimitOffset(page, page_size);
-                const res = await GetAccount(params);
+                const res = await withDelay(() => GetAccount(params));
                 this.tableData = res.payload.items;
                 this.loading = false;
                 this.pageTotal = res.payload.page_info.total;

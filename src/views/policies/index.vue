@@ -52,7 +52,7 @@ import { Refresh } from "@element-plus/icons-vue";
 import Pagination from "@/components/pagination/pagination";
 import DeletePolicy from "./deletepolicy.vue";
 import { formatTime } from "@/utils/date.js";
-import { convertToLimitOffset } from "../../utils/common.js";
+import { withDelay, convertToLimitOffset } from "../../utils/common.js";
 import { GetPolicies } from "@/api/index.js";
 export default {
     name: "PoliciesIndex",
@@ -78,7 +78,7 @@ export default {
         loadGetPolicies: async function (page_size, page) {
             try {
                 const params = convertToLimitOffset(page, page_size);
-                const res = await GetPolicies(params);
+                const res = await withDelay(() => GetPolicies(params));
                 this.tableData = res.payload.items;
                 this.loading = false;
                 this.pageTotal = res.payload.page_info.total;

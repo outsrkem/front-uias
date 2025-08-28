@@ -68,7 +68,7 @@
 import { Refresh } from "@element-plus/icons-vue";
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
-import { convertToLimitOffset } from "../../utils/common.js";
+import { withDelay, convertToLimitOffset } from "../../utils/common.js";
 import { msgcon } from "@/utils/message.js";
 import DeleteRole from "./deleteRole.vue";
 import { GetRoles, EditRole } from "@/api/index.js";
@@ -109,7 +109,8 @@ export default {
         loadGetRoles: async function (page_size, page) {
             try {
                 const params = convertToLimitOffset(page, page_size);
-                const res = await GetRoles(params);
+                // const res = await GetRoles(params);
+                const res = await withDelay(() => GetRoles(params));
                 this.tableData = res.payload.items;
                 this.loading = false;
                 this.pageTotal = res.payload.page_info.total;
