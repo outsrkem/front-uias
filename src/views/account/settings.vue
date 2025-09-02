@@ -129,7 +129,6 @@ export default {
                 });
         },
         loadSelectRoleFromUser: function (uid) {
-            this.roles = [];
             const paths = { uid: uid };
             SelectRoleFromUser(paths)
                 .then((res) => {
@@ -192,11 +191,8 @@ export default {
             // 添加延时，优化视觉体验感
             this.loading = true;
             const uid = this.$route.params.user_id;
-            clearTimeout(this.timeoutId);
-            this.timeoutId = setTimeout(() => {
-                this.loadAccountDetail(uid);
-                this.loadSelectRoleFromUser(uid);
-            }, this.$config.delayTime);
+            this.loadAccountDetail(uid);
+            this.loadSelectRoleFromUser(uid);
         },
     },
     created() {

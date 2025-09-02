@@ -6,7 +6,7 @@
             </div>
         </template>
         <div>
-            <el-table :data="allPolicies" style="width: 100%" @selection-change="handleSelectionChange">
+            <el-table :data="allPolicies" style="width: 100%" @selection-change="handleSelectionChange" v-loading="loading">
                 <el-table-column type="selection" width="55" :selectable="selected" />
                 <el-table-column prop="name" label="策略名称" />
                 <el-table-column label="类型">
@@ -35,6 +35,7 @@
 </template>
 
 <script>
+import { withDelay } from "../../utils/common.js";
 import Pagination from "@/components/pagination/pagination";
 import { convertToLimitOffset } from "../../utils/common.js";
 import { formatTime } from "@/utils/date.js";
@@ -45,6 +46,7 @@ export default {
     components: { Pagination },
     data() {
         return {
+            loading: false,
             allPolicies: [],
             bindPolicies: [],
             ChoosingRole: [],
@@ -85,15 +87,21 @@ export default {
             this.loadRoleBindingPolicies(this.ChoosingRole, this.bindPolicies);
         },
         loadGetPolicies: function (page_size, page) {
+            this.loading = true;
             const params = convertToLimitOffset(page, page_size);
-            GetPolicies(params).then((res) => {
-                this.allPolicies = res.payload.items;
-                this.pageTotal = res.payload.page_info.total;
-            });
+            withDelay(() => GetPolicies(params))
+                .then((res) => {
+                    this.allPolicies = res.payload.items;
+                    this.pageTotal = res.payload.page_info.total;
+                })
+                .finally(() => {
+                    this.loading = false;
+                });
         },
         loadRoleBindingPolicies: function (roles_id, policies_id) {
+            this.loading = true;
             const data = { roles: roles_id, policies: policies_id };
-            RoleBindingPolicies(data)
+            withDelay(() => RoleBindingPolicies(data))
                 .then(() => {
                     this.$message.success(msgcon("授权成功 "));
                     this.onCance();
@@ -101,6 +109,9 @@ export default {
                 .catch((err) => {
                     let msg = err.response.data.meta_info.res_msg;
                     this.$message.warning(msgcon(msg));
+                })
+                .finally(() => {
+                    this.loading = false;
                 });
         },
     },

@@ -104,12 +104,8 @@ export default {
             }
         },
         onRefresh() {
-            // 添加延时，优化视觉体验感
             this.statusSwitch(true);
-            clearTimeout(this.timeoutId);
-            this.timeoutId = setTimeout(() => {
-                this.loadSelectOptions();
-            }, this.$config.delayTime);
+            this.loadSelectOptions();
         },
         onEditOptions(val) {
             if (this.indexId > -1) {
@@ -119,8 +115,8 @@ export default {
             this.value = this.options[val].value;
             this.options[val].edit = true;
         },
+        // 确认更新
         submit(val) {
-            // 确认更新
             this.statusSwitch(true);
             this.options[val].edit = false;
             let data = {

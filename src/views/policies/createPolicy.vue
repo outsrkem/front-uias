@@ -19,12 +19,7 @@
 
             <el-form-item label="选择服务">
                 <el-select v-model="policyForm.service" placeholder="请选择服务" @change="handleSelectService">
-                    <el-option
-                        v-for="(item, index) in initFromData.service"
-                        :key="index"
-                        :label="item.title + '(' + item.name + ')'"
-                        :value="item.id"
-                    />
+                    <el-option v-for="(item, index) in initFromData.service" :key="index" :label="item.title + '(' + item.name + ')'" :value="item.id" />
                 </el-select>
             </el-form-item>
 
@@ -71,15 +66,14 @@
         <div class="end-container end-width">
             <div style="margin-right: 20px">
                 <el-button size="small" type="" @click="onCance">取消</el-button>
-                <el-button size="small" type="primary" :disabled="isButtonDisabled" @click="onCreatePolicy" :loading="createLoading">
-                    创建策略
-                </el-button>
+                <el-button size="small" type="primary" :disabled="isButtonDisabled" @click="onCreatePolicy" :loading="createLoading"> 创建策略 </el-button>
             </div>
         </div>
     </el-card>
 </template>
 
 <script>
+import { withDelay } from "../../utils/common.js";
 import { msgcon } from "@/utils/message.js";
 import { SelectService, SelectActions, CreatePolicy } from "@/api/index.js";
 export default {
@@ -138,31 +132,21 @@ export default {
     },
     methods: {
         loadSelectService: async function () {
-            SelectService()
+            withDelay(() => SelectService())
                 .then((res) => {
                     this.initFromData.service = res.payload.items;
                 })
                 .catch(() => {});
         },
         loadSelectActions: async function (sid) {
-            SelectActions({ sid: sid }).then((res) => {
-                let ReadOnly = [];
-                let ListOnly = [];
-                let ReadWrite = [];
-                res.payload.items.map((item) => {
-                    let group = item.actionInfo.group;
-                    if (group === "ReadOnly") {
-                        let act = {
-                            id: item.id,
-                            name: item.actionInfo.name,
-                            title: item.actionInfo.title,
-                            description: item.actionInfo.description,
-                            status: item.actionInfo.status,
-                            group: item.actionInfo.group,
-                        };
-                        ReadOnly.push(act);
-                    } else {
-                        if (group === "ListOnly") {
+            withDelay(() => SelectActions({ sid: sid }))
+                .then((res) => {
+                    let ReadOnly = [];
+                    let ListOnly = [];
+                    let ReadWrite = [];
+                    res.payload.items.map((item) => {
+                        let group = item.actionInfo.group;
+                        if (group === "ReadOnly") {
                             let act = {
                                 id: item.id,
                                 name: item.actionInfo.name,
@@ -171,35 +155,51 @@ export default {
                                 status: item.actionInfo.status,
                                 group: item.actionInfo.group,
                             };
-                            ListOnly.push(act);
+                            ReadOnly.push(act);
                         } else {
-                            let act = {
-                                id: item.id,
-                                name: item.actionInfo.name,
-                                title: item.actionInfo.title,
-                                description: item.actionInfo.description,
-                                status: item.actionInfo.status,
-                                group: item.actionInfo.group,
-                            };
-                            ReadWrite.push(act);
+                            if (group === "ListOnly") {
+                                let act = {
+                                    id: item.id,
+                                    name: item.actionInfo.name,
+                                    title: item.actionInfo.title,
+                                    description: item.actionInfo.description,
+                                    status: item.actionInfo.status,
+                                    group: item.actionInfo.group,
+                                };
+                                ListOnly.push(act);
+                            } else {
+                                let act = {
+                                    id: item.id,
+                                    name: item.actionInfo.name,
+                                    title: item.actionInfo.title,
+                                    description: item.actionInfo.description,
+                                    status: item.actionInfo.status,
+                                    group: item.actionInfo.group,
+                                };
+                                ReadWrite.push(act);
+                            }
                         }
-                    }
+                    });
+                    this.actions = {
+                        ReadOnly: ReadOnly,
+                        ListOnly: ListOnly,
+                        ReadWrite: ReadWrite,
+                    };
+                })
+                .finally(() => {
+                    this.createLoading = false;
                 });
-                this.actions = {
-                    ReadOnly: ReadOnly,
-                    ListOnly: ListOnly,
-                    ReadWrite: ReadWrite,
-                };
-            });
         },
         loadCreatePolicy: function (data) {
-            CreatePolicy(data)
+            withDelay(() => CreatePolicy(data))
                 .then(() => {
                     this.$message.success(msgcon("创建成功"));
                     this.$router.push({ name: "policies" });
                 })
                 .catch(() => {
                     this.$message.error(msgcon("创建失败"));
+                })
+                .finally(() => {
                     this.createLoading = false;
                 });
         },

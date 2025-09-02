@@ -1,34 +1,16 @@
 <template>
     <div>
-        <div>
-            <div class="hint-message">
-                <el-text>
-                    <el-icon style="color: #1476ff"><WarningFilled /></el-icon>
-                    <span style="margin-left: 5px">
-                        如果访问凭据泄露，会带来数据泄露风险，且每个访问凭据仅能下载一次，为了账号安全性，建议您定期更换并妥善保存访问凭据。
-                    </span>
-                </el-text>
-            </div>
-        </div>
         <div class="my_refresh">
             <el-row>
                 <el-button size="small" type="primary" style="margin-left: 10px" @click="onOpenCreateCredential()" :disabled="buttonDisable"
                     >新增访问凭据</el-button
                 >
-                <el-text style="margin-left: 18px">您最多可以创建{{ quota }}个访问凭据。</el-text>
-            </el-row>
-            <el-row>
                 <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
+                <el-text style="margin-left: 18px">您最多可以创建{{ quota }}个访问凭据。</el-text>
             </el-row>
         </div>
         <div>
-            <el-table
-                :data="tableData"
-                style="width: 100%"
-                v-loading="loading"
-                element-loading-text="加载中"
-                element-loading-spinner="el-icon-loading"
-            >
+            <el-table :data="tableData" style="width: 100%" v-loading="loading">
                 <el-table-column prop="access" label="密钥ID">
                     <template #default="scope">
                         <span class="access-text">{{ scope.row.access }}</span>
@@ -84,8 +66,7 @@
                             maxlength="60"
                             show-word-limit
                             :autosize="{ minRows: 3, maxRows: 3 }"
-                            placeholder="请输入描述信息"
-                        />
+                            placeholder="请输入描述信息" />
                     </el-form-item>
                 </el-form>
                 <div style="display: flex; justify-content: flex-end; align-items: center">
@@ -115,8 +96,7 @@
                             maxlength="60"
                             show-word-limit
                             :autosize="{ minRows: 3, maxRows: 3 }"
-                            placeholder="凭据描述信息"
-                        />
+                            placeholder="凭据描述信息" />
                     </el-form-item>
                 </el-form>
                 <div style="display: flex; justify-content: flex-end; align-items: center">
@@ -174,6 +154,7 @@
 </template>
 
 <script>
+import { withDelay } from "../../utils/common.js";
 import { msgcon } from "@/utils/message.js";
 import { RemoveFilled, WarningFilled, SuccessFilled } from "@element-plus/icons-vue";
 import { formatTime } from "@/utils/date.js";
@@ -232,14 +213,14 @@ export default {
             return formatTime(time);
         },
         loadGetCredential: function () {
-            GetCredential({ uid: this.vdata.id })
+            this.loading = true;
+            withDelay(() => GetCredential({ uid: this.vdata.id }))
                 .then((res) => {
                     this.tableData = res.payload.items;
                     this.quota = res.payload.quota;
                     this.buttonDisable = this.quota > this.tableData.length ? false : true;
-                    this.loading = false;
                 })
-                .catch(() => {
+                .finally(() => {
                     this.loading = false;
                 });
         },
@@ -248,13 +229,13 @@ export default {
             DeleteCredential({ uid: this.vdata.id }, data)
                 .then(() => {
                     this.deleteDialogVisible = false;
-                    this.onRefresh();
                     this.$message.success(msgcon("删除成功"));
-                    this.deleteButtonLoading = false;
                 })
                 .catch((err) => {
                     let msg = err.data.metadata.message;
-                    this.$message.error(msgcon("删除成功" + msg));
+                    this.$message.error(msgcon("删除失败" + msg));
+                })
+                .finally(() => {
                     this.deleteButtonLoading = false;
                     this.onRefresh();
                 });
@@ -295,10 +276,7 @@ export default {
         },
         onRefresh() {
             this.loading = true;
-            clearTimeout(this.timeoutId);
-            this.timeoutId = setTimeout(() => {
-                this.loadGetCredential();
-            }, 350);
+            this.loadGetCredential();
         },
         onEditCredential(val) {
             this.editDialogVisible = true;

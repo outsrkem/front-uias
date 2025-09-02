@@ -129,7 +129,6 @@ export default {
             editUserInfo: {},
             userInfo: {},
             deleteUserInfo: [],
-            timeoutId: null,
             searchAccountQuery: "",
             searchUsernameQuery: "",
         };
@@ -157,6 +156,7 @@ export default {
     },
     methods: {
         loadGetAccount: async function (page_size, page) {
+            this.loading = true;
             try {
                 const params = convertToLimitOffset(page, page_size);
                 const res = await withDelay(() => GetAccount(params));
@@ -169,12 +169,16 @@ export default {
             }
         },
         loadSearchAccount: function (k, page_size = 10, page = 1) {
+            this.loading = true;
             const params = { k: k, ...convertToLimitOffset(page, page_size) };
-            SearchAccount(params).then((res) => {
-                this.tableData = res.payload.items;
-                this.pageTotal = res.payload.page_info.total;
-                this.loading = false;
-            });
+            withDelay(() => SearchAccount(params))
+                .then((res) => {
+                    this.tableData = res.payload.items;
+                    this.pageTotal = res.payload.page_info.total;
+                })
+                .finally(() => {
+                    this.loading = false;
+                });
         },
         // 编辑用户请求
         loadEditRole: function (paths, data) {
@@ -196,14 +200,11 @@ export default {
         onRefresh() {
             // 添加延时，优化视觉体验感
             this.loading = true;
-            clearTimeout(this.timeoutId);
-            this.timeoutId = setTimeout(() => {
-                if (this.searchAccountQuery === "") {
-                    this.loadGetAccount(this.pageSize, this.page);
-                } else {
-                    this.loadSearchAccount(this.searchAccountQuery, this.pageSize, this.page);
-                }
-            }, this.$config.delayTime);
+            if (this.searchAccountQuery === "") {
+                this.loadGetAccount(this.pageSize, this.page);
+            } else {
+                this.loadSearchAccount(this.searchAccountQuery, this.pageSize, this.page);
+            }
         },
         onCurrentChange(p) {
             this.page = p;
@@ -279,5 +280,32 @@ export default {
 .icon {
     display: flex;
     align-items: center;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    border: 1px solid #ddd;
+}
+
+th,
+td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
 }
 </style>

@@ -14,7 +14,7 @@
             </div>
         </template>
         <div>
-            <el-table :data="allUsers" style="width: 100%" @selection-change="handleSelectionChange">
+            <el-table :data="allUsers" style="width: 100%" @selection-change="handleSelectionChange" v-loading="loading">
                 <el-table-column type="selection" width="55" :selectable="selected" />
                 <el-table-column prop="account" label="账号名称" />
                 <el-table-column prop="username" label="用户名" />
@@ -53,6 +53,7 @@
 </template>
 
 <script>
+import { withDelay } from "../../utils/common.js";
 import Pagination from "@/components/pagination/pagination";
 import { convertToLimitOffset } from "../../utils/common.js";
 import { formatTime } from "@/utils/date.js";
@@ -63,6 +64,7 @@ export default {
     components: { Pagination },
     data() {
         return {
+            loading: false,
             allUsers: [],
             bindUser: [],
             ChoosingRole: [],
@@ -121,30 +123,42 @@ export default {
             this.loadRoleBindingUser(this.ChoosingRole, this.bindUser);
         },
         loadGetAccount: function (page_size, page) {
+            this.loading = true;
             const params = convertToLimitOffset(page, page_size);
-            GetAccount(params).then((res) => {
-                this.allUsers = res.payload.items;
-                this.pageTotal = res.payload.page_info.total;
-            });
+            withDelay(() => GetAccount(params))
+                .then((res) => {
+                    this.allUsers = res.payload.items;
+                    this.pageTotal = res.payload.page_info.total;
+                })
+                .finally(() => {
+                    this.loading = false;
+                });
         },
         loadSearchAccount: function (k, s = 10, p = 1) {
+            this.loading = true;
             const params = { k: k, p: p, s: s };
-            SearchAccount(params).then((res) => {
-                this.allUsers = res.payload.items;
-                this.pageTotal = res.payload.page_info.total;
-                this.loading = false;
-            });
+            withDelay(() => SearchAccount(params))
+                .then((res) => {
+                    this.allUsers = res.payload.items;
+                    this.pageTotal = res.payload.page_info.total;
+                })
+                .finally(() => {
+                    this.loading = false;
+                });
         },
         loadRoleBindingUser: function (rid, uid) {
             const data = { roles: rid, users: uid };
-            RoleBindingUser(data)
+            withDelay(() => RoleBindingUser(data))
                 .then(() => {
-                    this.$message.success(msgcon("添加成功 "));
+                    this.$message.success(msgcon("添加成功"));
                     this.onCance();
                 })
                 .catch((err) => {
                     let msg = err.response.data.meta_info.res_msg;
                     this.$message.warning(msgcon(msg));
+                })
+                .finally(() => {
+                    this.loading = false;
                 });
         },
     },

@@ -6,7 +6,7 @@
             </div>
         </template>
         <div>
-            <el-table :data="allRole" style="width: 100%" @selection-change="handleSelectionChange">
+            <el-table :data="allRole" style="width: 100%" @selection-change="handleSelectionChange" v-loading="loading">
                 <el-table-column type="selection" width="55" />
                 <el-table-column prop="name" label="角色名称" show-overflow-tooltip />
                 <el-table-column prop="description" label="描述" show-overflow-tooltip />
@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import { withDelay } from "../../utils/common.js";
 import Pagination from "@/components/pagination/pagination";
 import { convertToLimitOffset } from "../../utils/common.js";
 import { formatTime } from "@/utils/date.js";
@@ -39,6 +40,7 @@ export default {
     components: { Pagination },
     data() {
         return {
+            loading: false,
             allRole: [],
             bindRole: [],
             ChoosingUser: [],
@@ -81,11 +83,16 @@ export default {
             this.loadRoleBindingUser(this.bindRole, this.ChoosingUser);
         },
         loadGetRoles: function (page_size, page) {
+            this.loading = true;
             const params = convertToLimitOffset(page, page_size);
-            GetRoles(params).then((res) => {
-                this.allRole = res.payload.items;
-                this.pageTotal = res.payload.page_info.total;
-            });
+            withDelay(() => GetRoles(params))
+                .then((res) => {
+                    this.allRole = res.payload.items;
+                    this.pageTotal = res.payload.page_info.total;
+                })
+                .finally(() => {
+                    this.loading = false;
+                });
         },
         loadRoleBindingUser: function (roles, users) {
             const data = { roles: roles, users: users };

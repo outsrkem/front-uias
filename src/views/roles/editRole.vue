@@ -72,6 +72,7 @@
 </template>
 
 <script>
+import { withDelay } from "../../utils/common.js";
 import { Refresh } from "@element-plus/icons-vue";
 import { formatTime } from "@/utils/date.js";
 import { msgcon } from "@/utils/message.js";
@@ -109,14 +110,14 @@ export default {
         },
         loadSelectRoleInfo: function (role_id) {
             const paths = { rid: role_id };
-            SelectRoleInfo(paths).then((res) => {
+            withDelay(() => SelectRoleInfo(paths)).then((res) => {
                 this.rolrInfo = res.payload.role;
                 this.loading = false;
             });
         },
         loadSelectUserFromRole: function (role_id) {
             const paths = { rid: role_id };
-            SelectUserFromRole(paths)
+            withDelay(() => SelectUserFromRole(paths))
                 .then((res) => {
                     this.users = res.payload.users;
                 })
@@ -126,7 +127,7 @@ export default {
         },
         loadSelectPoliciesFromRole: function (role_id) {
             const paths = { rid: role_id };
-            SelectPoliciesFromRole(paths)
+            withDelay(() => SelectPoliciesFromRole(paths))
                 .then((res) => {
                     this.policies = res.payload.policies;
                 })
@@ -137,17 +138,14 @@ export default {
         onRefresh() {
             // 添加延时，优化视觉体验感
             this.loading = true;
-            clearTimeout(this.timeoutId);
             const role_id = this.roleId;
-            this.timeoutId = setTimeout(() => {
-                this.loadSelectRoleInfo(role_id);
-                this.loadSelectUserFromRole(role_id);
-                this.loadSelectPoliciesFromRole(role_id);
-            }, this.$config.delayTime);
+            this.loadSelectRoleInfo(role_id);
+            this.loadSelectUserFromRole(role_id);
+            this.loadSelectPoliciesFromRole(role_id);
         },
         loadUnbindRoleAndUser: function (rid, uid) {
             const data = { roles: rid, users: uid };
-            UnbindRoleAndUser(data)
+            withDelay(() => UnbindRoleAndUser(data))
                 .then(() => {
                     this.$message.success(msgcon("移除成功"));
                     this.onRefreshUserFromRole();
@@ -159,7 +157,7 @@ export default {
         // 角色和策略解绑
         loadUnbindRoleAndPolicies: function (roles, policies) {
             const data = { roles: roles, policies: policies };
-            UnbindRoleAndPolicies(data)
+            withDelay(() => UnbindRoleAndPolicies(data))
                 .then(() => {
                     this.$message.success(msgcon("移除成功"));
                     this.onRefreshPoliciesFromRole();

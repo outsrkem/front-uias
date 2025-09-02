@@ -23,8 +23,9 @@
 </template>
 
 <script>
-import { msgcon } from "@/utils/message.js";
-import { CreateRoles } from "@/api/index.js";
+import { withDelay } from "../../utils/common.js";
+import { msgcon } from "../../utils/message.js";
+import { CreateRoles } from "../../api/index.js";
 export default {
     name: "CreateRoleIndex",
     data() {
@@ -56,10 +57,10 @@ export default {
             this.$router.push({ path: "/roles" });
         },
         loadCreateRoles: function (data) {
-            CreateRoles(data)
+            withDelay(() => CreateRoles(data))
                 .then(() => {
                     this.$message.success(msgcon("创建角色成功"));
-                    this.$router.push({ path: "/roles" });
+                    this.onCountermand();
                 })
                 .catch((err) => {
                     let msg = err.data.metadata.message;
@@ -74,8 +75,5 @@ export default {
 .end-container {
     width: 100%;
     margin-left: 100px;
-    // display: flex;
-    // justify-content: flex-end;
-    // justify-content: space-between;
 }
 </style>

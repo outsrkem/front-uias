@@ -107,6 +107,7 @@ export default {
     },
     methods: {
         loadGetRoles: async function (page_size, page) {
+            this.loading = true;
             try {
                 const params = convertToLimitOffset(page, page_size);
                 // const res = await GetRoles(params);
@@ -141,12 +142,8 @@ export default {
             console.log("点击了按钮", sid);
         },
         onRefresh() {
-            // 添加延时，优化视觉体验感
             this.loading = true;
-            clearTimeout(this.timeoutId);
-            this.timeoutId = setTimeout(() => {
-                this.loadGetRoles(this.pageSize, this.page);
-            }, this.$config.delayTime);
+            this.loadGetRoles(this.pageSize, this.page);
         },
         onCurrentChange(p) {
             this.page = p;
