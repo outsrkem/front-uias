@@ -26,11 +26,7 @@
             </aside>
             <main class="admin-content">
                 <!-- 子路由出口 -->
-                <router-view v-slot="{ Component, route }">
-                    <transition name="animation" mode="out-in">
-                        <component :is="Component" :key="route.path" />
-                    </transition>
-                </router-view>
+                <router-view />
             </main>
         </div>
     </div>
@@ -168,23 +164,6 @@ export default {
     padding: 10px; /* 内边距，避免内容贴边 */
     overflow-y: auto; /* 内容超出时仅右侧出现垂直滚动条 */
     height: 100%; /* 强制占满主体区高度 */
-}
-
-/* 过度动画配置代码 */
-.animation-enter-from,
-.animation-leave-to {
-    transform: translateX(20px);
-    opacity: 0;
-}
-.animation-enter-to,
-.animation-leave-from {
-    opacity: 1;
-}
-.animation-enter-active {
-    transition: all 0.5s ease;
-}
-.animation-leave-active {
-    transition: all 0.3s cubic-bezier(1, 0.6, 0.6, 1);
 }
 
 /* 4. 修复移动端菜单宽度：避免菜单过宽导致横向滚动 */
