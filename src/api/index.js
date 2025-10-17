@@ -75,9 +75,9 @@ export const CreatePolicy = (data) => ajax("/v1/uias/policy", "POST", null, data
 export const EditPolicy = (paths, data) => ajax(`/v1/uias/policy/${paths.policyId}`, "PATCH", null, data);
 
 // 查看系统配置 /v1/uias/system/options
-export const SelectOptions = () => ajax(`/v1/uias/system/options`, "GET");
+export const SelectRules = () => ajax(`/v1/uias/system/rules`, "GET");
 // 更新系统配置 /v1/uias/system/options
-export const UpdateOptions = (data) => ajax("/v1/uias/system/options", "PATCH", null, data);
+export const UpdateRules = (data) => ajax("/v1/uias/system/rules", "PATCH", null, data);
 
 // 凭据管理
 // 查询凭据 GET /v1/uias/user/center/:user_id/credential

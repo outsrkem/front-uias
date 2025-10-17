@@ -14,7 +14,7 @@
                 </div>
             </template>
             <div style="min-height: 170px" v-loading="loading.data">
-                <div v-for="(item, index) in options" :key="index">
+                <div v-for="(item, index) in rules" :key="index">
                     <div class="title">
                         <el-text>{{ item.title }}</el-text>
                     </div>
@@ -33,12 +33,12 @@
                             <el-button link size="small" type="primary" style="margin-right: 10px" @click="onWaive(index)">取消</el-button>
                         </span>
                         <span v-if="!item.edit">
-                            <el-button link style="margin-right: 10px" @click="onEditOptions(index)">修改</el-button>
+                            <el-button link style="margin-right: 10px" @click="onEditRules(index)">修改</el-button>
                         </span>
-                        <el-tooltip effect="dark" :content="item.describes" placement="right">
-                            <el-text
-                                ><el-icon><QuestionFilled /></el-icon
-                            ></el-text>
+                        <el-tooltip effect="dark" :content="item.remark" placement="right">
+                            <el-text>
+                                <el-icon><QuestionFilled /></el-icon>
+                            </el-text>
                         </el-tooltip>
                     </div>
                 </div>
@@ -50,10 +50,10 @@
 <script>
 import { Refresh } from "@element-plus/icons-vue";
 import { msgcon } from "@/utils/message.js";
-import { SelectOptions, UpdateOptions } from "@/api/index.js";
+import { SelectRules, UpdateRules } from "@/api/index.js";
 import { withDelay } from "../../utils/common.js";
 export default {
-    name: "OptionsIndex",
+    name: "RulesIndex",
     setup() {
         return {
             Refresh,
@@ -61,7 +61,7 @@ export default {
     },
     data() {
         return {
-            options: [], // Options
+            rules: [], // rules
             value: "", // 修改后的值，
             indexId: -1, // 保存当前编辑的索引，-1,代表没有赋值
             loading: {
@@ -71,19 +71,19 @@ export default {
         };
     },
     methods: {
-        loadSelectOptions: function () {
-            withDelay(() => SelectOptions())
+        loadSelectRules: function () {
+            withDelay(() => SelectRules())
                 .then((res) => {
-                    this.options = res.payload.system.options;
+                    this.rules = res.payload.system.rules;
                     this.statusSwitch(false);
                 })
                 .catch(() => {
                     this.statusSwitch(false);
                 });
         },
-        loadUpdateOptions: function (data) {
+        loadUpdateRules: function (data) {
             // 更新请求
-            UpdateOptions(data)
+            UpdateRules(data)
                 .then(() => {
                     this.$message.success(msgcon("更新成功"));
                     this.onRefresh();
@@ -105,38 +105,38 @@ export default {
         },
         onRefresh() {
             this.statusSwitch(true);
-            this.loadSelectOptions();
+            this.loadSelectRules();
         },
-        onEditOptions(val) {
+        onEditRules(val) {
             if (this.indexId > -1) {
-                this.options[this.indexId].edit = false;
+                this.rules[this.indexId].edit = false;
             }
             this.indexId = val;
-            this.value = this.options[val].value;
-            this.options[val].edit = true;
+            this.value = this.rules[val].value;
+            this.rules[val].edit = true;
         },
         // 确认更新
         submit(val) {
             this.statusSwitch(true);
-            this.options[val].edit = false;
+            this.rules[val].edit = false;
             let data = {
-                options: {
-                    name: this.options[val].name,
+                rules: {
+                    name: this.rules[val].name,
                     value: this.value,
                 },
             };
-            this.loadUpdateOptions(data);
+            this.loadUpdateRules(data);
         },
         setDefautValue(val) {
-            let value = this.options[val]["default-value"];
+            let value = this.rules[val]["default-value"];
             this.value = value;
         },
         onWaive(val) {
-            this.options[val].edit = false;
+            this.rules[val].edit = false;
         },
     },
     created() {
-        // this.loadSelectOptions();
+        // this.loadSelectRules();
         this.onRefresh();
     },
 };
