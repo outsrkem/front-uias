@@ -10,30 +10,19 @@
                 </el-row>
             </div>
         </template>
-        <el-descriptions :column="2">
-            <el-descriptions-item width="50%" label="策略名称"
-                ><el-tag>{{ policyInfo.name }}</el-tag></el-descriptions-item
-            >
-            <el-descriptions-item label="策略ID"
-                ><el-tag>{{ policyInfo.id }}</el-tag></el-descriptions-item
-            >
-            <el-descriptions-item label="描述"
-                ><el-tag>{{ policyInfo.description }}</el-tag></el-descriptions-item
-            >
-            <el-descriptions-item label="创建时间"
-                ><el-tag>{{ formatDate(policyInfo.create_time) }}</el-tag></el-descriptions-item
-            >
+        <el-descriptions :column="2" v-loading="loading">
+            <el-descriptions-item width="50%" label="策略名称">{{ policyInfo.name }}</el-descriptions-item>
+            <el-descriptions-item label="策略ID">{{ policyInfo.id }}</el-descriptions-item>
+            <el-descriptions-item label="描述">{{ policyInfo.description }}</el-descriptions-item>
+            <el-descriptions-item label="创建时间">{{ formatDate(policyInfo.create_time) }}</el-descriptions-item>
         </el-descriptions>
     </el-card>
     <el-card v-loading="loading">
         <el-tabs v-model="activeName" @tab-change="tabChange">
             <el-tab-pane label="策略内容" name="first">
                 <div style="width: auto">
-                    <div v-for="(item, index) in Statement" :key="index">
-                        <el-tag>{{ item.Effect }}</el-tag>
-                        <span style="margin-left: 5px" v-for="(act, index) in item.Action" :key="index">
-                            <el-tag type="success">{{ act }}</el-tag>
-                        </span>
+                    <div class="code-container">
+                        <pre class="codepre">{{ policyInfo.permit }}</pre>
                     </div>
                 </div>
             </el-tab-pane>
@@ -55,6 +44,7 @@
 <script>
 import { Refresh } from "@element-plus/icons-vue";
 import { formatTime } from "@/utils/date.js";
+import { withDelay } from "../../utils/common.js";
 import { SelectPolicyInfo, SelectRolesFromPolicy } from "@/api/index.js";
 export default {
     name: "PolicyInfoIndex",
@@ -80,7 +70,7 @@ export default {
         loadGetPoliciesInfo: async function (policy_id) {
             try {
                 const paths = { pid: policy_id };
-                const res = await SelectPolicyInfo(paths);
+                const res = await withDelay(() => SelectPolicyInfo(paths));
                 this.policyInfo = res.payload.policy;
                 this.Statement = res.payload.policy.permit.Statement;
                 this.loading = false;
@@ -91,7 +81,7 @@ export default {
         },
         loadSelectRolesFromPolicy: function (policy_id) {
             const paths = { policy_id: policy_id };
-            SelectRolesFromPolicy(paths)
+            withDelay(() => SelectRolesFromPolicy(paths))
                 .then((res) => {
                     this.roles = res.payload.roles;
                 })
@@ -110,11 +100,8 @@ export default {
         onRefresh() {
             const policy_id = this.policyId;
             this.loading = true;
-            clearTimeout(this.timeoutId);
-            this.timeoutId = setTimeout(() => {
-                this.loadGetPoliciesInfo(policy_id);
-                this.loadSelectRolesFromPolicy(policy_id);
-            }, this.$config.delayTime);
+            this.loadGetPoliciesInfo(policy_id);
+            this.loadSelectRolesFromPolicy(policy_id);
         },
     },
     created() {
@@ -124,4 +111,37 @@ export default {
 };
 </script>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+.code-container {
+    position: relative;
+    max-height: 600px;
+    overflow: auto;
+    margin-top: 10px;
+    border: 1px solid #ebeef5;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #f5f5f5;
+}
+.codepre {
+    box-sizing: border-box;
+    /*以下样式是自动换行代码*/
+    white-space: pre-wrap; /* css-3 */
+    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+    white-space: -pre-wrap; /* Opera 4-6 */
+    white-space: -o-pre-wrap; /* Opera 7 */
+    word-wrap: break-word; /* Internet Explorer 5.5+ */
+    /*以上样式是自动换行代码，需要的加上，不需要的删除*/
+    overflow: auto;
+    font-family: "Menlo", "Monaco", "Consolas", "Courier New", monospace;
+    font-size: 13px;
+    padding: 1px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    line-height: 1.2;
+    color: #333333;
+    word-break: break-all;
+    word-wrap: break-word;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+}
+</style>
