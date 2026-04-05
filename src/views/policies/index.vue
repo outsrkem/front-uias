@@ -12,29 +12,27 @@
                     </el-row>
                 </div>
             </template>
-            <!--内容开始-->
-            <el-table :data="tableData" style="width: 100%" v-loading="loading">
-                <el-table-column label="策略名称" show-overflow-tooltip>
-                    <template #default="scope">
-                        <el-button link type="primary" @click="onPolicyInfo(scope.row.id)">{{ scope.row.name }}</el-button>
-                    </template>
-                </el-table-column>
+            <!-- 替换为 MyTable 组件 -->
+            <MyTable :data="tableData" :columns="columns" v-loading="loading">
+                <!-- 策略名称 插槽 -->
+                <template #name="{ row }">
+                    <el-button link type="primary" @click="onPolicyInfo(row.id)">{{ row.name }}</el-button>
+                </template>
+                <!-- 类型 插槽 -->
+                <template #type="{ row }">
+                    <div v-if="row.system"><span>系统策略</span></div>
+                    <div v-else><span>自定义策略</span></div>
+                </template>
+                <template #update_time="{ row }">
+                    {{ formatDate(row.update_time) }}
+                </template>
+                <!-- 操作 插槽 -->
+                <template #action="{ row }">
+                    <el-button link type="primary" :disabled="!row.editable" @click="onSelectService(row)">编辑</el-button>
+                    <el-button link type="primary" :disabled="!row.deletable" @click="onDeletePolicies(row)">删除</el-button>
+                </template>
+            </MyTable>
 
-                <el-table-column label="类型">
-                    <template #default="scope">
-                        <div v-if="scope.row.system"><span>系统策略</span></div>
-                        <div v-else><span>自定义策略</span></div>
-                    </template>
-                </el-table-column>
-
-                <el-table-column prop="description" label="描述" show-overflow-tooltip />
-                <el-table-column label="操作">
-                    <template #default="scope">
-                        <el-button link type="primary" :disabled="!scope.row.editable" @click="onSelectService(scope.row)">编辑</el-button>
-                        <el-button link type="primary" :disabled="!scope.row.deletable" @click="onDeletePolicies(scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
             <div class="pagination">
                 <div>
                     <!--分页开始-->
@@ -48,6 +46,7 @@
 </template>
 
 <script>
+import MyTable from "../../components/MyTable/MyTable.vue";
 import { Refresh } from "@element-plus/icons-vue";
 import Pagination from "@/components/pagination/pagination";
 import DeletePolicy from "./deletepolicy.vue";
@@ -56,7 +55,11 @@ import { withDelay, convertToLimitOffset } from "../../utils/common.js";
 import { GetPolicies } from "@/api/index.js";
 export default {
     name: "PoliciesIndex",
-    components: { Pagination, DeletePolicy },
+    components: {
+        MyTable,
+        Pagination,
+        DeletePolicy,
+    },
     setup() {
         return {
             Refresh,
@@ -72,6 +75,14 @@ export default {
             delPolicy: {
                 data: [],
             },
+            // MyTable 列配置
+            columns: [
+                { label: "策略名称", slot: "name" },
+                { label: "类型", slot: "type" },
+                { label: "描述", prop: "description" },
+                { label: "更新时间", slot: "update_time" },
+                { label: "操作", slot: "action" },
+            ],
         };
     },
     methods: {
@@ -130,14 +141,4 @@ export default {
 };
 </script>
 
-<style scoped lang="less">
-.my_refresh {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.icon {
-    display: flex;
-    align-items: center;
-}
-</style>
+<style scoped lang="less"></style>

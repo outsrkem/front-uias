@@ -36,19 +36,16 @@
                 </el-table-column>
             </el-table>
         </div>
-        <template #footer>
-            <div class="end-container">
-                <div>
-                    <!--分页开始-->
-                    <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
-                    <!--分页结束-->
-                </div>
-                <div>
-                    <el-button size="small" type="primary" @click="onCance">取消</el-button>
-                    <el-button size="small" type="primary" @click="onSubmit">确定</el-button>
-                </div>
+
+        <div class="end-container">
+            <div>
+                <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
             </div>
-        </template>
+            <div>
+                <el-button size="small" type="primary" @click="onCance">取消</el-button>
+                <el-button size="small" type="primary" @click="onSubmit">确定</el-button>
+            </div>
+        </div>
     </el-card>
 </template>
 

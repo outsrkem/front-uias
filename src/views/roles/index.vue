@@ -12,31 +12,25 @@
                     </el-row>
                 </div>
             </template>
-            <!--内容开始-->
-            <el-table :data="tableData" style="width: 100%" v-loading="loading">
-                <el-table-column label="角色名称" show-overflow-tooltip>
-                    <template #default="scope">
-                        <el-button link type="primary" @click="onEditRole(scope.row.id)">{{ scope.row.name }}</el-button>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="users" label="用户数" show-overflow-tooltip />
-                <el-table-column prop="policies" label="策略数" show-overflow-tooltip />
-                <el-table-column label="创建时间">
-                    <template #default="scope">{{ formatDate(scope.row.create_time) }}</template>
-                </el-table-column>
-                <el-table-column label="操作">
-                    <template #default="scope">
-                        <el-button link type="primary" :disabled="!scope.row.editable" @click="onEditRoleInfo(scope.row)">编辑</el-button>
-                        <el-button link type="primary" :disabled="!scope.row.deletable" @click="onDeleteRole(scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
+            <!-- 替换为 MyTable 组件 -->
+            <MyTable :data="tableData" :columns="columns" v-loading="loading">
+                <!-- 角色名称 插槽 -->
+                <template #name="{ row }">
+                    <el-button link type="primary" @click="onEditRole(row.id)">{{ row.name }}</el-button>
+                </template>
+                <!-- 创建时间 插槽 -->
+                <template #create_time="{ row }">
+                    {{ formatDate(row.create_time) }}
+                </template>
+                <!-- 操作 插槽 -->
+                <template #action="{ row }">
+                    <el-button link type="primary" :disabled="!row.editable" @click="onEditRoleInfo(row)">编辑</el-button>
+                    <el-button link type="primary" :disabled="!row.deletable" @click="onDeleteRole(row)">删除</el-button>
+                </template>
+            </MyTable>
+
             <div class="pagination">
-                <div>
-                    <!--分页开始-->
-                    <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
-                    <!--分页结束-->
-                </div>
+                <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
             </div>
         </el-card>
         <!-- 修改角色详情开始 -->
@@ -65,6 +59,7 @@
 </template>
 
 <script>
+import MyTable from "../../components/MyTable/MyTable.vue";
 import { Refresh } from "@element-plus/icons-vue";
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
@@ -75,7 +70,11 @@ import { GetRoles, EditRole } from "@/api/index.js";
 
 export default {
     name: "RolesIndex",
-    components: { Pagination, DeleteRole },
+    components: {
+        MyTable,
+        Pagination,
+        DeleteRole,
+    },
     setup() {
         return {
             Refresh,
@@ -103,6 +102,14 @@ export default {
             delRole: {
                 data: [],
             },
+            // MyTable 列配置
+            columns: [
+                { label: "角色名称", slot: "name" },
+                { label: "用户数", prop: "users" },
+                { label: "策略数", prop: "policies" },
+                { label: "创建时间", slot: "create_time" },
+                { label: "操作", slot: "action" },
+            ],
         };
     },
     methods: {

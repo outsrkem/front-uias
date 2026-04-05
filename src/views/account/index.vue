@@ -20,40 +20,38 @@
                     </el-row>
                 </div>
             </template>
-            <!--内容开始-->
-            <el-table :data="filteredAccount" style="width: 100%" v-loading="loading">
-                <el-table-column label="账号名称" show-overflow-tooltip>
-                    <template #default="scope">
-                        <el-button link type="primary" @click="onSettingsUser(scope.row.id)">{{ scope.row.account }}</el-button>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="username" label="用户名" show-overflow-tooltip />
-                <el-table-column prop="description" label="描述" show-overflow-tooltip />
-                <el-table-column label="状态">
-                    <template #default="scope">
-                        <div class="icon" v-if="scope.row.enabled">
-                            <el-icon class="table-icon-line table-icon-enabled"><SuccessFilled /></el-icon>
-                            <span>启用</span>
-                        </div>
-                        <div class="icon" v-else>
-                            <el-icon class="table-icon-line table-icon-disabled"><RemoveFilled /></el-icon>
-                            <span>禁用</span>
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column label="最近登录时间" show-overflow-tooltip>
-                    <template #default="scope">{{ formatDate(scope.row.last_login_at) }}</template>
-                </el-table-column>
-                <el-table-column label="创建时间" show-overflow-tooltip>
-                    <template #default="scope">{{ formatDate(scope.row.create_time) }}</template>
-                </el-table-column>
-                <el-table-column label="操作">
-                    <template #default="scope">
-                        <el-button link type="primary" :disabled="!scope.row.editable" @click="onEditUserInfo(scope.row)">编辑</el-button>
-                        <el-button link type="primary" :disabled="!scope.row.deletable" @click="onDeleteAccount(scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
+            <!-- 替换为 MyTable 组件 -->
+            <MyTable :data="filteredAccount" :columns="columns" v-loading="loading">
+                <!-- 账号名称 插槽 -->
+                <template #account="{ row }">
+                    <el-button link type="primary" @click="onSettingsUser(row.id)">{{ row.account }}</el-button>
+                </template>
+                <!-- 状态 插槽 -->
+                <template #status="{ row }">
+                    <div class="icon" v-if="row.enabled">
+                        <el-icon class="table-icon-line table-icon-enabled"><SuccessFilled /></el-icon>
+                        <span>启用</span>
+                    </div>
+                    <div class="icon" v-else>
+                        <el-icon class="table-icon-line table-icon-disabled"><RemoveFilled /></el-icon>
+                        <span>禁用</span>
+                    </div>
+                </template>
+                <!-- 最近登录时间 插槽 -->
+                <template #last_login_at="{ row }">
+                    {{ formatDate(row.last_login_at) }}
+                </template>
+                <!-- 创建时间 插槽 -->
+                <template #create_time="{ row }">
+                    {{ formatDate(row.create_time) }}
+                </template>
+                <!-- 操作 插槽 -->
+                <template #action="{ row }">
+                    <el-button link type="primary" :disabled="!row.editable" @click="onEditUserInfo(row)">编辑</el-button>
+                    <el-button link type="primary" :disabled="!row.deletable" @click="onDeleteAccount(row)">删除</el-button>
+                </template>
+            </MyTable>
+
             <div class="pagination">
                 <div>
                     <!--分页开始-->
@@ -99,7 +97,9 @@
 </template>
 
 <script>
+import MyTable from "../../components/MyTable/MyTable.vue";
 import { Refresh } from "@element-plus/icons-vue";
+import { SuccessFilled, RemoveFilled } from "@element-plus/icons-vue";
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
 import { withDelay, convertToLimitOffset } from "../../utils/common.js";
@@ -109,12 +109,15 @@ import { GetAccount, EditAccount, SearchAccount } from "@/api/index.js";
 export default {
     name: "AccountIndex",
     components: {
+        MyTable,
         Pagination,
         DeleteUser,
     },
     setup() {
         return {
             Refresh,
+            SuccessFilled,
+            RemoveFilled,
         };
     },
     data() {
@@ -131,6 +134,16 @@ export default {
             deleteUserInfo: [],
             searchAccountQuery: "",
             searchUsernameQuery: "",
+            // MyTable 列配置
+            columns: [
+                { label: "账号名称", slot: "account" },
+                { label: "用户名", prop: "username" },
+                { label: "描述", prop: "description" },
+                { label: "状态", slot: "status" },
+                { label: "最近登录时间", slot: "last_login_at" },
+                { label: "创建时间", slot: "create_time" },
+                { label: "操作", slot: "action" },
+            ],
         };
     },
     computed: {
@@ -276,36 +289,4 @@ export default {
 };
 </script>
 
-<style scoped lang="less">
-.icon {
-    display: flex;
-    align-items: center;
-}
-table {
-    border-collapse: collapse;
-    width: 100%;
-    max-width: 800px;
-    margin: 20px auto;
-    border: 1px solid #ddd;
-}
-
-th,
-td {
-    border: 1px solid #ddd;
-    padding: 12px;
-    text-align: left;
-}
-
-th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-}
-
-tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-tr:hover {
-    background-color: #f1f1f1;
-}
-</style>
+<style scoped lang="less"></style>

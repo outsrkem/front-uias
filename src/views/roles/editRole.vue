@@ -28,7 +28,13 @@
                 <div>
                     <el-table :data="users" @selection-change="handleSelectionChangeUser">
                         <el-table-column type="selection" width="55" />
-                        <el-table-column prop="account" label="账号名称" />
+                        <el-table-column prop="account" label="账号名称">
+                            <template #default="scope">
+                                <el-link type="primary" :href="`${routerPrefix}/#/users/settings/${scope.row.id}`" target="_blank">
+                                    {{ scope.row.account }}
+                                </el-link>
+                            </template>
+                        </el-table-column>
                         <el-table-column prop="username" label="用户名" />
                         <el-table-column prop="description" label="描述" show-overflow-tooltip />
                         <el-table-column label="操作">
@@ -48,7 +54,13 @@
                 <div>
                     <el-table :data="policies" @selection-change="handleSelectionChangePolicies">
                         <el-table-column type="selection" width="55" :selectable="selected" />
-                        <el-table-column prop="name" label="策略名称" />
+                        <el-table-column prop="name" label="策略名称">
+                            <template #default="scope">
+                                <el-link type="primary" :href="`${routerPrefix}/#/policies/${scope.row.id}`" target="_blank">
+                                    {{ scope.row.name }}
+                                </el-link>
+                            </template>
+                        </el-table-column>
                         <el-table-column prop="description" label="描述" show-overflow-tooltip />
                         <el-table-column label="操作">
                             <template #default="scope">
@@ -98,6 +110,7 @@ export default {
             ChoosingPolicies: [],
             removeUserMore: true, // 批量移除用户的按钮状态，禁用/启用
             loading: true,
+            routerPrefix: "/uias",
         };
     },
     methods: {
