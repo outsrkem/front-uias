@@ -1,10 +1,22 @@
 const { defineConfig } = require("@vue/cli-service");
+
 module.exports = defineConfig({
+    transpileDependencies: true,
+    productionSourceMap: false, // 关闭 sourcemap，减小体积
+    publicPath: "/uias/",
+
+    // 这里配置关闭webpack体积警告
     configureWebpack: {
         devtool: false,
     },
-    transpileDependencies: true,
-    publicPath: "/uias/",
+
+    // 自动拆包，让首屏更快、文件更小
+    chainWebpack: (config) => {
+        config.optimization.splitChunks({
+            chunks: "all",
+        });
+    },
+
     devServer: {
         proxy: {
             "/": {

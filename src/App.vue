@@ -1,35 +1,47 @@
 <template>
-    <div id="app">
-      <!-- 路由出口 -->
-      <router-view/>
+    <div>
+        <router-view />
     </div>
 </template>
 
 <script>
-    export default {
-        name: 'App',
-    }
-    //表格问题（防抖函数）
-    //element的表格页面宽度变化问题 （防抖函数）
-    const debounce = (fn, delay) => {
-        let timer = null;
-        return function() {
-            let context = this;
-            let args = arguments;
-            clearTimeout(timer);
-            timer = setTimeout(function() {
-                fn.apply(context, args);
-            }, delay);
-        }
-    }
-    const _ResizeObserver = window.ResizeObserver;
-    window.ResizeObserver = class ResizeObserver extends _ResizeObserver {
+/**
+ * Debounce function to optimize Element UI table layout jitter on window resize
+ * @param {Function} fn - The function to debounce
+ * @param {number} delay - Delay time in milliseconds
+ * @returns {Function} Debounced function
+ */
+const debounce = (fn, delay = 16) => {
+    let timer = null;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            fn.apply(this, args);
+        }, delay);
+    };
+};
+
+/**
+ * Globally rewrite ResizeObserver to fix frequent layout updates
+ * which cause Element table width flickering issues
+ */
+(function rewriteResizeObserver() {
+    // Prevent duplicate rewriting
+    if (window.ResizeObserver.name === "DebouncedResizeObserver") return;
+
+    const OriginalResizeObserver = window.ResizeObserver;
+
+    window.ResizeObserver = class DebouncedResizeObserver extends OriginalResizeObserver {
         constructor(callback) {
-            callback = debounce(callback, 16);
-            super(callback);
+            // Add debounce to the ResizeObserver callback
+            super(debounce(callback, 16));
         }
-    }
+    };
+})();
+
+export default {
+    name: "App",
+};
 </script>
 
-<style>
-</style>
+<style scoped></style>

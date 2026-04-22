@@ -7,6 +7,8 @@ import "element-plus/dist/index.css";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import * as ElementPlusIconsVue from "@element-plus/icons-vue";
 
+// 加载normalize
+import "./styles/normalize.css";
 // 加载全局样式文件
 import "./styles/index.less";
 
