@@ -12,17 +12,13 @@
                     </el-row>
                 </div>
             </template>
-            <!-- 替换为 MyTable 组件 -->
             <MyTable :data="tableData" :columns="columns" v-loading="loading">
-                <!-- 角色名称 插槽 -->
                 <template #name="{ row }">
                     <el-button link type="primary" @click="onEditRole(row.id)">{{ row.name }}</el-button>
                 </template>
-                <!-- 创建时间 插槽 -->
                 <template #create_time="{ row }">
                     {{ formatDate(row.create_time) }}
                 </template>
-                <!-- 操作 插槽 -->
                 <template #action="{ row }">
                     <el-button link type="primary" :disabled="!row.editable" @click="onEditRoleInfo(row)">编辑</el-button>
                     <el-button link type="primary" :disabled="!row.deletable" @click="onDeleteRole(row)">删除</el-button>
@@ -59,14 +55,14 @@
 </template>
 
 <script>
-import MyTable from "../../components/MyTable/MyTable.vue";
 import { Refresh } from "@element-plus/icons-vue";
-import Pagination from "@/components/pagination/pagination";
-import { formatTime } from "@/utils/date.js";
-import { withDelay, convertToLimitOffset } from "../../utils/common.js";
-import { msgcon } from "@/utils/message.js";
+import MyTable from "../../components/MyTable/MyTable.vue";
+import Pagination from "../../components/pagination/pagination";
 import DeleteRole from "./deleteRole.vue";
-import { GetRoles, EditRole } from "@/api/index.js";
+import { formatTime } from "../../utils/date.js";
+import { withDelay, convertToLimitOffset } from "../../utils/common.js";
+import { msgcon } from "../../utils/message.js";
+import { GetRoles, EditRole } from "../../api/index.js";
 
 export default {
     name: "RolesIndex",
@@ -117,7 +113,6 @@ export default {
             this.loading = true;
             try {
                 const params = convertToLimitOffset(page, page_size);
-                // const res = await GetRoles(params);
                 const res = await withDelay(() => GetRoles(params));
                 this.tableData = res.payload.items;
                 this.loading = false;
@@ -183,7 +178,6 @@ export default {
         onSubmitEditRoleInfo() {
             const paths = { role_id: this.editRoleId };
             let data = {
-                // role_id: this.editRoleId,
                 role: this.roleInfo,
             };
             this.$refs["role-from"].validate((valid) => {
@@ -195,20 +189,7 @@ export default {
         },
     },
     created() {
-        // this.loadGetRoles(this.pageSize, this.page);
         this.onRefresh();
     },
 };
 </script>
-
-<style scoped lang="less">
-.my_refresh {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.icon {
-    display: flex;
-    align-items: center;
-}
-</style>

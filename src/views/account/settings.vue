@@ -21,16 +21,16 @@
             <el-descriptions-item label="状态">
                 <el-text v-if="basicInfo.enabled">
                     <el-icon class="table-icon-line table-icon-enabled"><SuccessFilled /></el-icon>
-                    启用
+                    <span>启用</span>
                 </el-text>
                 <el-text v-else>
                     <el-icon class="table-icon-line table-icon-disabled"><RemoveFilled /></el-icon>
-                    禁用
+                    <span> 禁用</span>
                 </el-text>
             </el-descriptions-item>
             <el-descriptions-item label="用户名">{{ basicInfo.username }}</el-descriptions-item>
             <el-descriptions-item label="创建时间">{{ formatDate(basicInfo.create_time) }}</el-descriptions-item>
-            <el-descriptions-item label="描述">{{ basicInfo.description }}</el-descriptions-item>
+            <el-descriptions-item label="描述">{{ basicInfo.description || "--" }}</el-descriptions-item>
         </el-descriptions>
     </el-card>
 

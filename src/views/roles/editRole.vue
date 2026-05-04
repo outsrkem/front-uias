@@ -48,7 +48,7 @@
             <el-tab-pane label="策略管理" name="second">
                 <div>
                     <el-button size="small" type="primary" :disabled="!rolrInfo.editable" @click="onRoleBindPolices">添加策略</el-button>
-                    <el-button size="small" type="primary" :disabled="!rolrInfo.editable" @click="onUnbindPoliciesMore">移除策略</el-button>
+                    <el-button size="small" type="primary" :disabled="removePolicyMore" @click="onUnbindPoliciesMore">移除策略</el-button>
                     <el-button size="small" type="primary">刷新</el-button>
                 </div>
                 <div>
@@ -84,11 +84,11 @@
 </template>
 
 <script>
-import { withDelay } from "../../utils/common.js";
 import { Refresh } from "@element-plus/icons-vue";
 import { formatTime } from "@/utils/date.js";
 import { msgcon } from "@/utils/message.js";
-import { SelectRoleInfo, SelectUserFromRole, SelectPoliciesFromRole, UnbindRoleAndUser, UnbindRoleAndPolicies } from "@/api/index.js";
+import { withDelay } from "../../utils/common.js";
+import { SelectRoleInfo, SelectUserFromRole, SelectPoliciesFromRole, UnbindRoleAndUser, UnbindRoleAndPolicies } from "../../api/index.js";
 
 export default {
     name: "EditRoleIndex",
@@ -108,7 +108,8 @@ export default {
             dialogFormVisible: false,
             ChoosingUser: [],
             ChoosingPolicies: [],
-            removeUserMore: true, // 批量移除用户的按钮状态，禁用/启用
+            removeUserMore: true, // 批量移除用户的按钮状态,禁用/启用
+            removePolicyMore: true, // 控制策略按钮禁用,禁用/启用
             loading: true,
             routerPrefix: "/uias",
         };
@@ -121,68 +122,64 @@ export default {
         formatDate(time) {
             return formatTime(time);
         },
-        loadSelectRoleInfo: function (role_id) {
+        async loadSelectRoleInfo(role_id) {
             const paths = { rid: role_id };
-            withDelay(() => SelectRoleInfo(paths)).then((res) => {
-                this.rolrInfo = res.payload.role;
+            const res = await withDelay(() => SelectRoleInfo(paths));
+            this.rolrInfo = res.payload.role;
+        },
+        async loadSelectUserFromRole(role_id) {
+            const paths = { rid: role_id };
+            try {
+                const res = await withDelay(() => SelectUserFromRole(paths));
+                this.users = res.payload.users;
+            } catch {
+                this.users = [];
+            }
+        },
+        async loadSelectPoliciesFromRole(role_id) {
+            const paths = { rid: role_id };
+            try {
+                const res = await withDelay(() => SelectPoliciesFromRole(paths));
+                this.policies = res.payload.policies;
+            } catch {
+                this.policies = [];
+            }
+        },
+        onRefresh() {
+            this.loading = true;
+            const role_id = this.roleId;
+            Promise.all([this.loadSelectRoleInfo(role_id), this.loadSelectUserFromRole(role_id), this.loadSelectPoliciesFromRole(role_id)]).finally(() => {
                 this.loading = false;
             });
         },
-        loadSelectUserFromRole: function (role_id) {
-            const paths = { rid: role_id };
-            withDelay(() => SelectUserFromRole(paths))
-                .then((res) => {
-                    this.users = res.payload.users;
-                })
-                .catch(() => {
-                    this.users = [];
-                });
-        },
-        loadSelectPoliciesFromRole: function (role_id) {
-            const paths = { rid: role_id };
-            withDelay(() => SelectPoliciesFromRole(paths))
-                .then((res) => {
-                    this.policies = res.payload.policies;
-                })
-                .catch(() => {
-                    this.policies = [];
-                });
-        },
-        onRefresh() {
-            // 添加延时，优化视觉体验感
-            this.loading = true;
-            const role_id = this.roleId;
-            this.loadSelectRoleInfo(role_id);
-            this.loadSelectUserFromRole(role_id);
-            this.loadSelectPoliciesFromRole(role_id);
-        },
-        loadUnbindRoleAndUser: function (rid, uid) {
+        async loadUnbindRoleAndUser(rid, uid) {
             const data = { roles: rid, users: uid };
-            withDelay(() => UnbindRoleAndUser(data))
-                .then(() => {
-                    this.$message.success(msgcon("移除成功"));
-                    this.onRefreshUserFromRole();
-                })
-                .catch((err) => {
-                    this.$message.warning(msgcon(err));
-                });
+            try {
+                await withDelay(() => UnbindRoleAndUser(data));
+                this.$message.success(msgcon("移除成功"));
+                this.onRefreshUserFromRole();
+            } catch (err) {
+                this.$message.warning(msgcon(err));
+            }
         },
         // 角色和策略解绑
-        loadUnbindRoleAndPolicies: function (roles, policies) {
+        async loadUnbindRoleAndPolicies(roles, policies) {
             const data = { roles: roles, policies: policies };
-            withDelay(() => UnbindRoleAndPolicies(data))
-                .then(() => {
-                    this.$message.success(msgcon("移除成功"));
-                    this.onRefreshPoliciesFromRole();
-                })
-                .catch((err) => {
-                    this.$message.warning(msgcon(err));
-                });
+            try {
+                await withDelay(() => UnbindRoleAndPolicies(data));
+                this.$message.success(msgcon("移除成功"));
+                this.onRefreshPoliciesFromRole();
+            } catch (err) {
+                this.$message.warning(msgcon(err));
+            }
         },
         // 角色和用户解绑(单个)
         onUnbindRoleAndUser(user_id) {
+            this.loading = true;
             const role_id = this.$route.query.rid;
-            this.loadUnbindRoleAndUser(role_id.split(), user_id.split());
+            this.loadUnbindRoleAndUser(role_id.split(), user_id.split()).finally(() => {
+                this.loading = false;
+            });
         },
         // 角色和用户解绑(批量)
         onUnbindUserMore() {
@@ -191,12 +188,18 @@ export default {
                 this.$message.warning(msgcon("没有选择要移除的用户"));
                 return;
             }
-            this.loadUnbindRoleAndUser(role_id.split(), this.ChoosingUser);
+            this.loading = true;
+            this.loadUnbindRoleAndUser(role_id.split(), this.ChoosingUser).finally(() => {
+                this.loading = false;
+            });
         },
         // 角色和策略解绑(单个)
         onUnbindPolicies(policy_id) {
+            this.loading = true;
             const role_id = this.$route.query.rid;
-            this.loadUnbindRoleAndPolicies(role_id.split(), policy_id.split());
+            this.loadUnbindRoleAndPolicies(role_id.split(), policy_id.split()).finally(() => {
+                this.loading = false;
+            });
         },
         // 角色和策略解绑(批量)
         onUnbindPoliciesMore() {
@@ -205,7 +208,10 @@ export default {
                 this.$message.warning(msgcon("没有选择要移除的策略"));
                 return;
             }
-            this.loadUnbindRoleAndPolicies(role_id.split(), this.ChoosingPolicies);
+            this.loading = true;
+            this.loadUnbindRoleAndPolicies(role_id.split(), this.ChoosingPolicies).finally(() => {
+                this.loading = false;
+            });
         },
         // 刷新角色绑定的策略
         onRefreshPoliciesFromRole() {
@@ -234,24 +240,12 @@ export default {
             this.$router.push({ query: { ...this.$route.query, pane: val } });
         },
         handleSelectionChangeUser(val) {
-            let s = [];
-            val.map((item) => {
-                s.push(item.id);
-            });
-            if (s.length != 0) {
-                this.removeUserMore = false;
-            } else {
-                this.removeUserMore = true;
-            }
-            this.ChoosingUser = s;
+            this.ChoosingUser = val.map((item) => item.id);
+            this.removeUserMore = this.ChoosingUser.length === 0;
         },
         handleSelectionChangePolicies(val) {
-            let s = [];
-            val.map((item) => {
-                s.push(item.id);
-            });
-            console.log("====");
-            this.ChoosingPolicies = s;
+            this.ChoosingPolicies = val.map((item) => item.id);
+            this.removePolicyMore = this.ChoosingPolicies.length === 0;
         },
     },
     created() {
@@ -264,5 +258,3 @@ export default {
     },
 };
 </script>
-
-<style scoped lang="less"></style>
