@@ -17,7 +17,7 @@
                                 <el-table :data="accountData">
                                     <el-table-column label="账号名称">
                                         <template #default="scope">
-                                            <el-form-item :prop="scope.$index + '.account'" :rules="fromRules.account">
+                                            <el-form-item :prop="`${scope.$index}.account`" :rules="fromRules.account">
                                                 <el-input
                                                     v-model="accountData[scope.$index].account"
                                                     autocomplete="off"
@@ -27,7 +27,7 @@
                                     </el-table-column>
                                     <el-table-column label="用户名">
                                         <template #default="scope">
-                                            <el-form-item :prop="scope.$index + '.username'" :rules="fromRules.username">
+                                            <el-form-item :prop="`${scope.$index}.username`" :rules="fromRules.username">
                                                 <el-input
                                                     v-model="accountData[scope.$index].username"
                                                     autocomplete="off"
@@ -37,7 +37,7 @@
                                     </el-table-column>
                                     <el-table-column label="邮件地址">
                                         <template #default="scope">
-                                            <el-form-item :prop="scope.$index + '.email'" :rules="fromRules.email">
+                                            <el-form-item :prop="`${scope.$index}.email`" :rules="fromRules.email">
                                                 <el-input
                                                     v-model="accountData[scope.$index].email"
                                                     autocomplete="off"
@@ -47,7 +47,7 @@
                                     </el-table-column>
                                     <el-table-column label="手机号">
                                         <template #default="scope">
-                                            <el-form-item :prop="scope.$index + '.mobile'" :rules="fromRules.mobile">
+                                            <el-form-item :prop="`${scope.$index}.mobile`" :rules="fromRules.mobile">
                                                 <el-input
                                                     v-model="accountData[scope.$index].mobile"
                                                     autocomplete="off"
@@ -57,7 +57,7 @@
                                     </el-table-column>
                                     <el-table-column label="描述">
                                         <template #default="scope">
-                                            <el-form-item :prop="scope.$index + '.description'" :rules="fromRules.describes">
+                                            <el-form-item :prop="`${scope.$index}.description`" :rules="fromRules.describes">
                                                 <el-input
                                                     v-model="accountData[scope.$index].description"
                                                     autocomplete="off"
@@ -134,8 +134,9 @@
         </el-card>
     </div>
 </template>
+
 <script>
-import { GetRoles, CreateAccount, RoleBindingUser } from "@/api/index.js";
+import { GetRoles, CreateAccount, RoleBindingUser } from "../../api/index.js";
 
 export default {
     name: "CreateUser",
@@ -143,7 +144,7 @@ export default {
         return {
             size: "small",
             accountData: [],
-            maxRow: 10, // 最大创建10个用户
+            maxRow: 10,
             addButton: false,
             delButton: false,
             createLoading: false,
@@ -185,155 +186,109 @@ export default {
     },
     computed: {
         residueUser() {
-            // 计算可创建的剩余用户数目，用于页面显示
             return this.maxRow - this.accountData.length;
         },
     },
     methods: {
-        // 切换增加行，删除行的按钮状态
         switchButtonState() {
-            if (this.accountData.length < this.maxRow) {
-                // 大于或者等于max行的时候不能再添加
-                this.addButton = false;
-            } else {
-                this.addButton = true;
-            }
-            if (this.accountData.length > 1) {
-                // 只有1行的时候不能删除
-                this.delButton = false;
-            } else {
-                this.delButton = true;
-            }
-        },
-        // 创建按钮和页面状态切换
-        onSwitchStatus(val) {
-            if (val) {
-                this.createLoading = true; // 创建禁用按钮
-                this.pageLoading = true;
-            } else {
-                this.createLoading = false; // 启用禁用按钮
-                this.pageLoading = false;
-            }
-        },
-        // 添加一个创建的用户行
-        handAddRow() {
-            let index = this.accountData.length;
-            this.accountData.push({ key: index });
-            // 按钮切换要放在数据变化之后
-            this.switchButtonState();
-        },
-        handleDeleteRow(row) {
-            let datas = this.accountData;
-            for (var i = 0; i < datas.length; i++) {
-                if (datas[i].key == row.key) {
-                    datas.splice(i, 1);
-                }
-            }
-            // 按钮切换要放在数据变化之后
-            this.switchButtonState();
-        },
-        // 验证账户表单
-        async validateAccountForm() {
-            return new Promise((resolve) => {
-                this.$refs["account-form"].validate((valid) => {
-                    resolve(valid);
-                });
-            });
+            this.addButton = this.accountData.length >= this.maxRow;
+            this.delButton = this.accountData.length <= 1;
         },
 
-        // 验证密码表单
-        async validatePasswordForm() {
-            return new Promise((resolve) => {
-                this.$refs["password-form"].validate((valid) => {
-                    resolve(valid);
-                });
-            });
+        onSwitchStatus(val) {
+            this.createLoading = val;
+            this.pageLoading = val;
         },
-        // 点击按钮，创建用户
+
+        handAddRow() {
+            this.accountData.push({ key: this.accountData.length });
+            this.switchButtonState();
+        },
+
+        handleDeleteRow(row) {
+            const index = this.accountData.findIndex((item) => item.key === row.key);
+            if (index !== -1) {
+                this.accountData.splice(index, 1);
+                this.switchButtonState();
+            }
+        },
+
+        async validateAccountForm() {
+            return this.$refs["account-form"]?.validate() || false;
+        },
+
+        async validatePasswordForm() {
+            return this.$refs["password-form"]?.validate() || false;
+        },
+
         async onCreateUser() {
-            // 验证用户信息
             const accountValid = await this.validateAccountForm();
             if (!accountValid) return;
 
-            // 验证密码
             const passwordValid = await this.validatePasswordForm();
             if (!passwordValid) return;
 
-            // 检查选择的角色数目
             if (this.ChoosingRole.length > 10) {
                 this.$message.warning({ message: "角色选择不能超过10个", plain: true, showClose: true, duration: 2000 });
                 return;
             }
 
-            // 验证通过，禁用创建按钮
             this.onSwitchStatus(true);
 
-            // 准备请求体
-            // 使用 Object.prototype.hasOwnProperty.call
-            const users = this.accountData.filter((item) => Object.prototype.hasOwnProperty.call(item, "account")).map((item) => ({ ...item, key: undefined }));
-            if (users.length < 1) {
+            const users = this.accountData.filter((item) => item.account).map((item) => ({ ...item, key: undefined }));
+
+            if (!users.length) {
+                this.onSwitchStatus(false);
                 return;
             }
 
-            const req_body = { basicinfo: { ...this.basicinfo, user: users } };
+            const req_body = {
+                basicinfo: { ...this.basicinfo, user: users },
+            };
             this.loadCreateAccount(req_body);
         },
-        // 查询角色
-        loadGetRoles() {
-            GetRoles({ page_size: 100 })
-                .then((res) => {
-                    let r = res.payload.items;
-                    this.roles = r;
-                })
-                .catch((err) => {
-                    if (err.status === 403) {
-                        this.$message.warning({ message: "没有权限获取角色.", plain: true, showClose: true, duration: 2000 });
-                    } else {
-                        this.$message.error({ message: "获取角色失败.", plain: true, showClose: true, duration: 2000 });
-                    }
-                });
+
+        async loadGetRoles() {
+            try {
+                const res = await GetRoles({ page_size: 100 });
+                this.roles = res.payload.items;
+            } catch (err) {
+                const msg = err.status === 403 ? "没有权限获取角色" : "获取角色失败";
+                this.$message.warning({ message: msg, plain: true, showClose: true, duration: 2000 });
+            }
         },
-        loadCreateAccount: function (data) {
-            let uids = [];
-            CreateAccount(data)
-                .then((res) => {
-                    let u = res.payload.users;
-                    u.map((item) => {
-                        uids.push(item["id"]); // 获取用户id, 用于后续绑定角色
-                    });
-                    if (this.ChoosingRole.length > 0) {
-                        this.loadRoleBindingUser(this.ChoosingRole, uids);
-                    } else {
-                        this.$router.push({ name: "users" });
-                    }
-                    this.$message.success({ message: "创建用户成功.", plain: true, showClose: true, duration: 2000 });
-                })
-                .catch((err) => {
-                    this.onSwitchStatus(false);
-                    if (err.status !== 403) {
-                        this.$message.error({ message: err.data, plain: true, showClose: true, duration: 2000 });
-                    }
-                });
-        },
-        loadRoleBindingUser: function (rid, uid) {
-            const data = { roles: rid, users: uid };
-            RoleBindingUser(data)
-                .then(() => {
-                    this.onSwitchStatus(false);
-                    this.$message.success({ message: "角色绑定成功.", plain: true, showClose: true, duration: 2000 });
+
+        async loadCreateAccount(data) {
+            try {
+                const res = await CreateAccount(data);
+                const uids = res.payload.users.map((item) => item.id);
+
+                if (this.ChoosingRole.length > 0) {
+                    await this.loadRoleBindingUser(this.ChoosingRole, uids);
+                } else {
                     this.$router.push({ name: "users" });
-                })
-                .catch((err) => {
-                    this.onSwitchStatus(false);
-                    if (err.status === 403) {
-                        this.$message.warning({ message: "您没有权限绑定角色.", plain: true, showClose: true, duration: 2000 });
-                    } else {
-                        let msg = err.data;
-                        this.$message.error({ message: msg, plain: true, showClose: true, duration: 2000 });
-                    }
-                });
+                }
+
+                this.$message.success({ message: "创建用户成功", plain: true, showClose: true, duration: 2000 });
+            } catch (err) {
+                this.onSwitchStatus(false);
+                this.$message.error({ message: err.data || "创建失败", plain: true, showClose: true, duration: 2000 });
+            }
         },
-        //取消创建
+
+        async loadRoleBindingUser(rid, uid) {
+            try {
+                await RoleBindingUser({ roles: rid, users: uid });
+                this.$message.success({ message: "角色绑定成功", plain: true, showClose: true, duration: 2000 });
+                this.$router.push({ name: "users" });
+            } catch (err) {
+                const msg = err.status === 403 ? "您没有权限绑定角色" : err.data;
+                this.$message.error({ message: msg, plain: true, showClose: true, duration: 2000 });
+            } finally {
+                this.onSwitchStatus(false);
+            }
+        },
+
         onCance() {
             this.$router.push({ name: "users" });
         },
@@ -354,24 +309,18 @@ export default {
     display: flex;
     align-items: flex-start;
 }
-// 行之间的间隙，第一个行不需要，第二个及后面的行顶部增加宽度
 .row-space {
     margin-top: 20px;
 }
 .text-container {
     width: 100px;
-    // flex-grow: 1;
-    height: 100%; /* 设置容器的高度 */
     .text-top {
-        vertical-align: top; /* 设置文字置顶 */
-        display: inline-block; /* 使div内部的文字表现得像inline-block元素 */
+        vertical-align: top;
+        display: inline-block;
     }
 }
 .end-container {
     width: 100%;
     margin-left: 100px;
-    // display: flex;
-    // justify-content: flex-end;
-    // justify-content: space-between;
 }
 </style>

@@ -2,62 +2,66 @@
     <div>
         <div class="my_refresh">
             <el-row>
-                <el-button size="small" type="primary" style="margin-left: 10px" @click="onOpenCreateCredential()" :disabled="buttonDisable"
-                    >新增访问凭据</el-button
-                >
-                <el-button size="small" type="primary" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
-                <el-text style="margin-left: 18px">您最多可以创建{{ quota }}个访问凭据。</el-text>
+                <el-button size="small" type="primary" style="margin-left: 10px" :disabled="buttonDisable" @click="onOpenCreateCredential">
+                    新增访问凭据
+                </el-button>
+                <el-button size="small" type="primary" :loading="loading" style="margin-left: 10px" @click="onRefresh"> 刷新 </el-button>
+                <el-text style="margin-left: 18px"> 您最多可以创建{{ quota }}个访问凭据。 </el-text>
             </el-row>
         </div>
-        <div>
-            <el-table :data="tableData" style="width: 100%" v-loading="loading">
-                <el-table-column prop="access" label="密钥ID">
-                    <template #default="scope">
-                        <span class="access-text">{{ scope.row.access }}</span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="description" label="描述" show-overflow-tooltip />
-                <el-table-column prop="status" label="状态">
-                    <template #default="scope">
-                        <div class="icon" v-if="scope.row.status === 'active'" style="display: flex; align-items: center">
-                            <el-icon :size="14" style="color: #50d4ab; padding-right: 5px"><SuccessFilled /></el-icon>
-                            <span>启用</span>
-                        </div>
-                        <div class="icon" v-else>
-                            <el-icon :size="14" style="color: #adb0b8; padding-right: 5px"><RemoveFilled /></el-icon>
-                            <span>停用</span>
-                        </div>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="create_time" label="创建时间">
-                    <template #default="scope">{{ formatDate(scope.row.create_time) }}</template>
-                </el-table-column>
-                <el-table-column prop="last_use_at" label="最近使用时间">
-                    <template #default="scope">{{ formatDate(scope.row.last_use_at) }}</template>
-                </el-table-column>
-                <el-table-column prop="" label="操作">
-                    <template #default="scope">
-                        <el-button link type="primary" @click="onEditCredential(scope.row)">编辑</el-button>
-                        <span v-if="scope.row.status === 'active'">
-                            <el-button link type="primary" @click="onSwitchStatus(scope.row)">停用</el-button>
-                        </span>
-                        <span v-if="scope.row.status === 'inactive'">
-                            <el-button link type="primary" @click="onSwitchStatus(scope.row)">启用</el-button>
-                        </span>
-                        <el-button link type="primary" @click="onDeleteCredential(scope.row)">删除</el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </div>
 
+        <el-table :data="tableData" style="width: 100%" v-loading="loading">
+            <el-table-column prop="access" label="密钥ID">
+                <template #default="scope">
+                    <span class="access-text">{{ scope.row.access }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="description" label="描述" show-overflow-tooltip />
+            <el-table-column prop="status" label="状态">
+                <template #default="scope">
+                    <div class="icon" v-if="scope.row.status === 'active'">
+                        <el-icon :size="14" style="color: #50d4ab; padding-right: 5px">
+                            <SuccessFilled />
+                        </el-icon>
+                        <span>启用</span>
+                    </div>
+                    <div class="icon" v-else>
+                        <el-icon :size="14" style="color: #adb0b8; padding-right: 5px">
+                            <RemoveFilled />
+                        </el-icon>
+                        <span>停用</span>
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="create_time" label="创建时间">
+                <template #default="scope">
+                    {{ formatDate(scope.row.create_time) }}
+                </template>
+            </el-table-column>
+            <el-table-column prop="last_use_at" label="最近使用时间">
+                <template #default="scope">
+                    {{ formatDate(scope.row.last_use_at) || "--" }}
+                </template>
+            </el-table-column>
+            <el-table-column label="操作">
+                <template #default="scope">
+                    <el-button link type="primary" @click="onEditCredential(scope.row)"> 编辑 </el-button>
+                    <el-button link type="primary" v-if="scope.row.status === 'active'" @click="onSwitchStatus(scope.row)"> 停用 </el-button>
+                    <el-button link type="primary" v-else @click="onSwitchStatus(scope.row)"> 启用 </el-button>
+                    <el-button link type="primary" @click="onDeleteCredential(scope.row)"> 删除 </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+
+        <!-- 编辑弹窗 -->
         <el-dialog v-model="editDialogVisible" title="编辑" width="500px" :close-on-click-modal="false" draggable>
-            <div style="margin-left: 20px; margin-right: 20px">
-                <el-form :model="editForm" label-width="auto" style="max-width: auto" label-position="left">
-                    <el-form-item label="密钥ID" style="margin-bottom: 0px">
+            <div style="margin: 0 20px">
+                <el-form :model="editForm" label-width="auto" label-position="left">
+                    <el-form-item label="密钥ID" style="margin-bottom: 0">
                         <el-text>{{ editForm.access }}</el-text>
                     </el-form-item>
                     <el-form-item label="创建时间">
-                        <el-text>{{ formatDate(editForm.created_at) }}</el-text>
+                        <el-text>{{ formatDate(editForm.create_time) }}</el-text>
                     </el-form-item>
                     <el-form-item label="描述">
                         <el-input
@@ -69,17 +73,18 @@
                             placeholder="请输入描述信息" />
                     </el-form-item>
                 </el-form>
-                <div style="display: flex; justify-content: flex-end; align-items: center">
+                <div style="display: flex; justify-content: flex-end; margin-top: 10px">
                     <el-form-item size="small">
                         <el-button @click="editDialogVisible = false">取消</el-button>
-                        <el-button type="primary" :loading="editButtonLoading" @click="onSubmitEditCredential">确定</el-button>
+                        <el-button type="primary" :loading="editButtonLoading" @click="onSubmitEditCredential"> 确定 </el-button>
                     </el-form-item>
                 </div>
             </div>
         </el-dialog>
 
+        <!-- 新增弹窗 -->
         <el-dialog v-model="createDialogVisible" title="新增访问凭据" width="500px" :close-on-click-modal="false" draggable>
-            <div style="margin-left: 20px; margin-right: 20px">
+            <div style="margin: 0 20px">
                 <div class="hint-message">
                     <el-text>
                         <el-icon style="color: #1476ff"><WarningFilled /></el-icon>
@@ -88,7 +93,7 @@
                         </span>
                     </el-text>
                 </div>
-                <el-form :model="createForm" label-width="auto" style="max-width: auto" label-position="top">
+                <el-form :model="createForm" label-width="auto" label-position="top">
                     <el-form-item label="请输入凭据的描述信息">
                         <el-input
                             v-model="createForm.description"
@@ -99,14 +104,16 @@
                             placeholder="凭据描述信息" />
                     </el-form-item>
                 </el-form>
-                <div style="display: flex; justify-content: flex-end; align-items: center">
+                <div style="display: flex; justify-content: flex-end; margin-top: 10px">
                     <el-form-item size="small">
                         <el-button @click="createDialogVisible = false">取消</el-button>
-                        <el-button type="primary" :loading="createButtonLoading" @click="onSubmitCreateCredential">创建</el-button>
+                        <el-button type="primary" :loading="createButtonLoading" @click="onSubmitCreateCredential"> 创建 </el-button>
                     </el-form-item>
                 </div>
             </div>
         </el-dialog>
+
+        <!-- 保存密钥弹窗 -->
         <el-dialog v-model="SaveCredentia.DialogVisible" title="保存访问凭据" width="500px" :close-on-click-modal="false">
             <div class="hint-message">
                 <el-text>
@@ -116,7 +123,6 @@
             </div>
             <div class="code-container" @click="handleClickCode">
                 <pre class="codepre">{{ SaveCredentia.Data }}</pre>
-                <!-- 使用 v-show 替代 v-if，以便 CSS 过渡生效 -->
                 <transition name="fade">
                     <div class="overlay" v-if="!SaveCredentia.showFullCode">
                         <span class="overlay-text">{{ SaveCredentia.overlayText }}</span>
@@ -125,27 +131,28 @@
             </div>
         </el-dialog>
 
+        <!-- 删除弹窗 -->
         <el-dialog v-model="deleteDialogVisible" title="确定删除该访问凭据？" width="800px" :close-on-click-modal="false" draggable>
-            <div style="margin-left: 20px; margin-right: 20px">
+            <div style="margin: 0 20px">
                 <div class="hint-message">
                     <el-text>
                         <el-icon style="color: #1476ff"><WarningFilled /></el-icon>
-                        <span style="margin-left: 5px">删除后该凭据将无法再继续使用，且删除操作无法恢复，请谨慎删除。 </span>
+                        <span style="margin-left: 5px"> 删除后该凭据将无法再继续使用，且删除操作无法恢复，请谨慎删除。 </span>
                     </el-text>
                 </div>
-                <div style="margin-bottom: 20px">
-                    <el-table :data="deleteFrom" style="width: 100%">
-                        <el-table-column prop="access" label="密钥ID" />
-                        <el-table-column prop="description" label="描述" show-overflow-tooltip />
-                        <el-table-column prop="created_at" label="创建时间" show-overflow-tooltip>
-                            <template #default="scope">{{ formatDate(scope.row.created_at) }}</template>
-                        </el-table-column>
-                    </el-table>
-                </div>
-                <div style="display: flex; justify-content: flex-end; align-items: center">
+                <el-table :data="deleteFrom" style="width: 100%; margin-bottom: 20px">
+                    <el-table-column prop="access" label="密钥ID" />
+                    <el-table-column prop="description" label="描述" show-overflow-tooltip />
+                    <el-table-column prop="created_at" label="创建时间">
+                        <template #default="scope">
+                            {{ formatDate(scope.row.create_time) }}
+                        </template>
+                    </el-table-column>
+                </el-table>
+                <div style="display: flex; justify-content: flex-end">
                     <el-form-item size="small">
                         <el-button @click="deleteDialogVisible = false">取消</el-button>
-                        <el-button type="primary" :loading="deleteButtonLoading" @click="onSubmitDeleteCredential">确定</el-button>
+                        <el-button type="primary" :loading="deleteButtonLoading" @click="onSubmitDeleteCredential"> 确定 </el-button>
                     </el-form-item>
                 </div>
             </div>
@@ -154,15 +161,19 @@
 </template>
 
 <script>
-import { withDelay } from "../../utils/common.js";
-import { msgcon } from "@/utils/message.js";
 import { RemoveFilled, WarningFilled, SuccessFilled } from "@element-plus/icons-vue";
-import { formatTime } from "@/utils/date.js";
-import { GetCredential, DeleteCredential, EditCredential, CreateCredential } from "@/api/index.js";
+import { withDelay } from "../../utils/common.js";
+import { msgcon } from "../../utils/message.js";
+import { formatTime } from "../../utils/date.js";
+import { GetCredential, DeleteCredential, EditCredential, CreateCredential } from "../../api/index.js";
+
 export default {
     name: "CredentialTab",
     props: {
-        vdata: Object,
+        vdata: {
+            type: Object,
+            default: () => ({ id: "" }),
+        },
     },
     components: {
         WarningFilled,
@@ -174,7 +185,6 @@ export default {
             quota: 0,
             tableData: [],
             loading: true,
-            timeoutId: null,
             // 编辑
             editDialogVisible: false,
             editForm: {
@@ -186,9 +196,7 @@ export default {
             // 创建
             buttonDisable: true,
             createDialogVisible: false,
-            createForm: {
-                description: "",
-            },
+            createForm: { description: "" },
             createButtonLoading: false,
             // 删除
             deleteDialogVisible: false,
@@ -202,119 +210,137 @@ export default {
                 overlayText: "点击查看密钥信息",
                 showFullCode: false,
             },
-            // showFullCode: false,.
         };
     },
     methods: {
         handleClickCode() {
             this.SaveCredentia.showFullCode = true;
         },
-        formatDate(time) {
-            return formatTime(time);
-        },
-        loadGetCredential: function () {
+
+        // 时间格式化精简
+        formatDate: formatTime,
+
+        /** 获取凭据列表 */
+        async loadGetCredential() {
             this.loading = true;
-            withDelay(() => GetCredential({ uid: this.vdata.id }))
-                .then((res) => {
-                    this.tableData = res.payload.items;
-                    this.quota = res.payload.quota;
-                    this.buttonDisable = this.quota > this.tableData.length ? false : true;
-                })
-                .finally(() => {
-                    this.loading = false;
-                });
+            try {
+                const res = await withDelay(() => GetCredential({ uid: this.vdata.id }));
+                this.tableData = res.payload?.items || [];
+                this.quota = res.payload?.quota || 0;
+                this.buttonDisable = this.tableData.length >= this.quota;
+            } finally {
+                this.loading = false;
+            }
         },
-        loadDeleteCredential: function (access) {
-            const data = { credential: { access: access } };
-            DeleteCredential({ uid: this.vdata.id }, data)
-                .then(() => {
-                    this.deleteDialogVisible = false;
-                    this.$message.success(msgcon("删除成功"));
-                })
-                .catch((err) => {
-                    let msg = err.data.metadata.message;
-                    this.$message.error(msgcon("删除失败" + msg));
-                })
-                .finally(() => {
-                    this.deleteButtonLoading = false;
-                    this.onRefresh();
-                });
+
+        /** 删除凭据 */
+        async loadDeleteCredential(access) {
+            try {
+                const data = { credential: { access } };
+                await DeleteCredential({ uid: this.vdata.id }, data);
+                this.deleteDialogVisible = false;
+                this.$message.success(msgcon("删除成功"));
+            } catch (err) {
+                const msg = err.data?.metadata?.message || "未知错误";
+                this.$message.error(msgcon(`删除失败：${msg}`));
+            } finally {
+                this.deleteButtonLoading = false;
+                this.onRefresh();
+            }
         },
-        loadEditCredential: function (data) {
-            EditCredential({ uid: this.vdata.id }, data)
-                .then(() => {
-                    this.editDialogVisible = false;
-                    this.onRefresh();
-                    this.$message.success(msgcon("操作成功"));
-                    this.editButtonLoading = false;
-                })
-                .catch((err) => {
-                    this.onRefresh();
-                    let msg = err.data.metadata.message;
-                    this.$message.error(msgcon("操作失败" + msg));
-                    this.editButtonLoading = false;
-                });
+
+        /** 编辑凭据 */
+        async loadEditCredential(data) {
+            this.editButtonLoading = true;
+            try {
+                await EditCredential({ uid: this.vdata.id }, data);
+                this.editDialogVisible = false;
+                this.$message.success(msgcon("操作成功"));
+            } catch (err) {
+                const msg = err.data?.metadata?.message || "操作失败";
+                this.$message.error(msgcon(`操作失败：${msg}`));
+            } finally {
+                this.editButtonLoading = false;
+                this.onRefresh();
+            }
         },
-        loadCreateCredential: async function (data) {
-            await CreateCredential({ uid: this.vdata.id }, data)
-                .then((res) => {
-                    this.createDialogVisible = false;
-                    this.onRefresh();
-                    this.$message.success(msgcon("创建成功"));
-                    this.createButtonLoading = false;
-                    this.createForm.description = "";
-                    // 展示保存窗口
-                    this.SaveCredentia.Data = res.payload;
-                    this.SaveCredentia.DialogVisible = true;
-                })
-                .catch((err) => {
-                    this.onRefresh();
-                    let msg = err.data.metadata.message;
-                    this.$message.error(msgcon("创建失败" + msg));
-                    this.createButtonLoading = false;
-                });
+
+        /** 创建凭据 */
+        async loadCreateCredential(data) {
+            this.createButtonLoading = true;
+            try {
+                const res = await CreateCredential({ uid: this.vdata.id }, data);
+                this.createDialogVisible = false;
+                this.$message.success(msgcon("创建成功"));
+                this.createForm.description = "";
+                this.SaveCredentia.Data = res.payload;
+                this.SaveCredentia.DialogVisible = true;
+            } catch (err) {
+                const msg = err.data?.metadata?.message || "创建失败";
+                this.$message.error(msgcon(`创建失败：${msg}`));
+            } finally {
+                this.createButtonLoading = false;
+                this.onRefresh();
+            }
         },
+
+        /** 刷新 */
         onRefresh() {
-            this.loading = true;
             this.loadGetCredential();
         },
+
+        /** 编辑 */
         onEditCredential(val) {
+            this.editForm = { ...val };
             this.editDialogVisible = true;
-            this.editForm.access = val["access"];
-            this.editForm.created_at = val["created_at"];
-            this.editForm.description = val["description"];
         },
+
+        /** 提交编辑 */
         onSubmitEditCredential() {
-            this.editButtonLoading = true;
-            const data = { credential: { access: this.editForm.access, description: this.editForm.description } };
+            const data = {
+                credential: {
+                    access: this.editForm.access,
+                    description: this.editForm.description,
+                },
+            };
             this.loadEditCredential(data);
         },
+
+        /** 打开创建 */
         onOpenCreateCredential() {
-            this.SaveCredentia.showFullCode = false; // 初始化模糊层状态
+            this.SaveCredentia.showFullCode = false;
             this.createDialogVisible = true;
         },
+
+        /** 提交创建 */
         onSubmitCreateCredential() {
-            this.createButtonLoading = true;
-            const data = { credential: { description: this.createForm.description } };
+            const data = {
+                credential: { description: this.createForm.description },
+            };
             this.loadCreateCredential(data);
         },
+
+        /** 切换状态 */
         onSwitchStatus(val) {
-            let access = val["access"];
-            let status = val["status"] === "active" ? "inactive" : "active";
-            const data = { credential: { access: access, status: status } };
+            const data = {
+                credential: {
+                    access: val.access,
+                    status: val.status === "active" ? "inactive" : "active",
+                },
+            };
             this.loadEditCredential(data);
         },
+
+        /** 删除凭据 */
         onDeleteCredential(val) {
-            this.deleteFrom = [];
-            this.deleteFrom.push(val);
+            this.deleteFrom = [val];
             this.deleteDialogVisible = true;
         },
+
+        /** 提交删除 */
         onSubmitDeleteCredential() {
             this.deleteButtonLoading = true;
-            console.log(this.deleteFrom[0].access);
-            let access = [];
-            access.push(this.deleteFrom[0].access);
-            this.loadDeleteCredential(access);
+            this.loadDeleteCredential(this.deleteFrom[0].access);
         },
     },
     created() {
@@ -324,49 +350,34 @@ export default {
 </script>
 
 <style scoped lang="less">
-/* 提示消息样式 */
 .hint-message {
-    background-color: #deecff;
-    padding-top: 7px;
-    padding-bottom: 7px;
+    background: #deecff;
+    padding: 7px 16px;
     border-radius: 8px;
-    padding-left: 16px;
-    padding-right: 16px;
     margin-bottom: 10px;
 }
 
-/* 刷新样式 */
 .my_refresh {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* 凭据展示格式 */
 .codepre {
     box-sizing: border-box;
-    /*以下样式是自动换行代码*/
-    white-space: pre-wrap; /* css-3 */
-    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
-    white-space: -pre-wrap; /* Opera 4-6 */
-    white-space: -o-pre-wrap; /* Opera 7 */
-    word-wrap: break-word; /* Internet Explorer 5.5+ */
-    /*以上样式是自动换行代码，需要的加上，不需要的删除*/
+    white-space: pre-wrap;
+    word-wrap: break-word;
     overflow: auto;
     font-family: "Menlo", "Monaco", "Consolas", "Courier New", monospace;
     font-size: 13px;
     padding: 1px;
-    margin-top: 0px;
-    margin-bottom: 0px;
+    margin: 0;
     line-height: 1.2;
-    color: #333333;
-    word-break: break-all;
-    word-wrap: break-word;
+    color: #333;
     border-radius: 4px;
-    background-color: #f5f5f5;
+    background: #f5f5f5;
 }
 
-/* 凭据展示弹窗 */
 .code-container {
     position: relative;
     max-height: 300px;
@@ -375,30 +386,22 @@ export default {
     border: 1px solid #ebeef5;
     border-radius: 4px;
     padding: 10px;
-    background-color: #f5f5f5;
+    background: #f5f5f5;
 }
 
-/* 模糊层样式 */
 .overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: rgba(255, 255, 255, 0.85);
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     backdrop-filter: blur(3px);
-    transition: opacity 0.5s ease; /* 确保过渡属性存在 */
-    opacity: 1; /* 默认显示 */
+    transition: opacity 0.5s ease;
+    opacity: 1;
 }
 
-/* 当 showFullCode = true 时，Vue 会自动添加透明度变化 */
-.overlay-leave-active {
-    opacity: 0; /* 淡出效果 */
-}
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.5s;
@@ -407,7 +410,7 @@ export default {
 .fade-leave-to {
     opacity: 0;
 }
-/* 模糊层文本样式 */
+
 .overlay-text {
     font-size: 16px;
     color: #1476ff;
@@ -416,10 +419,15 @@ export default {
     background: rgba(255, 255, 255, 0.7);
     border-radius: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease; /* 文字也加过渡 */
 }
+
 .access-text {
     font-family: "Consolas", Courier, monospace;
-    font-size: 16px; /* 可根据需要调整 */
+    font-size: 16px;
+}
+
+.icon {
+    display: flex;
+    align-items: center;
 }
 </style>

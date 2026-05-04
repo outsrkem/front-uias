@@ -5,13 +5,15 @@
                 <span>用户添加到角色</span>
             </div>
         </template>
+
         <div>
-            <el-table :data="allRole" style="width: 100%" @selection-change="handleSelectionChange" v-loading="loading">
+            <el-table :data="allRole" style="width: 100%" v-loading="loading" @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55" />
-                <el-table-column prop="name" label="角色名称" show-overflow-tooltip />
-                <el-table-column prop="description" label="描述" show-overflow-tooltip />
+                <el-table-column prop="name" label="Role Name" show-overflow-tooltip />
+                <el-table-column prop="description" label="Description" show-overflow-tooltip />
             </el-table>
         </div>
+
         <div class="end-container">
             <div>
                 <Pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
@@ -25,15 +27,17 @@
 </template>
 
 <script>
-import { withDelay } from "../../utils/common.js";
-import Pagination from "@/components/pagination/pagination";
-import { convertToLimitOffset } from "../../utils/common.js";
-import { formatTime } from "@/utils/date.js";
-import { msgcon } from "@/utils/message.js";
-import { GetRoles, RoleBindingUser } from "@/api/index.js";
+import Pagination from "../..//components/pagination/pagination.vue";
+import { withDelay, convertToLimitOffset } from "../../utils/common.js";
+import { formatTime } from "../..//utils/date.js";
+import { msgcon } from "../..//utils/message.js";
+import { GetRoles, RoleBindingUser } from "../..//api/index.js";
+
 export default {
     name: "AddRoleIndex",
-    components: { Pagination },
+    components: {
+        Pagination,
+    },
     data() {
         return {
             loading: false,
@@ -46,61 +50,68 @@ export default {
         };
     },
     methods: {
+        /** Format date */
         formatDate(time) {
             return formatTime(time);
         },
+
+        /** Handle table selection change */
         handleSelectionChange(val) {
-            // console.log(val)
-            let selectUser = [];
-            val.map((item) => {
-                console.log(item.id);
-                selectUser.push(item.id);
-            });
-            this.bindRole = selectUser;
+            this.bindRole = val.map((item) => item.id);
         },
+
+        /** Page number change */
         onCurrentChange(p) {
             this.page = p;
             this.loadGetRoles(this.pageSize, p);
         },
+
+        /** Page size change */
         onSizeChange(s) {
             this.pageSize = s;
             this.page = 1;
             this.loadGetRoles(s, 1);
         },
-        onCance() {
+
+        /** Cancel and go back */
+        onCancel() {
             const user_id = this.$route.params.user_id;
             this.$router.push({
                 name: "settings",
-                params: { user_id: user_id },
+                params: { user_id },
                 query: { pane: "second" },
             });
         },
+
+        /** Submit binding */
         onSubmit() {
             this.loadRoleBindingUser(this.bindRole, this.ChoosingUser);
         },
-        loadGetRoles: function (page_size, page) {
+
+        /** Get all role list */
+        async loadGetRoles(page_size, page) {
             this.loading = true;
-            const params = convertToLimitOffset(page, page_size);
-            withDelay(() => GetRoles(params))
-                .then((res) => {
-                    this.allRole = res.payload.items;
-                    this.pageTotal = res.payload.page_info.total;
-                })
-                .finally(() => {
-                    this.loading = false;
-                });
+            try {
+                const params = convertToLimitOffset(page, page_size);
+                const res = await withDelay(() => GetRoles(params));
+                this.allRole = res.payload?.items || [];
+                this.pageTotal = res.payload?.page_info?.total || 0;
+            } finally {
+                this.loading = false;
+            }
         },
-        loadRoleBindingUser: function (roles, users) {
-            const data = { roles: roles, users: users };
-            RoleBindingUser(data)
-                .then(() => {
-                    this.$message.success(msgcon("添加成功"));
-                    this.onCance();
-                })
-                .catch((err) => {
-                    let msg = err.response.data.meta_info.res_msg;
-                    this.$message.warning(msgcon(msg));
-                });
+
+        /** Bind user to role */
+        async loadRoleBindingUser(roles, users) {
+            try {
+                const data = { roles, users };
+                await RoleBindingUser(data);
+                this.$message.success(msgcon("Added successfully"));
+                this.onCancel();
+            } catch (err) {
+                const msg = err.response?.data?.meta_info?.res_msg || "Operation failed";
+                this.$message.warning(msgcon(msg));
+            }
         },
     },
     created() {
@@ -109,5 +120,3 @@ export default {
     },
 };
 </script>
-
-<style scoped lang="less"></style>

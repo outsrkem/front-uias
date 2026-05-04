@@ -7,7 +7,7 @@
                         <span>用户信息</span>
                     </el-row>
                     <el-row>
-                        <el-button size="small" type="primary" :icon="Refresh" @click="onRefresh" :loading="loading" style="margin-left: 10px">
+                        <el-button size="small" type="primary" :icon="Refresh" :loading="loading" style="margin-left: 10px" @click="onRefresh">
                             刷新
                         </el-button>
                     </el-row>
@@ -25,7 +25,7 @@
                 </el-text>
                 <el-text v-else>
                     <el-icon class="table-icon-line table-icon-disabled"><RemoveFilled /></el-icon>
-                    <span> 禁用</span>
+                    <span>禁用</span>
                 </el-text>
             </el-descriptions-item>
             <el-descriptions-item label="用户名">{{ basicInfo.username }}</el-descriptions-item>
@@ -36,16 +36,16 @@
 
     <el-card v-loading="loading">
         <el-tabs v-model="activeName" @tab-change="tabChange">
-            <!-- 安全设置 -->
+            <!-- Security Settings -->
             <el-tab-pane label="安全设置" name="first">
                 <SafetySet :vmodel="basicInfo" />
             </el-tab-pane>
 
-            <!-- 所属角色 -->
+            <!-- Assigned Roles -->
             <el-tab-pane label="所属角色" name="second">
                 <div style="margin-bottom: 12px">
                     <el-button size="small" type="primary" :disabled="!basicInfo.editable" @click="onUserBindRole"> 加入角色 </el-button>
-                    <el-button size="small" type="primary" @click="onRefreshRole" style="margin-left: 8px"> 刷新 </el-button>
+                    <el-button size="small" type="primary" style="margin-left: 8px" @click="onRefreshRole"> 刷新 </el-button>
                 </div>
 
                 <el-table :data="roles" style="width: 100%">
@@ -65,20 +65,20 @@
                 </el-table>
             </el-tab-pane>
 
-            <!-- 访问凭据 -->
+            <!-- Access Credential -->
             <el-tab-pane label="访问凭据" name="credential">
                 <CredentialTab :vdata="user" />
             </el-tab-pane>
 
-            <!-- 标签管理 -->
+            <!-- Tag Management -->
             <el-tab-pane label="标签管理" name="annotation">
                 <AnnotationTab :vdata="user" />
             </el-tab-pane>
 
-            <!-- 授权记录 -->
+            <!-- Authorization Record -->
             <el-tab-pane label="授权记录" name="third">
                 <div style="margin-bottom: 12px">
-                    <el-button size="small" type="primary" @click="onRefreshPolicies">刷新</el-button>
+                    <el-button size="small" type="primary" @click="onRefreshPolicies"> 刷新 </el-button>
                 </div>
 
                 <el-table :data="policies" style="width: 100%">
@@ -103,10 +103,10 @@ import { Refresh, SuccessFilled, RemoveFilled } from "@element-plus/icons-vue";
 import SafetySet from "./safetyset.vue";
 import CredentialTab from "./credential.vue";
 import AnnotationTab from "./annotation.vue";
-import { formatTime } from "@/utils/date.js";
-import { msgcon } from "@/utils/message.js";
+import { formatTime } from "../../utils/date.js";
+import { msgcon } from "../../utils/message.js";
 import { withDelay } from "../../utils/common.js";
-import { AccountDetail, SelectRoleFromUser, SelectPoliciesFromRole, UnbindRoleAndUser } from "@/api/index.js";
+import { AccountDetail, SelectRoleFromUser, SelectPoliciesFromRole, UnbindRoleAndUser } from "../../api/index.js";
 
 export default {
     name: "SettingsIndex",
@@ -131,65 +131,64 @@ export default {
             policies: [],
             loading: true,
             user: { id: "" },
-            routerPrefix: "/uias", // 路由统一前缀
+            routerPrefix: "/uias",
         };
     },
     methods: {
-        formatDate(time) {
-            return formatTime(time);
-        },
+        /** Date formatting utility */
+        formatDate: formatTime,
 
-        // 加载用户详情
+        /** Load user detail information */
         async loadAccountDetail(user_id) {
             try {
                 const res = await withDelay(() => AccountDetail({ user_id }));
-                this.basicInfo = res.payload.user || {};
+                this.basicInfo = res.payload?.user || {};
             } catch (err) {
-                console.error("加载用户信息失败", err);
+                console.error("Failed to load user information", err);
             } finally {
                 this.loading = false;
             }
         },
 
-        // 加载用户角色
+        /** Load roles associated with the user */
         async loadSelectRoleFromUser(uid) {
             try {
                 const res = await withDelay(() => SelectRoleFromUser({ uid }));
-                this.roles = res.payload.roles || [];
+                this.roles = res.payload?.roles || [];
             } catch (err) {
-                console.error("加载角色失败", err);
+                console.error("Failed to load roles", err);
             }
         },
 
-        // 加载策略（优化：循环请求改为安全拼接）
+        /** Batch load policies linked to roles (safe concurrency) */
         async loadSelectPoliciesFromRole() {
             this.policies = [];
-            if (this.roles.length === 0) return;
+            if (!this.roles.length) return;
 
             try {
                 const promises = this.roles.map((role) => SelectPoliciesFromRole({ rid: role.id }));
                 const results = await Promise.allSettled(promises);
 
                 results.forEach((result, index) => {
-                    if (result.status === "fulfilled") {
-                        const role = this.roles[index];
-                        const list = result.value?.payload?.policies || [];
-                        list.forEach((item) => {
-                            this.policies.push({
-                                ...item,
-                                sName: role.name,
-                                sId: role.id,
-                                sDesc: role.description,
-                            });
-                        });
-                    }
+                    if (result.status !== "fulfilled") return;
+                    const role = this.roles[index];
+                    const list = result.value?.payload?.policies || [];
+
+                    this.policies.push(
+                        ...list.map((item) => ({
+                            ...item,
+                            sId: role.id,
+                            sName: role.name,
+                            sDesc: role.description,
+                        })),
+                    );
                 });
             } catch (err) {
-                console.error("加载策略失败", err);
+                console.error("Failed to load policies", err);
             }
         },
 
-        // 解除用户角色绑定
+        /** Unbind user from role */
         async loadUnbindRoleAndUser(roleId, userId) {
             try {
                 await UnbindRoleAndUser({
@@ -200,61 +199,60 @@ export default {
                 this.onRefreshRole();
             } catch (err) {
                 this.$message.warning(msgcon(err));
+            } finally {
+                this.loading = false;
             }
         },
 
-        // 刷新角色
+        /** Refresh role list */
         onRefreshRole() {
             this.loadSelectRoleFromUser(this.userId);
         },
 
-        // 刷新策略
+        /** Refresh policy list */
         onRefreshPolicies() {
             this.loadSelectPoliciesFromRole();
         },
 
-        // 切换 tab
+        /** Switch tab + save status to router */
         tabChange(val) {
             this.activeName = val;
             this.$router.push({
                 query: { ...this.$route.query, pane: val },
             });
-            if (val === "third") {
-                this.loadSelectPoliciesFromRole();
-            }
+            val === "third" && this.loadSelectPoliciesFromRole();
         },
 
-        // 移除角色
+        /** Remove role from user */
         onRemoveRoleFromUser(row) {
+            this.loading = true;
             this.loadUnbindRoleAndUser(row.id, this.userId);
         },
 
-        // 绑定角色
+        /** Navigate to role binding page */
         onUserBindRole() {
             this.$router.push(`/users/settings/${this.userId}/addRole`);
         },
 
-        // 全局刷新
+        /** Global refresh all data */
         onRefresh() {
             this.loading = true;
-            this.onRefreshRole();
             this.loadAccountDetail(this.userId);
+            this.onRefreshRole();
         },
     },
     created() {
-        // 从路由获取用户ID
+        // Get user ID from route params
         this.userId = this.$route.params.user_id || "";
         this.user.id = this.userId;
 
-        // 恢复 tab 记忆
+        // Restore tab status from route query
         const pane = this.$route.query.pane;
         if (pane) this.activeName = pane;
 
-        // 初始化加载
+        // Initialize data
         this.loadAccountDetail(this.userId);
         this.loadSelectRoleFromUser(this.userId);
     },
 };
 </script>
-
-<style scoped lang="less"></style>
