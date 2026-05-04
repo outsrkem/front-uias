@@ -43,65 +43,70 @@
 
 <script>
 import { Refresh } from "@element-plus/icons-vue";
-import { formatTime } from "@/utils/date.js";
+import { formatTime } from "../../utils/date.js";
 import { withDelay } from "../../utils/common.js";
-import { SelectPolicyInfo, SelectRolesFromPolicy } from "@/api/index.js";
+import { SelectPolicyInfo, SelectRolesFromPolicy } from "../../api/index.js";
+
 export default {
     name: "PolicyInfoIndex",
     setup() {
-        return {
-            Refresh,
-        };
+        return { Refresh };
     },
     data() {
         return {
-            loading: true,
+            loading: false,
+            policyId: "",
             policyInfo: {},
             roles: [],
             activeName: "first",
-            ChoosingRoles: [],
-            Statement: [],
+            // 移除未使用变量：ChoosingRoles、Statement
         };
     },
     methods: {
+        // 时间格式化
         formatDate(time) {
             return formatTime(time);
         },
-        loadGetPoliciesInfo: async function (policy_id) {
+
+        // 获取策略详情
+        async loadGetPoliciesInfo(policyId) {
+            this.loading = true;
             try {
-                const paths = { pid: policy_id };
-                const res = await withDelay(() => SelectPolicyInfo(paths));
-                this.policyInfo = res.payload.policy;
-                this.Statement = res.payload.policy.permit.Statement;
-                this.loading = false;
+                const res = await withDelay(() => SelectPolicyInfo({ pid: policyId }));
+                this.policyInfo = res.payload?.policy || {};
             } catch (err) {
-                this.tableData = [];
+                console.error("获取策略信息失败：", err);
+                this.policyInfo = {};
+            } finally {
                 this.loading = false;
             }
         },
-        loadSelectRolesFromPolicy: function (policy_id) {
-            const paths = { policy_id: policy_id };
-            withDelay(() => SelectRolesFromPolicy(paths))
-                .then((res) => {
-                    this.roles = res.payload.roles;
-                })
-                .catch(() => {
-                    this.roles = [];
-                });
+
+        // 获取关联角色列表
+        async loadSelectRolesFromPolicy(policyId) {
+            try {
+                const res = await withDelay(() => SelectRolesFromPolicy({ policy_id: policyId }));
+                this.roles = res.payload?.roles || [];
+            } catch (err) {
+                console.error("获取关联角色失败：", err);
+                this.roles = [];
+            }
         },
+
+        // 刷新关联角色
         onRefreshRolesFromRolicy() {
-            const policy_id = this.$route.params.policy_id;
-            this.loadSelectRolesFromPolicy(policy_id);
+            this.loadSelectRolesFromPolicy(this.policyId);
         },
-        // tabs标签时，刷新页面停留在当前tab
+
+        // tab 切换
         tabChange(val) {
             this.$router.push({ query: { ...this.$route.query, pane: val } });
         },
-        onRefresh() {
-            const policy_id = this.policyId;
-            this.loading = true;
-            this.loadGetPoliciesInfo(policy_id);
-            this.loadSelectRolesFromPolicy(policy_id);
+
+        // 统一刷新
+        async onRefresh() {
+            await this.loadGetPoliciesInfo(this.policyId);
+            await this.loadSelectRolesFromPolicy(this.policyId);
         },
     },
     created() {
@@ -124,13 +129,11 @@ export default {
 }
 .codepre {
     box-sizing: border-box;
-    /*以下样式是自动换行代码*/
-    white-space: pre-wrap; /* css-3 */
-    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
-    white-space: -pre-wrap; /* Opera 4-6 */
-    white-space: -o-pre-wrap; /* Opera 7 */
-    word-wrap: break-word; /* Internet Explorer 5.5+ */
-    /*以上样式是自动换行代码，需要的加上，不需要的删除*/
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
     overflow: auto;
     font-family: "Menlo", "Monaco", "Consolas", "Courier New", monospace;
     font-size: 13px;

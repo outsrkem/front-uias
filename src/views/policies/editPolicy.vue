@@ -43,6 +43,14 @@
                                     </div>
                                 </el-checkbox-group>
                             </div>
+                            <div v-if="initData.actions.DelOnly.length > 0" style="margin-bottom: 10px">
+                                <el-tag type="primary">删除</el-tag>
+                                <el-checkbox-group class="action-group" v-model="fronData.permit.action">
+                                    <div class="row" v-for="(item, index) in initData.actions.DelOnly" :key="index">
+                                        <el-checkbox :value="item.name">{{ item.title }}</el-checkbox>
+                                    </div>
+                                </el-checkbox-group>
+                            </div>
                             <div v-if="initData.actions.ReadWrite.length > 0">
                                 <el-tag type="primary">可写</el-tag>
                                 <el-checkbox-group class="action-group" v-model="fronData.permit.action">
@@ -88,92 +96,84 @@
 </template>
 
 <script>
-import { msgcon } from "@/utils/message.js";
-import { SelectPolicyInfo, SelectService, SelectActions, EditPolicy } from "@/api/index.js";
+import { msgcon } from "../../utils/message.js";
+import { SelectPolicyInfo, SelectService, SelectActions, EditPolicy } from "../../api/index.js";
+
 export default {
     name: "EditPolicyIndex",
     data() {
         return {
-            // 表单中填充的数据
+            policyId: "",
+            // 表单数据
             fronData: {
                 name: "",
                 description: "",
                 permit: { effect: "", action: [] },
                 service: "",
             },
-            // 控制页面是可视化还是json
+            // 显示模式：可视化 / JSON
             design: {
                 visual: false,
                 vjson: false,
             },
-            // json格式的策略
-            jsonPermit: {},
-            // 初始化待选择数据
+            // JSON 策略
+            jsonPermit: "",
+            // 初始化选项数据
             initData: {
-                service: "",
+                service: [],
                 actions: {
-                    ReadOnly: [],
                     ListOnly: [],
+                    ReadOnly: [],
+                    DelOnly: [],
                     ReadWrite: [],
                 },
             },
+            // 状态控制
             st: {
-                bt: {
-                    ld: false, // 按钮加载状态
-                    ds: false, // 按钮禁用状态
-                },
-                ld: {
-                    da: true, // 页面加载状态
-                },
+                bt: { ld: false, ds: false },
+                ld: { da: true },
             },
         };
     },
     computed: {
-        DisplayTips1() {
-            return this.DisplayTips_1;
-        },
+        // 移除无用计算属性，保留原有逻辑但精简
         DisplayTips2() {
-            if (this.DisplayTips_1 === false) {
-                // 选择了服务，根据服务的action判断提示内容
-                let actions = this.actions;
-                return actions.ReadOnly.length === 0 && actions.ListOnly.length === 0 && actions.ReadWrite.length === 0;
-            } else {
-                return false;
-            }
+            const { ReadOnly, ListOnly, DelOnly, ReadWrite } = this.initData.actions;
+            return !ReadOnly.length && !ListOnly.length && !DelOnly.length && !ReadWrite.length;
         },
     },
     methods: {
-        //  检查策略是否能使用可视化视图
-        checkActions(statement) {
-            if (statement.length > 1) {
-                return false;
-            }
+        // 格式化时间（如需要可启用）
+        formatDate(time) {
+            return time || "-";
+        },
+
+        // 检查策略是否支持可视化编辑
+        checkActions(statement = []) {
+            if (statement.length > 1) return false;
+
             for (const stmt of statement) {
-                for (const action of stmt.Action) {
-                    // 检查是否包含星号
-                    if (action.includes("*")) {
-                        return false;
-                    }
-                    // 检查第一个冒号前的部分是否一致
-                    const firstPrefix = stmt.Action[0].split(":")[0];
-                    for (const action of stmt.Action) {
-                        if (action.split(":")[0] !== firstPrefix) {
-                            return false;
-                        }
-                    }
-                }
+                const actions = stmt.Action || [];
+                if (actions.some((a) => a.includes("*"))) return false;
+
+                const prefix = actions[0]?.split(":")[0];
+                if (!actions.every((a) => a.split(":")[0] === prefix)) return false;
             }
             return true;
         },
-        gainService(statement) {
-            const service = this.initData.service;
-            statement.map((stmt) => {
-                const name = stmt.Action[0].split(":")[0];
-                const srv = service.find((srv) => srv.name.toLowerCase() === name.toLowerCase());
-                stmt["service_id"] = srv.id;
+
+        // 匹配服务 ID
+        gainService(statement = []) {
+            const serviceList = this.initData.service || [];
+            statement.forEach((stmt) => {
+                const name = stmt.Action?.[0]?.split(":")[0] || "";
+                const srv = serviceList.find((s) => s.name.toLowerCase() === name.toLowerCase());
+                if (srv) stmt.service_id = srv.id;
             });
         },
-        initPolicyData(statement) {
+
+        // 初始化策略展示模式
+        initPolicyData(statement = []) {
             if (this.checkActions(statement)) {
                 this.design.visual = true;
                 this.gainService(statement);
@@ -183,140 +183,153 @@ export default {
                 return false;
             }
         },
-        // 处理action数据结构
-        handleAction(actions) {
-            let ReadOnly = [];
-            let ListOnly = [];
-            let ReadWrite = [];
-            actions.map((item) => {
-                let group = item.actionInfo.group;
-                if (group === "ReadOnly") {
-                    let act = {
-                        id: item.id,
-                        name: item.actionInfo.name,
-                        title: item.actionInfo.title,
-                        description: item.actionInfo.description,
-                        status: item.actionInfo.status,
-                        group: item.actionInfo.group,
-                    };
-                    ReadOnly.push(act);
-                } else {
-                    if (group === "ListOnly") {
-                        let act = {
-                            id: item.id,
-                            name: item.actionInfo.name,
-                            title: item.actionInfo.title,
-                            description: item.actionInfo.description,
-                            status: item.actionInfo.status,
-                            group: item.actionInfo.group,
-                        };
-                        ListOnly.push(act);
-                    } else {
-                        let act = {
-                            id: item.id,
-                            name: item.actionInfo.name,
-                            title: item.actionInfo.title,
-                            description: item.actionInfo.description,
-                            status: item.actionInfo.status,
-                            group: item.actionInfo.group,
-                        };
-                        ReadWrite.push(act);
-                    }
+
+        // 处理操作权限分组：ListOnly / ReadOnly / DelOnly / ReadWrite
+        handleAction(actions = []) {
+            const groups = {
+                ListOnly: [],
+                ReadOnly: [],
+                DelOnly: [],
+                ReadWrite: [],
+            };
+
+            actions.forEach((item) => {
+                const group = item.actionInfo?.group;
+                const act = {
+                    id: item.id,
+                    name: item.actionInfo?.name,
+                    title: item.actionInfo?.title,
+                    description: item.actionInfo?.description,
+                    status: item.actionInfo?.status,
+                    group,
+                };
+                if (groups[group] !== undefined) {
+                    groups[group].push(act);
                 }
             });
-            this.initData.actions = { ReadOnly: ReadOnly, ListOnly: ListOnly, ReadWrite: ReadWrite };
+
+            this.initData.actions = groups;
         },
-        // TODO: asd
-        // 加载策略信息
-        loadGetPoliciesInfo: async function (policy_id) {
-            const res = await SelectPolicyInfo({ pid: policy_id });
-            const policy = res.payload.policy;
-            if (this.initPolicyData(policy.permit.Statement)) {
-                this.fronData = {
-                    name: policy.name,
-                    description: policy.description,
-                    permit: {
-                        effect: policy.permit.Statement[0].Effect,
-                        action: policy.permit.Statement[0].Action,
-                    },
-                    service: policy.permit.Statement[0].service_id,
-                };
-                const sid = policy.permit.Statement[0].service_id;
-                const action = await SelectActions({ sid: sid });
-                this.handleAction(action.payload.items);
-                this.st.ld.da = false; // 页面加载状态
-            } else {
-                this.fronData = {
-                    name: policy.name,
-                    description: policy.description,
-                };
-                this.jsonPermit = JSON.stringify(policy.permit, null, 4);
-                this.st.ld.da = false; // 页面加载状态
+
+        // 加载策略详情
+        async loadGetPoliciesInfo(policyId) {
+            try {
+                const res = await SelectPolicyInfo({ pid: policyId });
+                const policy = res.payload?.policy || {};
+                const statement = policy.permit?.Statement || [];
+
+                if (this.initPolicyData(statement)) {
+                    // 可视化模式
+                    this.fronData = {
+                        name: policy.name || "",
+                        description: policy.description || "",
+                        permit: {
+                            effect: statement[0]?.Effect || "",
+                            action: statement[0]?.Action || [],
+                        },
+                        service: statement[0]?.service_id || "",
+                    };
+
+                    const sid = statement[0]?.service_id;
+                    if (sid) {
+                        const actionRes = await SelectActions({ sid });
+                        this.handleAction(actionRes.payload?.items);
+                    }
+                } else {
+                    // JSON 模式
+                    this.fronData = {
+                        name: policy.name || "",
+                        description: policy.description || "",
+                    };
+                    this.jsonPermit = JSON.stringify(policy.permit, null, 4);
+                }
+            } catch (err) {
+                console.error("加载策略失败：", err);
+            } finally {
+                this.st.ld.da = false;
             }
         },
-        // 取消创建按钮
+
+        // 取消
         onCance() {
             this.$router.push({ name: "policies" });
         },
-        // 组装请求数据
+
+        // 组装提交数据
         assembleData() {
-            const fromData = this.fronData;
-            let data = {
+            const { fronData, design } = this;
+            const data = {
                 policy: {
-                    name: fromData.name,
-                    description: fromData.description,
+                    name: fronData.name,
+                    description: fronData.description,
                     permit: {},
                 },
             };
-            if (this.design.visual == true) {
-                const permit = {
+
+            if (design.visual) {
+                data.policy.permit = {
                     Version: "1.0",
-                    Statement: [{ Action: fromData.permit.action, Effect: fromData.permit.effect }],
+                    Statement: [
+                        {
+                            Action: fronData.permit.action,
+                            Effect: fronData.permit.effect,
+                        },
+                    ],
                 };
-                data.policy.permit = permit;
             }
-            if (this.design.vjson == true) {
-                data.policy.permit = JSON.parse(this.jsonPermit);
+
+            if (design.vjson) {
+                try {
+                    data.policy.permit = JSON.parse(this.jsonPermit);
+                } catch {
+                    data.policy.permit = {};
+                }
             }
 
             return data;
         },
 
         // 提交修改
-        onEditPolicy() {
-            this.st.bt.ld = true; // 按钮加载状态
-            // const fromData = this.fronData;
-
-            const data = this.assembleData();
-            if (data.policy.permit.Statement[0].Action.length < 1) {
+        async onEditPolicy() {
+            if (this.design.visual && !this.fronData.permit.action.length) {
                 this.$message.warning(msgcon("至少选择一个操作"));
-                this.st.bt.ld = false; // 按钮加载状态
                 return;
             }
-            EditPolicy({ policyId: this.policyId }, data)
-                .then(() => {
-                    this.$message.success(msgcon("修改策略成功"));
-                    this.st.bt.ld = false; // 按钮加载状态
-                    this.onCance();
-                })
-                .catch((err) => {
-                    let msg = err.data;
-                    this.$message.error(msgcon(msg));
-                    this.st.bt.ld = false; // 按钮加载状态
-                });
+
+            this.st.bt.ld = true;
+            try {
+                const data = this.assembleData();
+                await EditPolicy({ policyId: this.policyId }, data);
+                this.$message.success(msgcon("修改策略成功"));
+                this.onCance();
+            } catch (err) {
+                const msg = err.data || "修改失败";
+                this.$message.error(msgcon(msg));
+            } finally {
+                this.st.bt.ld = false;
+            }
         },
-        // 切换服务，查询actions
-        handleSelectService(val) {
+
+        // 切换服务
+        async handleSelectService(sid) {
             this.fronData.permit.action = [];
-            SelectActions({ sid: val }).then((res) => {
-                this.handleAction(res.payload.items);
-            });
+            try {
+                const res = await SelectActions({ sid });
+                this.handleAction(res.payload?.items);
+            } catch (err) {
+                console.error("获取操作失败：", err);
+            }
         },
-        // 初始化页面数据
-        initPageData: async function () {
-            const res = await SelectService().catch(() => {});
-            this.initData.service = res.payload.items;
-            this.loadGetPoliciesInfo(this.policyId);
+
+        // 初始化页面
+        async initPageData() {
+            try {
+                const res = await SelectService();
+                this.initData.service = res.payload?.items || [];
+            } catch (err) {
+                console.error("加载服务失败：", err);
+            }
+            await this.loadGetPoliciesInfo(this.policyId);
         },
     },
     created() {

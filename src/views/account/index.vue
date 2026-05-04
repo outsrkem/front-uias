@@ -14,8 +14,8 @@
                             style="width: 400px"
                             placeholder="按账号名称搜索（默认当前页搜索，回车进行远程搜索）"
                             clearable
-                            @change="onSearch()" />
-                        <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateUser()">创建用户</el-button>
+                            @change="onSearch" />
+                        <el-button size="small" type="primary" style="margin-left: 10px" @click="onCreateUser">创建用户</el-button>
                         <el-button size="small" type="primary" :icon="Refresh" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
                     </el-row>
                 </div>
@@ -73,7 +73,7 @@
                     <el-form-item label="状态">
                         <el-radio-group v-model="editUserInfo.enabled">
                             <el-radio value="true">启用</el-radio>
-                            <el-radio value="flase">禁用</el-radio>
+                            <el-radio value="false">禁用</el-radio>
                         </el-radio-group>
                     </el-form-item>
                     <el-form-item label="用户名">
@@ -98,14 +98,14 @@
 
 <script>
 import MyTable from "../../components/MyTable/MyTable.vue";
-import { Refresh } from "@element-plus/icons-vue";
-import { SuccessFilled, RemoveFilled } from "@element-plus/icons-vue";
+import { Refresh, SuccessFilled, RemoveFilled } from "@element-plus/icons-vue";
 import Pagination from "@/components/pagination/pagination";
 import { formatTime } from "@/utils/date.js";
 import { withDelay, convertToLimitOffset } from "../../utils/common.js";
 import { msgcon } from "@/utils/message.js";
 import DeleteUser from "./deleteUser.vue";
 import { GetAccount, EditAccount, SearchAccount } from "@/api/index.js";
+
 export default {
     name: "AccountIndex",
     components: {
@@ -114,6 +114,7 @@ export default {
         DeleteUser,
     },
     setup() {
+        // 统一导出图标
         return {
             Refresh,
             SuccessFilled,
@@ -123,18 +124,22 @@ export default {
     data() {
         return {
             tableData: [],
-            loading: true,
+            loading: false,
             pageTotal: 0,
             pageSize: 10,
             page: 1,
             openEdirUser: false,
             editUserId: "",
-            editUserInfo: {},
+            // 修复：使用对象确保响应式
+            editUserInfo: {
+                username: "",
+                enabled: "true",
+                description: "",
+            },
             userInfo: {},
             deleteUserInfo: [],
             searchAccountQuery: "",
-            searchUsernameQuery: "",
-            // MyTable 列配置
+            // 移除无用变量 searchUsernameQuery
             columns: [
                 { label: "账号名称", slot: "account" },
                 { label: "用户名", prop: "username" },
@@ -147,140 +152,142 @@ export default {
         };
     },
     computed: {
-        isTrueComputed: {
-            get() {
-                return this.editUserInfo.enabled ? "true" : "flase";
-            },
-        },
+        // 移除无用计算属性 isTrueComputed
+        // 修复过滤逻辑，只保留现有功能（按账号搜索）
         filteredAccount() {
-            // 如果没有搜索关键词，则显示所有用户
-            if (!this.searchAccountQuery && !this.searchUsernameQuery) return this.tableData;
+            const keyword = this.searchAccountQuery?.toLowerCase().trim();
+            if (!keyword) return this.tableData;
 
-            // 按账号搜索
-            return this.tableData.filter((item) => {
-                if (this.searchAccountQuery && item.account.toLowerCase().includes(this.searchAccountQuery.toLowerCase())) {
-                    return [item];
-                }
-                if (this.searchUsernameQuery && item.username.toLowerCase().includes(this.searchUsernameQuery.toLowerCase())) {
-                    return [item];
-                }
-            });
+            return this.tableData.filter((item) => item.account?.toLowerCase().includes(keyword));
         },
     },
     methods: {
-        loadGetAccount: async function (page_size, page) {
-            this.loading = true;
-            try {
-                const params = convertToLimitOffset(page, page_size);
-                const res = await withDelay(() => GetAccount(params));
-                this.tableData = res.payload.items;
-                this.loading = false;
-                this.pageTotal = res.payload.page_info.total;
-            } catch (err) {
-                this.tableData = [];
-                this.loading = false;
-            }
-        },
-        loadSearchAccount: function (k, page_size = 10, page = 1) {
-            this.loading = true;
-            const params = { k: k, ...convertToLimitOffset(page, page_size) };
-            withDelay(() => SearchAccount(params))
-                .then((res) => {
-                    this.tableData = res.payload.items;
-                    this.pageTotal = res.payload.page_info.total;
-                })
-                .finally(() => {
-                    this.loading = false;
-                });
-        },
-        // 编辑用户请求
-        loadEditRole: function (paths, data) {
-            EditAccount(paths, data)
-                .then(() => {
-                    this.openEdirUser = false;
-                    this.$message.success(msgcon("操作成功"));
-                    this.onRefresh();
-                })
-                .catch((err) => {
-                    let msg = err.data.metadata.message;
-                    this.$message.error(msgcon("操作失败" + msg));
-                    this.onRefresh();
-                });
-        },
+        // 格式化时间
         formatDate(time) {
             return formatTime(time);
         },
-        onRefresh() {
-            // 添加延时，优化视觉体验感
+
+        // 获取用户列表
+        async loadGetAccount(pageSize, page) {
             this.loading = true;
-            if (this.searchAccountQuery === "") {
-                this.loadGetAccount(this.pageSize, this.page);
-            } else {
+            try {
+                const params = convertToLimitOffset(page, pageSize);
+                const res = await withDelay(() => GetAccount(params));
+                this.tableData = res.payload.items;
+                this.pageTotal = res.payload.page_info.total;
+            } catch (err) {
+                this.tableData = [];
+                console.error("获取用户列表失败：", err);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        // 搜索用户
+        async loadSearchAccount(keyword, pageSize = 10, page = 1) {
+            this.loading = true;
+            try {
+                const params = { k: keyword, ...convertToLimitOffset(page, pageSize) };
+                const res = await withDelay(() => SearchAccount(params));
+                this.tableData = res.payload.items;
+                this.pageTotal = res.payload.page_info.total;
+            } catch (err) {
+                this.tableData = [];
+                console.error("搜索用户失败：", err);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        // 统一加载数据（抽离公共逻辑）
+        loadData() {
+            if (this.searchAccountQuery.trim()) {
                 this.loadSearchAccount(this.searchAccountQuery, this.pageSize, this.page);
-            }
-        },
-        onCurrentChange(p) {
-            this.page = p;
-            if (this.searchAccountQuery === "") {
-                this.loadGetAccount(this.pageSize, p);
             } else {
-                this.loadSearchAccount(this.searchAccountQuery, this.pageSize, p);
+                this.loadGetAccount(this.pageSize, this.page);
             }
         },
-        onSizeChange(s) {
-            this.pageSize = s;
+
+        // 编辑用户提交
+        async loadEditAccount(paths, data) {
+            try {
+                await EditAccount(paths, data);
+                this.openEdirUser = false;
+                this.$message.success(msgcon("操作成功"));
+                this.onRefresh();
+            } catch (err) {
+                const msg = err.data?.metadata?.message || "";
+                this.$message.error(msgcon(`操作失败：${msg}`));
+            }
+        },
+
+        // 刷新
+        onRefresh() {
+            this.loadData();
+        },
+
+        // 页码改变
+        onCurrentChange(page) {
+            this.page = page;
+            this.loadData();
+        },
+
+        // 每页条数改变
+        onSizeChange(size) {
+            this.pageSize = size;
             this.page = 1;
-            if (this.searchAccountQuery === "") {
-                this.loadGetAccount(s, 1);
-            } else {
-                this.loadSearchAccount(this.searchAccountQuery, s, 1);
-            }
+            this.loadData();
         },
-        onSettingsUser(user_id) {
+
+        // 搜索
+        onSearch() {
+            this.page = 1;
+            this.loadData();
+        },
+
+        // 前往用户设置
+        onSettingsUser(userId) {
             this.$router.push({
                 name: "settings",
-                params: {
-                    user_id: user_id,
-                },
+                params: { user_id: userId },
             });
         },
-        onSearch() {
-            if (this.searchAccountQuery === "") {
-                this.loadGetAccount(this.pageSize, this.page);
-            } else {
-                this.page = 1;
-                this.loadSearchAccount(this.searchAccountQuery, this.pageSize, this.page);
-            }
-        },
+
+        // 创建用户
         onCreateUser() {
             this.$router.push({ path: "/users/create" });
         },
-        onDeleteAccount(raw) {
-            // 删除用户
+
+        // 删除用户
+        onDeleteAccount(row) {
             this.$refs.DeleteUser.openDeleteUserDialog();
-            this.deleteUserInfo = [];
-            this.deleteUserInfo.push(raw);
+            this.deleteUserInfo = [row];
         },
-        // 修改用户信息
-        onEditUserInfo(val) {
-            this.editUserId = val.id;
-            this.userInfo = val;
-            this.editUserInfo.username = val.username;
-            this.editUserInfo.enabled = val.enabled ? "true" : "flase";
-            this.editUserInfo.description = val.description;
+
+        // 打开编辑弹窗
+        onEditUserInfo(row) {
+            this.editUserId = row.id;
+            this.userInfo = { ...row };
+            // 赋值编辑表单
+            this.editUserInfo = {
+                username: row.username || "",
+                enabled: row.enabled ? "true" : "false",
+                description: row.description || "",
+            };
             this.openEdirUser = true;
         },
+
+        // 提交编辑
         onSubmitEditUserInfo() {
             const paths = { user_id: this.editUserId };
-            let data = {
-                // user_id: this.editUserId,
+            const data = {
                 accountInfo: {
                     username: this.editUserInfo.username,
-                    enabled: this.editUserInfo.enabled === "true" ? true : false,
+                    enabled: this.editUserInfo.enabled === "true",
                     description: this.editUserInfo.description,
                 },
             };
-            this.loadEditRole(paths, data);
+            this.loadEditAccount(paths, data);
         },
     },
     created() {
@@ -288,5 +295,3 @@ export default {
     },
 };
 </script>
-
-<style scoped lang="less"></style>

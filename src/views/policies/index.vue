@@ -46,13 +46,14 @@
 </template>
 
 <script>
-import MyTable from "../../components/MyTable/MyTable.vue";
 import { Refresh } from "@element-plus/icons-vue";
-import Pagination from "@/components/pagination/pagination";
+import MyTable from "../../components/MyTable/MyTable.vue";
+import Pagination from "../../components/pagination/pagination";
 import DeletePolicy from "./deletepolicy.vue";
-import { formatTime } from "@/utils/date.js";
+import { formatTime } from "../../utils/date.js";
 import { withDelay, convertToLimitOffset } from "../../utils/common.js";
-import { GetPolicies } from "@/api/index.js";
+import { GetPolicies } from "../../api/index.js";
+
 export default {
     name: "PoliciesIndex",
     components: {
@@ -68,14 +69,14 @@ export default {
     data() {
         return {
             tableData: [],
-            loading: true,
+            loading: false,
             pageTotal: 0,
             pageSize: 10,
             page: 1,
             delPolicy: {
                 data: [],
             },
-            // MyTable 列配置
+            // 表格列配置
             columns: [
                 { label: "策略名称", slot: "name" },
                 { label: "类型", slot: "type" },
@@ -86,53 +87,72 @@ export default {
         };
     },
     methods: {
-        loadGetPolicies: async function (page_size, page) {
-            this.loading = true;
-            try {
-                const params = convertToLimitOffset(page, page_size);
-                const res = await withDelay(() => GetPolicies(params));
-                this.tableData = res.payload.items;
-                this.loading = false;
-                this.pageTotal = res.payload.page_info.total;
-            } catch (err) {
-                console.log(err);
-                this.tableData = [];
-                this.loading = false;
-            }
-        },
+        // 时间格式化
         formatDate(time) {
             return formatTime(time);
         },
-        // 修改策略
-        onSelectService(val) {
-            this.$router.push({ path: `/policies/edit/${val.id}` });
-        },
-        onRefresh() {
+
+        // 获取策略列表
+        async loadGetPolicies(pageSize, page) {
             this.loading = true;
+            try {
+                const params = convertToLimitOffset(page, pageSize);
+                const res = await withDelay(() => GetPolicies(params));
+                this.tableData = res.payload?.items || [];
+                this.pageTotal = res.payload?.page_info?.total || 0;
+            } catch (err) {
+                console.error("获取策略列表失败：", err);
+                this.tableData = [];
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        // 统一加载数据（公共方法）
+        loadData() {
             this.loadGetPolicies(this.pageSize, this.page);
         },
-        onCurrentChange(p) {
-            this.page = p;
-            this.loadGetPolicies(this.pageSize, p);
+
+        // 刷新
+        onRefresh() {
+            this.loadData();
         },
-        onSizeChange(s) {
-            this.pageSize = s;
+
+        // 切换页码
+        onCurrentChange(page) {
+            this.page = page;
+            this.loadData();
+        },
+
+        // 切换每页条数
+        onSizeChange(size) {
+            this.pageSize = size;
             this.page = 1;
-            this.loadGetPolicies(s, 1);
+            this.loadData();
         },
+
+        // 编辑策略
+        onSelectService(row) {
+            this.$router.push(`/policies/edit/${row.id}`);
+        },
+
         // 新建策略
         onCreatePolicy() {
             this.$router.push({ name: "createPolicy" });
         },
-        // 打开策略详情
+
+        // 查看策略详情
         onPolicyInfo(id) {
-            this.$router.push({ name: "policyInfo", params: { policy_id: id } });
+            this.$router.push({
+                name: "policyInfo",
+                params: { policy_id: id },
+            });
         },
-        // 点击删除策略按钮
-        onDeletePolicies(val) {
+
+        // 删除策略
+        onDeletePolicies(row) {
             this.$refs.DeletePolicy.openDeletePoliciesDialog();
-            this.delPolicy.data = [];
-            this.delPolicy.data.push(val);
+            this.delPolicy.data = [row];
         },
     },
     created() {
@@ -140,5 +160,3 @@ export default {
     },
 };
 </script>
-
-<style scoped lang="less"></style>

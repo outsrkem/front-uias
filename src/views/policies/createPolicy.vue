@@ -47,6 +47,17 @@
                             </div>
                         </el-checkbox-group>
                     </div>
+
+                    <!-- 新增：删除分组 DelOnly -->
+                    <div v-if="actions.DelOnly.length > 0" style="margin-bottom: 10px">
+                        <el-tag type="primary">删除</el-tag>
+                        <el-checkbox-group class="action-group" v-model="selectedData.actions">
+                            <div class="row" v-for="(item, index) in actions.DelOnly" :key="index">
+                                <el-checkbox :value="item.name">{{ item.title }}</el-checkbox>
+                            </div>
+                        </el-checkbox-group>
+                    </div>
+
                     <div v-if="actions.ReadWrite.length > 0">
                         <el-tag type="primary">可写</el-tag>
                         <el-checkbox-group class="action-group" v-model="selectedData.actions">
@@ -74,8 +85,9 @@
 
 <script>
 import { withDelay } from "../../utils/common.js";
-import { msgcon } from "@/utils/message.js";
-import { SelectService, SelectActions, CreatePolicy } from "@/api/index.js";
+import { msgcon } from "../../utils/message.js";
+import { SelectService, SelectActions, CreatePolicy } from "../../api/index.js";
+
 export default {
     name: "CreatePolicyIndex",
     data() {
@@ -83,9 +95,11 @@ export default {
             initFromData: {
                 service: [],
             },
+            // 新增 DelOnly 分组
             actions: {
-                ReadOnly: [],
                 ListOnly: [],
+                ReadOnly: [],
+                DelOnly: [],
                 ReadWrite: [],
             },
             selectedData: {
@@ -95,6 +109,7 @@ export default {
             policyForm: {
                 name: "",
                 description: "",
+                service: "",
             },
             createLoading: false,
             DisplayTips_1: true,
@@ -111,115 +126,98 @@ export default {
             return this.DisplayTips_1;
         },
         DisplayTips2() {
-            if (this.DisplayTips_1 === false) {
-                // 选择了服务，根据服务的action判断提示内容
-                let actions = this.actions;
-                return actions.ReadOnly.length === 0 && actions.ListOnly.length === 0 && actions.ReadWrite.length === 0;
-            } else {
-                return false;
+            if (!this.DisplayTips_1) {
+                const { ListOnly, ReadOnly, DelOnly, ReadWrite } = this.actions;
+                return !ListOnly.length && !ReadOnly.length && !DelOnly.length && !ReadWrite.length;
             }
+            return false;
         },
         isButtonDisabled() {
-            if (this.DisplayTips_1 === false) {
-                // 选择了服务，根据服务的action判断
-                let actions = this.actions;
-                // 没有actions时，禁用创建策略按钮
-                return actions.ReadOnly.length === 0 && actions.ListOnly.length === 0 && actions.ReadWrite.length === 0;
-            } else {
-                return false;
+            if (!this.DisplayTips_1) {
+                const { ListOnly, ReadOnly, DelOnly, ReadWrite } = this.actions;
+                return !ListOnly.length && !ReadOnly.length && !DelOnly.length && !ReadWrite.length;
             }
+            return false;
         },
     },
     methods: {
-        loadSelectService: async function () {
-            withDelay(() => SelectService())
-                .then((res) => {
-                    this.initFromData.service = res.payload.items;
-                })
-                .catch(() => {});
-        },
-        loadSelectActions: async function (sid) {
-            withDelay(() => SelectActions({ sid: sid }))
-                .then((res) => {
-                    let ReadOnly = [];
-                    let ListOnly = [];
-                    let ReadWrite = [];
-                    res.payload.items.map((item) => {
-                        let group = item.actionInfo.group;
-                        if (group === "ReadOnly") {
-                            let act = {
-                                id: item.id,
-                                name: item.actionInfo.name,
-                                title: item.actionInfo.title,
-                                description: item.actionInfo.description,
-                                status: item.actionInfo.status,
-                                group: item.actionInfo.group,
-                            };
-                            ReadOnly.push(act);
-                        } else {
-                            if (group === "ListOnly") {
-                                let act = {
-                                    id: item.id,
-                                    name: item.actionInfo.name,
-                                    title: item.actionInfo.title,
-                                    description: item.actionInfo.description,
-                                    status: item.actionInfo.status,
-                                    group: item.actionInfo.group,
-                                };
-                                ListOnly.push(act);
-                            } else {
-                                let act = {
-                                    id: item.id,
-                                    name: item.actionInfo.name,
-                                    title: item.actionInfo.title,
-                                    description: item.actionInfo.description,
-                                    status: item.actionInfo.status,
-                                    group: item.actionInfo.group,
-                                };
-                                ReadWrite.push(act);
-                            }
-                        }
-                    });
-                    this.actions = {
-                        ReadOnly: ReadOnly,
-                        ListOnly: ListOnly,
-                        ReadWrite: ReadWrite,
-                    };
-                })
-                .finally(() => {
-                    this.createLoading = false;
-                });
-        },
-        loadCreatePolicy: function (data) {
-            withDelay(() => CreatePolicy(data))
-                .then(() => {
-                    this.$message.success(msgcon("创建成功"));
-                    this.$router.push({ name: "policies" });
-                })
-                .catch(() => {
-                    this.$message.error(msgcon("创建失败"));
-                })
-                .finally(() => {
-                    this.createLoading = false;
-                });
-        },
-        // 这里是选中服务后的回调
-        handleSelectService(value) {
-            if (value === undefined || value === "") {
-                return;
+        // 加载服务列表
+        async loadSelectService() {
+            try {
+                const res = await withDelay(() => SelectService());
+                this.initFromData.service = res.payload?.items || [];
+            } catch (err) {
+                console.error("加载服务失败：", err);
             }
-            this.DisplayTips_1 = false; // false标识服务已经选择
+        },
+
+        // 加载操作列表（统一分组）
+        async loadSelectActions(sid) {
+            try {
+                const res = await withDelay(() => SelectActions({ sid }));
+                const items = res.payload?.items || [];
+
+                const groups = {
+                    ListOnly: [],
+                    ReadOnly: [],
+                    DelOnly: [],
+                    ReadWrite: [],
+                };
+
+                items.forEach((item) => {
+                    const group = item.actionInfo?.group;
+                    const act = {
+                        id: item.id,
+                        name: item.actionInfo?.name,
+                        title: item.actionInfo?.title,
+                        description: item.actionInfo?.description,
+                        status: item.actionInfo?.status,
+                        group,
+                    };
+                    if (groups[group] !== undefined) {
+                        groups[group].push(act);
+                    }
+                });
+
+                this.actions = groups;
+            } catch (err) {
+                console.error("加载操作失败：", err);
+            }
+        },
+
+        // 创建策略
+        async loadCreatePolicy(data) {
+            try {
+                await withDelay(() => CreatePolicy(data));
+                this.$message.success(msgcon("创建成功"));
+                this.$router.push({ name: "policies" });
+            } catch (err) {
+                this.$message.error(msgcon("创建失败"));
+            } finally {
+                this.createLoading = false;
+            }
+        },
+
+        // 选择服务
+        handleSelectService(value) {
+            if (!value) return;
+            this.DisplayTips_1 = false;
+            this.selectedData.actions = [];
             this.loadSelectActions(value);
         },
-        // 创建策略按钮
+
+        // 提交创建
         onCreatePolicy() {
             this.$refs["policy-from"].validate((valid) => {
-                if (!valid) {
-                    // 如果表单验证失败，停止请求提交
+                if (!valid) return;
+
+                if (this.selectedData.actions.length === 0) {
+                    this.$notify({ title: "请选择操作", duration: 2000, type: "warning" });
                     return;
                 }
+
                 this.createLoading = true;
-                let data = {
+                const data = {
                     policy: {
                         name: this.policyForm.name,
                         description: this.policyForm.description,
@@ -234,15 +232,11 @@ export default {
                         },
                     },
                 };
-                if (this.selectedData.actions.length === 0) {
-                    this.createLoading = false;
-                    this.$notify({ title: "请选择操作", duration: 2000, type: "warning" });
-                    return;
-                }
                 this.loadCreatePolicy(data);
             });
         },
-        // 取消创建按钮
+
+        // 取消
         onCance() {
             this.$router.push({ name: "policies" });
         },
@@ -257,9 +251,6 @@ export default {
 .end-container {
     width: 100%;
     margin-left: 100px;
-    // display: flex;
-    // justify-content: flex-end;
-    // justify-content: space-between;
 }
 .end-width {
     max-width: 80%;

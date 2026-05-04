@@ -26,52 +26,60 @@
 </template>
 
 <script>
-import { msgcon } from "@/utils/message.js";
-import { formatTime } from "@/utils/date.js";
-import { DeletePolicies } from "@/api/index.js";
+import { msgcon } from "../../utils/message.js";
+import { formatTime } from "../../utils/date.js";
+import { DeletePolicies } from "../../api/index.js";
+
 export default {
     name: "DeletePolicy",
     props: {
-        vdata: Array,
+        vdata: {
+            type: Array,
+            default: () => [],
+            required: true,
+        },
     },
     data() {
         return {
             dialogVisible: false,
         };
     },
-    component() {},
     methods: {
+        // 时间格式化
         formatDate(time) {
             return formatTime(time);
         },
+
+        // 打开删除弹窗
         openDeletePoliciesDialog() {
             this.dialogVisible = true;
         },
+
+        // 关闭删除弹窗
         onCloseDialog() {
             this.dialogVisible = false;
         },
-        loadDeletePolicies: function (data) {
-            DeletePolicies(data)
-                .then(() => {
-                    this.dialogVisible = false;
-                    this.$message.success(msgcon("删除策略成功"));
-                    this.$parent.onRefresh();
-                })
-                .catch((err) => {
-                    let msg = err.data.metadata.message;
-                    this.$message.error(msgcon("操作失败 " + msg));
-                });
+
+        // 调用删除接口
+        async loadDeletePolicies(params) {
+            try {
+                await DeletePolicies(params);
+                this.dialogVisible = false;
+                this.$message.success(msgcon("删除策略成功"));
+                this.$parent.onRefresh?.();
+            } catch (err) {
+                const msg = err.data?.metadata?.message || "删除失败";
+                this.$message.error(msgcon(`操作失败 ${msg}`));
+            }
         },
+
+        // 确定删除
         onDeletePolicies() {
-            let pid = [];
-            this.vdata.map((item) => {
-                pid.push(item.id);
-            });
-            let data = { policy_ids: pid };
+            // 提取策略ID
+            const policyIds = this.vdata.map((item) => item.id);
+            const data = { policy_ids: policyIds };
             this.loadDeletePolicies(data);
         },
     },
 };
 </script>
-
-<style scoped></style>
