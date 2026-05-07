@@ -1,4 +1,5 @@
-<!-- PolicyForm.vue -->
+<!-- PolicyBaseForm.vue -->
+<style scoped lang="less" src="./PolicyBaseForm.less"></style>
 <template>
     <el-form size="default" :model="policyForm" :rules="formRules" ref="policyFormRef" label-width="100px" style="max-width: 80%">
         <el-form-item label="策略名称" prop="name">
@@ -10,115 +11,133 @@
                 :options="[
                     { label: '视图模式', value: 'stms' },
                     { label: 'JSON模式', value: 'json' },
-                ]" />
+                ]"
+                @change="syncModeChange" />
         </el-form-item>
         <el-form-item label="策略内容">
             <!-- 循环渲染多个策略组 -->
-            <div
-                class="container"
-                v-for="(item, index) in statementList"
-                :key="index"
-                :style="{ marginBottom: index === statementList.length - 1 ? '0' : '10px' }">
-                <!-- 头部：折叠箭头 + 标签栏 + 操作按钮 -->
-                <div class="header">
-                    <!-- 折叠/展开箭头 -->
-                    <div class="toggle" @click="item.isOpen = !item.isOpen">
-                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" :style="{ transform: item.isOpen ? 'rotate(180deg)' : '' }">
-                            <path
-                                d="m11.26,8.32c.41-.41,1.07-.41,1.48,0l6.15,6.15c.29.29.29.77,0,1.06s-.77.29-1.06,0l-5.83-5.83-5.83,5.83c-.26.26-.66.29-.96.09l-.1-.09c-.29-.29-.29-.77,0-1.06l6.15-6.15Z" />
-                        </svg>
-                    </div>
-
-                    <!-- 标签项 -->
-                    <div class="cards">
-                        <div class="card-section" :class="{ selected: item.plane === 'A' }" style="cursor: pointer" @click="switchTab(index, 'A')">
-                            <span class="text">{{ item.effect === "Allow" ? "允许" : "拒绝" }}</span>
-                        </div>
-
-                        <div class="card-section" :class="{ selected: item.plane === 'B' }" style="cursor: pointer" @click="switchTab(index, 'B')">
-                            <span class="text">
-                                {{ getServiceLabel(item.service) }}
-                            </span>
-                        </div>
-
-                        <div class="card-section" :class="{ selected: item.plane === 'C' }" style="cursor: pointer" @click="switchTab(index, 'C')">
-                            <span class="text">
-                                {{ item.actions.selected.length ? item.actions.selected.length + "项操作" : "操作" }}
-                            </span>
-                        </div>
-                    </div>
-                    <!-- 操作按钮 -->
-                    <div class="tools">
-                        <div class="action-btn" title="添加" @click="handleClone(index)">
-                            <svg viewBox="0 0 16 16">
+            <template v-if="pzst === 'stms'">
+                <div
+                    class="container"
+                    v-for="(item, index) in statementList"
+                    :key="index"
+                    :style="{ marginBottom: index === statementList.length - 1 ? '0' : '10px' }">
+                    <!-- 头部：折叠箭头 + 标签栏 + 操作按钮 -->
+                    <div class="header">
+                        <!-- 折叠/展开箭头 -->
+                        <div class="toggle" @click="item.isOpen = !item.isOpen">
+                            <svg
+                                class="icon"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                :style="{ transform: item.isOpen ? 'rotate(180deg)' : '' }">
                                 <path
-                                    d="M10,3.5c1.4,0,2.5,1.1,2.5,2.5v6c0,1.4-1.1,2.5-2.5,2.5H4c-1.4,0-2.5-1.1-2.5-2.5V6c0-1.4,1.1-2.5,2.5-2.5H10z M10,4.5H4C3.2,4.5,2.5,5.2,2.5,6v6c0,0.8,0.7,1.5,1.5,1.5h6c0.8,0,1.5-0.7,1.5-1.5V6C11.5,5.2,10.8,4.5,10,4.5z M7,6c0.3,0,0.5,0.2,0.5,0.5v2h2C9.8,8.5,10,8.7,10,9c0,0.3-0.2,0.5-0.5,0.5h-2v2C7.5,11.8,7.3,12,7,12c-0.3,0-0.5-0.2-0.5-0.5v-2h-2C4.2,9.5,4,9.3,4,9c0-0.3,0.2-0.5,0.5-0.5h2v-2C6.5,6.2,6.7,6,7,6z M12,1.5c1.4,0,2.5,1.1,2.5,2.5v5c0,0.3-0.2,0.5-0.5,0.5c-0.3,0-0.5-0.2-0.5-0.5V4c0-0.8-0.7-1.5-1.5-1.5H7C6.7,2.5,6.5,2.3,6.5,2c0-0.3,0.2-0.5,0.5-0.5H12z" />
+                                    d="m11.26,8.32c.41-.41,1.07-.41,1.48,0l6.15,6.15c.29.29.29.77,0,1.06s-.77.29-1.06,0l-5.83-5.83-5.83,5.83c-.26.26-.66.29-.96.09l-.1-.09c-.29-.29-.29-.77,0-1.06l6.15-6.15Z" />
                             </svg>
                         </div>
-                        <div class="action-btn" title="删除" @click="handleDelete(index)">
-                            <svg viewBox="0 0 24 24">
-                                <path
-                                    d="m18.82,7.93c.38,0,.75.38.75.75v11.01c0,1.5-1.25,2.75-2.75,2.75H6.68c-1.5,0-2.75-1.25-2.75-2.75v-11.01c0-.38.38-.75.75-.75s.75.38.75.75v11.01c0,.63.5,1.25,1.25,1.25h10.13c.63,0,1.25-.5,1.25-1.25v-11.01c0-.38.38-.75.75-.75Zm-9.38,2.25c.38,0,.75.38.75.75v6.88c0,.25-.13.38-.25.5-.13.13-.38.25-.5.25-.5,0-.75-.38-.75-.75v-6.88c0-.38.38-.75.75-.75Zm4.63,0c.38,0,.75.38.75.75v6.88c0,.38-.38.75-.75.75s-.75-.38-.75-.75v-6.88c0-.38.38-.75.75-.75Zm0-8.63c.88,0,1.63.5,1.88,1.25l.75,2.63h4.5c.38,0,.75.38.75.75s-.38.75-.75.75H2.8c-.38,0-.75-.38-.75-.75s.38-.75.75-.75h4.38l1-2.63c.25-.75,1-1.25,1.75-1.25h4.13Zm0,1.38h-4c-.25,0-.5.13-.5.25l-.75,2.13h6.38l-.63-2.13c-.13-.13-.25-.25-.5-.25Z" />
-                            </svg>
+
+                        <!-- 标签项 -->
+                        <div class="cards">
+                            <div class="card-section" :class="{ selected: item.plane === 'A' }" style="cursor: pointer" @click="switchTab(index, 'A')">
+                                <div style="width: 16px; height: 16px; display: flex; align-items: center; justify-content: center">
+                                    <SvgIcon name="IconRichTextAlignRight" />
+                                </div>
+                                <span class="text">{{ item.effect === "Allow" ? "允许" : "拒绝" }}</span>
+                            </div>
+
+                            <div class="card-section" :class="{ selected: item.plane === 'B' }" style="cursor: pointer" @click="switchTab(index, 'B')">
+                                <div style="width: 16px; height: 16px; display: flex; align-items: center; justify-content: center">
+                                    <SvgIcon name="IconRichTextAlignRight" />
+                                </div>
+                                <span class="text">
+                                    {{ getServiceLabel(item.service) }}
+                                </span>
+                            </div>
+
+                            <div class="card-section" :class="{ selected: item.plane === 'C' }" style="cursor: pointer" @click="switchTab(index, 'C')">
+                                <div style="width: 16px; height: 16px; display: flex; align-items: center; justify-content: center">
+                                    <SvgIcon name="IconRichTextAlignRight" />
+                                </div>
+                                <span class="text">
+                                    {{ item.actions.selected.length ? item.actions.selected.length + "项操作" : "操作" }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 操作按钮 -->
+                        <div class="tools">
+                            <div class="tools-btn" title="添加" @click="handleClone(index)"><SvgIcon name="copy" /></div>
+                            <div class="tools-btn" title="删除" @click="handleDelete(index)"><SvgIcon name="delete" /></div>
+                        </div>
+                    </div>
+
+                    <div class="body" v-show="item.isOpen">
+                        <!-- 内容区 -->
+                        <div v-if="item.plane === 'A'">
+                            <el-radio-group
+                                v-model="item.effect"
+                                @change="
+                                    () => {
+                                        switchTabAuto(index, 'B');
+                                        syncViewToJson();
+                                    }
+                                ">
+                                <el-radio border value="Allow">允许</el-radio>
+                                <el-radio border value="Deny">拒绝</el-radio>
+                            </el-radio-group>
+                        </div>
+                        <div v-if="item.plane === 'B'" style="width: 400px">
+                            <el-select v-model="item.service" placeholder="请选择服务" @change="handleSelectService(index, $event)">
+                                <el-option v-for="(it, idx) in initFromData.service" :key="idx" :label="it.title + '(' + it.name + ')'" :value="it.id" />
+                            </el-select>
+                        </div>
+                        <div v-if="item.plane === 'C'">
+                            <div v-if="item.DisplayTips1">
+                                <el-text type="warning">请先选择服务</el-text>
+                            </div>
+                            <div v-if="item.DisplayTips2">
+                                <el-text type="danger">该服务没有action</el-text>
+                            </div>
+                            <div style="flex-direction: column">
+                                <div v-if="item.actions.ListOnly.length > 0" class="action-bor">
+                                    <div class="line-tag tag-blue">列表</div>
+                                    <el-checkbox-group class="action-group" v-model="item.actions.selected" @change="syncViewToJson">
+                                        <div class="row" v-for="(it, idx) in item.actions.ListOnly" :key="idx">
+                                            <el-checkbox :value="it.name">{{ it.title }}</el-checkbox>
+                                        </div>
+                                    </el-checkbox-group>
+                                </div>
+                                <div v-if="item.actions.ReadOnly.length > 0" class="action-bor">
+                                    <div class="line-tag tag-green">只读</div>
+                                    <el-checkbox-group class="action-group" v-model="item.actions.selected" @change="syncViewToJson">
+                                        <div class="row" v-for="(it, idx) in item.actions.ReadOnly" :key="idx">
+                                            <el-checkbox :value="it.name">{{ it.title }}</el-checkbox>
+                                        </div>
+                                    </el-checkbox-group>
+                                </div>
+                                <div v-if="item.actions.DelOnly.length > 0" class="action-bor">
+                                    <div class="line-tag tag-red">删除</div>
+                                    <el-checkbox-group class="action-group" v-model="item.actions.selected" @change="syncViewToJson">
+                                        <div class="row" v-for="(it, idx) in item.actions.DelOnly" :key="idx">
+                                            <el-checkbox :value="it.name">{{ it.title }}</el-checkbox>
+                                        </div>
+                                    </el-checkbox-group>
+                                </div>
+                                <div v-if="item.actions.ReadWrite.length > 0" class="action-bor">
+                                    <div class="line-tag tag-orange">可写</div>
+                                    <el-checkbox-group class="action-group" v-model="item.actions.selected" @change="syncViewToJson">
+                                        <div class="row" v-for="(it, idx) in item.actions.ReadWrite" :key="idx">
+                                            <el-checkbox :value="it.name">{{ it.title }}</el-checkbox>
+                                        </div>
+                                    </el-checkbox-group>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="body" v-show="item.isOpen">
-                    <!-- 内容区 -->
-                    <div v-if="item.plane === 'A'">
-                        <el-radio-group v-model="item.effect" @change="() => switchTabAuto(index, 'B')">
-                            <el-radio border value="Allow">允许</el-radio>
-                            <el-radio border value="Deny">拒绝</el-radio>
-                        </el-radio-group>
-                    </div>
-                    <div v-if="item.plane === 'B'">
-                        <el-select v-model="item.service" placeholder="请选择服务" @change="handleSelectService(index, $event)">
-                            <el-option v-for="(it, idx) in initFromData.service" :key="idx" :label="it.title + '(' + it.name + ')'" :value="it.id" />
-                        </el-select>
-                    </div>
-                    <div v-if="item.plane === 'C'">
-                        <div v-if="item.DisplayTips1">
-                            <el-text type="warning">请先选择服务</el-text>
-                        </div>
-                        <div v-if="item.DisplayTips2">
-                            <el-text type="danger">该服务没有action</el-text>
-                        </div>
-                        <div style="flex-direction: column">
-                            <div v-if="item.actions.ListOnly.length > 0" style="margin-bottom: 10px">
-                                <el-tag type="primary">列表</el-tag>
-                                <el-checkbox-group class="action-group" v-model="item.actions.selected">
-                                    <div class="row" v-for="(it, idx) in item.actions.ListOnly" :key="idx">
-                                        <el-checkbox :value="it.name">{{ it.title }}</el-checkbox>
-                                    </div>
-                                </el-checkbox-group>
-                            </div>
-                            <div v-if="item.actions.ReadOnly.length > 0" style="margin-bottom: 10px">
-                                <el-tag type="primary">只读</el-tag>
-                                <el-checkbox-group class="action-group" v-model="item.actions.selected">
-                                    <div class="row" v-for="(it, idx) in item.actions.ReadOnly" :key="idx">
-                                        <el-checkbox :value="it.name">{{ it.title }}</el-checkbox>
-                                    </div>
-                                </el-checkbox-group>
-                            </div>
-                            <div v-if="item.actions.DelOnly.length > 0" style="margin-bottom: 10px">
-                                <el-tag type="primary">删除</el-tag>
-                                <el-checkbox-group class="action-group" v-model="item.actions.selected">
-                                    <div class="row" v-for="(it, idx) in item.actions.DelOnly" :key="idx">
-                                        <el-checkbox :value="it.name">{{ it.title }}</el-checkbox>
-                                    </div>
-                                </el-checkbox-group>
-                            </div>
-                            <div v-if="item.actions.ReadWrite.length > 0">
-                                <el-tag type="primary">可写</el-tag>
-                                <el-checkbox-group class="action-group" v-model="item.actions.selected">
-                                    <div class="row" v-for="(it, idx) in item.actions.ReadWrite" :key="idx">
-                                        <el-checkbox :value="it.name">{{ it.title }}</el-checkbox>
-                                    </div>
-                                </el-checkbox-group>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </template>
+            <div v-if="pzst === 'json'" style="width: 100%">
+                <el-input v-model="jsonPermit" type="textarea" :rows="10" @input="syncJsonToView" />
             </div>
         </el-form-item>
 
@@ -129,37 +148,26 @@
 </template>
 
 <script>
+import SvgIcon from "../../components/SvgIcon/SvgIcon.vue";
+import { msgcon } from "../../utils/message.js";
 import { withDelay } from "../../utils/common.js";
 import { deepClone } from "../../utils/deepClone.js";
 import { SelectService, SelectActions } from "../../api/index.js";
 
 export default {
     name: "PolicyForm",
+    components: {
+        SvgIcon,
+    },
     props: {
-        title: {
-            type: String,
-            default: "策略配置",
-        },
+        title: { type: String, default: "策略配置" },
         initialData: {
             type: Object,
-            default: () => ({
-                name: "",
-                description: "",
-                statementList: null,
-            }),
+            default: () => ({ name: "", description: "", statementList: null }),
         },
-        showOperationButtons: {
-            type: Boolean,
-            default: true,
-        },
-        minStatementCount: {
-            type: Number,
-            default: 1,
-        },
-        maxStatementCount: {
-            type: Number,
-            default: 10,
-        },
+        showOperationButtons: { type: Boolean, default: true },
+        minStatementCount: { type: Number, default: 1 },
+        maxStatementCount: { type: Number, default: 10 },
     },
     data() {
         return {
@@ -173,6 +181,7 @@ export default {
                     { min: 2, max: 64, message: "长度为2到64个字符", trigger: ["blur", "change"] },
                 ],
             },
+            jsonPermit: "", // 改为空字符串
         };
     },
     watch: {
@@ -196,16 +205,65 @@ export default {
                         }
                     }
                 });
+                this.syncViewToJson(); // 列表变化同步JSON
             },
         },
     },
     methods: {
-        // 向外传递表单数据（不再主动emit）
-        emitFormData() {
-            // 空方法，保留兼容
+        // 视图 → JSON
+        syncViewToJson() {
+            const data = {
+                Version: "1.0",
+                Statement: this.statementList.map((item) => ({
+                    Effect: item.effect,
+                    Action: item.actions.selected || [],
+                    Service: item.service || "",
+                })),
+            };
+            this.jsonPermit = JSON.stringify(data, null, 4);
         },
 
-        // ====================== 父组件主动调用获取数据 ======================
+        // JSON → 视图
+        syncJsonToView() {
+            try {
+                if (!this.jsonPermit) return;
+                const json = JSON.parse(this.jsonPermit);
+                if (!json.Statement || !Array.isArray(json.Statement)) return;
+
+                const newList = json.Statement.map((stmt) => ({
+                    isOpen: true,
+                    plane: "C",
+                    effect: stmt.Effect || "Allow",
+                    service: stmt.Service || "",
+                    DisplayTips1: !stmt.Service,
+                    DisplayTips2: false,
+                    actions: {
+                        selected: stmt.Action || [],
+                        ListOnly: [],
+                        ReadOnly: [],
+                        DelOnly: [],
+                        ReadWrite: [],
+                    },
+                }));
+
+                this.statementList = newList;
+                this.statementList.forEach((item, idx) => {
+                    if (item.service) this.loadSelectActions(idx, item.service);
+                });
+            } catch (e) {
+                console.warn("JSON 格式错误，无法同步到视图", e);
+            }
+        },
+
+        // 切换模式时同步
+        syncModeChange() {
+            if (this.pzst === "stms") {
+                this.syncViewToJson();
+            } else {
+                this.syncJsonToView();
+            }
+        },
+
         getFormData() {
             const Statement = this.statementList.map((item) => ({
                 Action: item.actions.selected,
@@ -215,10 +273,7 @@ export default {
             return {
                 name: this.policyForm.name,
                 description: this.policyForm.description,
-                permit: {
-                    Version: "1.0",
-                    Statement,
-                },
+                permit: { Version: "1.0", Statement },
                 raw: {
                     statementList: deepClone(this.statementList),
                     policyForm: deepClone(this.policyForm),
@@ -228,12 +283,8 @@ export default {
 
         // 设置表单数据（编辑回显）
         setFormData(data) {
-            if (data.name) {
-                this.policyForm.name = data.name;
-            }
-            if (data.description) {
-                this.policyForm.description = data.description;
-            }
+            if (data.name) this.policyForm.name = data.name;
+            if (data.description) this.policyForm.description = data.description;
             if (data.statementList && Array.isArray(data.statementList)) {
                 this.statementList = deepClone(data.statementList);
             } else if (data.permit?.Statement) {
@@ -253,11 +304,10 @@ export default {
                     },
                 }));
                 this.statementList.forEach((item, idx) => {
-                    if (item.service) {
-                        this.loadSelectActions(idx, item.service);
-                    }
+                    if (item.service) this.loadSelectActions(idx, item.service);
                 });
             }
+            this.syncViewToJson(); // 回显后同步JSON
         },
 
         // 验证表单
@@ -287,15 +337,10 @@ export default {
                     service: "",
                     DisplayTips1: true,
                     DisplayTips2: false,
-                    actions: {
-                        selected: [],
-                        ListOnly: [],
-                        ReadOnly: [],
-                        DelOnly: [],
-                        ReadWrite: [],
-                    },
+                    actions: { selected: [], ListOnly: [], ReadOnly: [], DelOnly: [], ReadWrite: [] },
                 },
             ];
+            this.syncViewToJson();
         },
 
         switchTab(index, plane) {
@@ -325,13 +370,7 @@ export default {
             try {
                 const res = await withDelay(() => SelectActions({ sid }));
                 const items = res.payload?.items || [];
-                const group = {
-                    selected: [],
-                    ListOnly: [],
-                    ReadOnly: [],
-                    DelOnly: [],
-                    ReadWrite: [],
-                };
+                const group = { selected: [], ListOnly: [], ReadOnly: [], DelOnly: [], ReadWrite: [] };
                 items.forEach((it) => {
                     const g = it.actionInfo?.group;
                     const obj = { name: it.actionInfo?.name, title: it.actionInfo?.title };
@@ -341,6 +380,7 @@ export default {
                 group.selected = oldSelected.filter((selected) => items.some((it) => it.actionInfo?.name === selected));
                 this.statementList[index].actions = group;
                 this.statementList[index].DisplayTips2 = items.length === 0;
+                this.syncViewToJson();
             } catch (err) {
                 console.error("加载操作失败", err);
             }
@@ -360,7 +400,7 @@ export default {
         // 复制
         handleClone(index) {
             if (this.statementList.length >= this.maxStatementCount) {
-                this.$message.warning(`最多支持 ${this.maxStatementCount} 组策略`);
+                this.$message.warning(msgcon(`最多支持 ${this.maxStatementCount} 组策略`));
                 return;
             }
             const copy = deepClone(this.statementList[index]);
@@ -372,15 +412,15 @@ export default {
             this.statementList.push(copy);
         },
 
-        // 删除
         handleDelete(index) {
             if (this.statementList.length <= this.minStatementCount) {
-                this.$message.warning(`至少保留 ${this.minStatementCount} 组策略`);
+                this.$message.warning(msgcon(`至少保留 ${this.minStatementCount} 组策略`));
                 return;
             }
             this.statementList.splice(index, 1);
         },
     },
+
     created() {
         this.loadSelectService();
         if (this.initialData?.statementList) {
@@ -393,123 +433,3 @@ export default {
     },
 };
 </script>
-
-<style scoped lang="less">
-.card-header {
-    font-weight: 500;
-}
-.container {
-    width: 100%;
-    border: 1px solid #f5f5f5;
-    border-radius: 4px;
-    background: #fff;
-    overflow: visible !important;
-}
-.header {
-    display: flex;
-    align-items: center;
-    padding: 0;
-}
-.toggle {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 8px;
-}
-.toggle .icon {
-    width: 16px;
-    height: 16px;
-    transition: transform 0.2s ease;
-    display: block;
-}
-.cards {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    width: 100%;
-}
-.card-section {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    flex: 1;
-    width: 0;
-    color: #6b7280;
-    cursor: pointer;
-    position: relative;
-    margin-right: 3px;
-    background: #f5f5f5;
-    z-index: 3;
-    height: 32px;
-    padding-left: 15px;
-}
-.card-section.selected {
-    color: #f5f5f5;
-    font-weight: 500;
-    background: #409eff;
-    z-index: 3;
-}
-.card-section:nth-child(2) {
-    z-index: 2;
-}
-.card-section:nth-child(3) {
-    z-index: 1;
-}
-.card-section:not(:last-child):after {
-    content: "";
-    position: absolute;
-    right: -18px;
-    top: 8px;
-    width: 18px;
-    height: 16px;
-    background: #f5f5f5;
-    z-index: 999 !important;
-    transform: translate(-50%) rotate(60deg) skew(30deg);
-}
-.card-section:not(:first-child):before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 8px;
-    width: 18px;
-    height: 16px;
-    background: #ffffff;
-    z-index: 2;
-    transform: translate(-50%) rotate(60deg) skew(30deg);
-}
-.card-section.selected:after {
-    background: #409eff;
-}
-.tools {
-    display: flex;
-    align-items: center;
-    height: 32px;
-    background: #f5f5f5;
-    gap: 8px;
-    padding: 0 8px;
-}
-.action-btn {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 4px;
-    color: #6b7280;
-}
-.action-btn:hover {
-    background: #f5f5f5;
-    color: #165dff;
-}
-.action-btn svg {
-    width: 16px;
-    height: 16px;
-}
-.body {
-    padding: 12px 16px;
-    padding-left: 32px;
-    min-height: 45px;
-}
-</style>

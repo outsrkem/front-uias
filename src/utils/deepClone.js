@@ -1,3 +1,8 @@
+/**
+ * Deep clones a value, handling circular references
+ * @param {*} value - The value to deep clone
+ * @returns {*} Deep cloned copy of the input value
+ */
 export function deepClone(value) {
     const cache = new Map();
     function _deepClone(value) {
@@ -14,5 +19,6 @@ export function deepClone(value) {
         }
         return result;
     }
+
     return _deepClone(value);
 }
