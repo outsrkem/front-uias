@@ -510,5 +510,6 @@ export default {
 .body {
     padding: 12px 16px;
     padding-left: 32px;
+    min-height: 45px;
 }
 </style>
