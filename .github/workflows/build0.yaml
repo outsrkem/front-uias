@@ -1,0 +1,83 @@
+name: Build0
+
+on:
+    push:
+        branches:
+            - "build/*"
+
+env:
+    NAME: uias
+    INSTALL_DIR: /opt/www
+    RPM_ARCH: x86_64
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: "Checkout repository"
+              uses: actions/checkout@v4.1.1
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20.x"
+
+            # 从分支名提取版本 + 发布号（build/1.0.000-rc.2 → 1.0.000 + rc.2）
+            - name: Get version and release from branch
+              id: get_version
+              run: |
+                  BRANCH_NAME=${GITHUB_REF#refs/heads/} # 获取分支名称
+                  TMP=${BRANCH_NAME#build/} # 去掉前缀 build/ → 剩下 1.0.000-rc.2
+                  # 按 第一个 '-' 分割版本和发布号
+                  VERSION=${TMP%-*}
+                  RELEASE=${TMP#*-}
+                  # 输出给后续步骤使用
+                  echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+                  echo "RELEASE=$RELEASE" >> $GITHUB_OUTPUT
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Build project
+              run: npm run build
+
+            - name: Pack tar.gz
+              run: |
+                  product="${{ env.NAME }}-${{ steps.get_version.outputs.VERSION }}"
+                  tar zcvf "${product}.tar.gz" --transform "s/^dist/${product}/" dist
+
+            # 用 Docker + rpmbuild 正确构建 RPM
+            - name: Build RPM package with rpmbuild
+              run: |
+                  docker run --rm \
+                    -v "$(pwd)/.cid/uias.spec:/root/rpmbuild/SPECS/uias.spec" \
+                    -v "$(pwd)/${{ env.NAME }}-${{ steps.get_version.outputs.VERSION }}.tar.gz:/root/rpmbuild/SOURCES/${{ env.NAME }}-${{ steps.get_version.outputs.VERSION }}.tar.gz" \
+                    -v "$(pwd)/rpms:/root/rpmbuild/RPMS" \
+                    -w /root/rpmbuild \
+                    outsrkem/rpmbuild:4.14.3-rocky8 \
+                    bash -c "rpmbuild -bb \
+                    --define \"_version ${{ steps.get_version.outputs.VERSION }}\" \
+                    --define \"_release ${{ steps.get_version.outputs.RELEASE }}\" \
+                    --define \"dist .el6\" \
+                    --define \"_packager LiHua\" \
+                    --define \"_email lark@email.com\" SPECS/uias.spec"
+
+            # 上传生成的RPM包
+            - name: Upload to HuaweiCloud OBS
+              env:
+                  AK: ${{ secrets.HW_ACCESS_KEY_ID }}
+                  SK: ${{ secrets.HW_SECRET_ACCESS_KEY }}
+                  OBS_ENDPOINT: obs.cn-north-4.myhuaweicloud.com
+                  OBS_BUCKET: 110254b2cf424535aec05afe14ab8497
+              run: |
+                  wget -q https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz
+                  tar -xzf obsutil_linux_amd64.tar.gz
+                  mv obsutil_linux_amd64_* obsutil
+                  chmod 755 obsutil/obsutil
+
+                  ./obsutil/obsutil config -i="$AK" -k="$SK" -e="$OBS_ENDPOINT"
+
+                  find . -type f -name "uias-*.rpm" | while read file; do
+                    echo "Uploading RPM: $file"
+                    ./obsutil/obsutil cp "$file" obs://$OBS_BUCKET/${{ env.NAME }}/
+                  done

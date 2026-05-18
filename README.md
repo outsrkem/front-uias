@@ -1,24 +1,42 @@
 # uias
 
-## Project setup
+> 身份认证中心控制台界面
+
+### 构建临时包
+
 ```
-npm install
+# 推送分支build_版本号-补丁号，如：
+git push origin build/0.0.001-rc.4
+
+# 该分支名称的构建包如下：
+uias-0.0.001-rc.4.el6.x86_64.rpm
 ```
 
-### Compiles and hot-reloads for development
+### 构建正式包
+
 ```
-npm run serve
+# 打标签并推送标签
+v=0.2.3
+git tag -a v$v -m "Release version $v" HEAD && git push origin v$v
+
+# 构建包如下
+uias-0.2.3-1.el6.x86_64.rpm
 ```
 
-### Compiles and minifies for production
+### 包部署
+
 ```
-npm run build
+rpm -ivh uias-0.2.3-1.el6.x86_64.rpm
 ```
 
-### Lints and fixes files
+### 包升级
+
 ```
-npm run lint
+rpm -Fvh uias-0.2.3-1.el6.x86_64.rpm
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### 包强制升级（回退）
+
+```
+rpm -Uvh --force uias-0.2.3-1.el6.x86_64.rpm
+```
