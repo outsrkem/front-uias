@@ -1,6 +1,5 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 const Layout = () => import(/* webpackChunkName: "25a57435eb81" */ "../views/layout/index.vue");
-const Home = () => import(/* webpackChunkName: "9e31c1802734" */ "../views/home/index.vue");
 const Account = () => import(/* webpackChunkName: "ce010b716ed9" */ "../views/account/index.vue");
 const Settings = () => import(/* webpackChunkName: "4c94f2c57a90" */ "../views/account/settings.vue");
 const UserAddRole = () => import(/* webpackChunkName: "2033c1a23bc4" */ "../views/account/addRole.vue");
@@ -21,8 +20,8 @@ const routes = [
         path: "/",
         component: Layout,
         meta: { title: "UIAS" },
+        redirect: "/users",
         children: [
-            { meta: { title: "首页" }, path: "/", name: "home", component: Home },
             { meta: { title: "用户管理" }, path: "/users", name: "users", component: Account },
             { meta: { title: "创建用户" }, path: "/users/create", name: "create", component: CreateUser },
             { meta: { title: "用户设置" }, path: "/users/settings/:user_id", name: "settings", component: Settings },
