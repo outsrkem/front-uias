@@ -8,7 +8,5 @@ cp uias.spec rpmbuild/SPECS
 rpmbuild -bb \
   --define "_version 0.0.1" \
   --define "_release 1" \
-  --define "dist .el6" \
-  --define "_packager LiHua" \
-  --define "_email lihua@company.com" SPECS/uias.spec
+  --define "dist .el6" SPECS/uias.spec
 ```
